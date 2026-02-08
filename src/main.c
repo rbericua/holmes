@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     Grid *grid = grid_create(argv[1]);
     ui_init(&ui);
 
-    ui_print_grid(&ui, grid);
+    ui_print_grid(&ui, grid, NULL);
     getch();
 
     SolveStatus status;
@@ -29,14 +29,14 @@ int main(int argc, char *argv[]) {
 
         if (status != SOLVE_ONGOING) break;
 
-        ui_print_grid(&ui, grid);
+        ui_print_grid(&ui, grid, &step);
         ui_print_step(&ui, &step);
         getch();
 
         solver_apply_step(grid, &step);
     }
 
-    ui_print_grid(&ui, grid);
+    ui_print_grid(&ui, grid, NULL);
 
     switch (status) {
     case SOLVE_COMPLETE:

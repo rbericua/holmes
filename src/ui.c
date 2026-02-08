@@ -18,12 +18,19 @@
 #define UNIT_TO_STR(u) \
     ((u) == UNIT_ROW ? "Row" : (u) == UNIT_COL ? "Column" : "Box")
 
+static void generate_colors(Grid *grid, Step *step, ColorPair colors[81][9]);
+
 void ui_init(Ui *ui) {
     setlocale(LC_ALL, "");
     initscr();
     cbreak();
     noecho();
     curs_set(0);
+
+    start_color();
+    use_default_colors();
+    init_pair(CP_REMOVAL, COLOR_BLACK, COLOR_RED);
+    init_pair(CP_TRIGGER, COLOR_BLACK, COLOR_GREEN);
 
     ui->grid_win = newwin(GRID_HEIGHT, GRID_WIDTH, 0, (COLS - GRID_WIDTH) / 2);
     ui->info_win = newwin(LINES - GRID_HEIGHT, COLS, GRID_HEIGHT, 0);
@@ -50,7 +57,7 @@ void ui_print_message(Ui *ui, bool clear, char *format, ...) {
     va_end(args);
 }
 
-void ui_print_grid(Ui *ui, Grid *grid) {
+void ui_print_grid(Ui *ui, Grid *grid, Step *step) {
     wchar_t *top = L"┏━━━━━━━━━┯━━━━━━━━━┯━━━━━━━━━┳━━━━━━━━━┯━━━━━━━━━┯━━━━━━━"
                    L"━━┳━━━━━━━━━┯━━━━━━━━━┯━━━━━━━━━┓";
     wchar_t *row_sep = L"┠─────────┼─────────┼─────────╂─────────┼─────────┼───"
@@ -59,6 +66,11 @@ void ui_print_grid(Ui *ui, Grid *grid) {
                         L"━━━━━━━╋━━━━━━━━━┿━━━━━━━━━┿━━━━━━━━━┫";
     wchar_t *bottom = L"┗━━━━━━━━━┷━━━━━━━━━┷━━━━━━━━━┻━━━━━━━━━┷━━━━━━━━━┷━━━━"
                       L"━━━━━┻━━━━━━━━━┷━━━━━━━━━┷━━━━━━━━━┛";
+
+    ColorPair colors[81][9] = {0};
+    if (step) {
+        generate_colors(grid, step, colors);
+    }
 
     wclear(ui->grid_win);
     for (int row = 0; row < 9; row++) {
@@ -78,13 +90,17 @@ void ui_print_grid(Ui *ui, Grid *grid) {
                     waddwstr(ui->grid_win, L"│");
                 }
 
-                Cell *cell = grid->rows[row][col];
+                int idx = IDX_FROM_ROW_COL(row, col);
+                Cell *cell = grid->cells[idx];
                 if (cell_is_empty(cell)) {
                     waddstr(ui->grid_win, " ");
                     for (int cand = subrow * 3 + 1; cand <= subrow * 3 + 3;
                          cand++) {
                         if (cell_has_cand(cell, cand)) {
+                            ColorPair color = colors[idx][cand - 1];
+                            wattron(ui->grid_win, COLOR_PAIR(color));
                             wprintw(ui->grid_win, "%d", cand);
+                            wattroff(ui->grid_win, COLOR_PAIR(color));
                         } else {
                             waddstr(ui->grid_win, " ");
                         }
@@ -128,6 +144,32 @@ void ui_print_step(Ui *ui, Step *step) {
 
         ui_print_message(ui, true, "[Hidden Single (%s %d)] Set r%dc%d to %d\n",
                          unit_str, unit_idx + 1, row + 1, col + 1, value);
+    } break;
+    default: break;
+    }
+}
+
+static void generate_colors(Grid *grid, Step *step, ColorPair colors[81][9]) {
+    switch (step->tech) {
+    case TECH_NAKED_SINGLE: {
+        int idx = step->as.naked_single.idx;
+        int value = step->as.naked_single.value;
+
+        colors[idx][value - 1] = CP_TRIGGER;
+        for (int i = 0; i < NUM_NEIGHBOURS; i++) {
+            int neighbour_idx = cell_idx(grid->neighbours[idx][i]);
+            colors[neighbour_idx][value - 1] = CP_REMOVAL;
+        }
+    } break;
+    case TECH_HIDDEN_SINGLE: {
+        int idx = step->as.hidden_single.idx;
+        int value = step->as.hidden_single.value;
+
+        colors[idx][value - 1] = CP_TRIGGER;
+        for (int i = 0; i < NUM_NEIGHBOURS; i++) {
+            int neighbour_idx = cell_idx(grid->neighbours[idx][i]);
+            colors[neighbour_idx][value - 1] = CP_REMOVAL;
+        }
     } break;
     default: break;
     }
