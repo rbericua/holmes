@@ -16,6 +16,16 @@ CandSet cand_set_full(void) {
     return (CandSet){.cands = ALL_CANDS, .len = 9};
 }
 
+int cand_set_to_arr(CandSet set, int out[]) {
+    int count = 0;
+    for (int value = 1; value <= 9; value++) {
+        if (cand_set_has(set, value)) {
+            out[count++] = value;
+        }
+    }
+    return count;
+}
+
 bool cand_set_has(CandSet set, int cand) {
     if (cand == 0) return false;
     return IS_BIT_SET(set.cands, cand - 1);

@@ -18,6 +18,12 @@ typedef struct {
     int empty_cells;
 } Grid;
 
+typedef enum {
+    UNIT_ROW,
+    UNIT_COL,
+    UNIT_BOX
+} UnitType;
+
 Grid *grid_create(char *grid_str);
 void grid_destroy(Grid *grid);
 bool grid_is_solved(Grid *grid);

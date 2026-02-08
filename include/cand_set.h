@@ -10,6 +10,7 @@ typedef struct {
 
 CandSet cand_set_empty(void);
 CandSet cand_set_full(void);
+int cand_set_to_arr(CandSet set, int out[]);
 bool cand_set_has(CandSet set, int cand);
 void cand_set_add(CandSet *set, int cand);
 void cand_set_remove(CandSet *set, int cand);

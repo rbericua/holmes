@@ -61,10 +61,12 @@ void grid_fill_cell(Grid *grid, Cell *cell, int value) {
 }
 
 static CandSet grid_cell_initial_cands(Grid *grid, Cell *cell) {
-    CandSet row_missing_values = cells_missing_values(grid->rows[cell->row], 9);
-    CandSet col_missing_values = cells_missing_values(grid->cols[cell->col], 9);
-    CandSet box_missing_values = cells_missing_values(grid->boxes[cell->box],
-                                                      9);
+    CandSet row_missing_values = cells_missing_values_to_set(
+        grid->rows[cell->row], 9);
+    CandSet col_missing_values = cells_missing_values_to_set(
+        grid->cols[cell->col], 9);
+    CandSet box_missing_values = cells_missing_values_to_set(
+        grid->boxes[cell->box], 9);
 
     return cand_set_intersection(3, row_missing_values, col_missing_values,
                                  box_missing_values);

@@ -21,6 +21,12 @@ void solver_apply_step(Grid *grid, Step *step) {
 
         grid_fill_cell(grid, grid->cells[idx], value);
     } break;
+    case TECH_HIDDEN_SINGLE: {
+        int idx = step->as.hidden_single.idx;
+        int value = step->as.hidden_single.value;
+
+        grid_fill_cell(grid, grid->cells[idx], value);
+    } break;
     default: break;
     }
 }

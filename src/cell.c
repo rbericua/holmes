@@ -58,10 +58,24 @@ int cell_only_cand(Cell *cell) {
     return cand_set_only(cell->cands);
 }
 
-CandSet cells_missing_values(Cell *cells[], int num_cells) {
+CandSet cells_missing_values_to_set(Cell *cells[], int num_cells) {
     CandSet missing_values = cand_set_full();
     for (int i = 0; i < num_cells; i++) {
         cand_set_remove(&missing_values, cells[i]->value);
     }
     return missing_values;
+}
+
+int cells_missing_values_to_arr(Cell *cells[], int num_cells, int out[]) {
+    return cand_set_to_arr(cells_missing_values_to_set(cells, num_cells), out);
+}
+
+int cells_with_cand(Cell *cells[], int num_cells, int cand, Cell *out[]) {
+    int count = 0;
+    for (int i = 0; i < num_cells; i++) {
+        if (cell_has_cand(cells[i], cand)) {
+            out[count++] = cells[i];
+        }
+    }
+    return count;
 }

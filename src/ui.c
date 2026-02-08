@@ -15,6 +15,9 @@
 #define GRID_WIDTH 91
 #define GRID_HEIGHT 37
 
+#define UNIT_TO_STR(u) \
+    ((u) == UNIT_ROW ? "Row" : (u) == UNIT_COL ? "Column" : "Box")
+
 void ui_init(Ui *ui) {
     setlocale(LC_ALL, "");
     initscr();
@@ -115,6 +118,16 @@ void ui_print_step(Ui *ui, Step *step) {
 
         ui_print_message(ui, true, "[Naked Single] Set r%dc%d to %d\n", row + 1,
                          col + 1, value);
+    } break;
+    case TECH_HIDDEN_SINGLE: {
+        int row = ROW_FROM_IDX(step->as.hidden_single.idx);
+        int col = COL_FROM_IDX(step->as.hidden_single.idx);
+        int value = step->as.hidden_single.value;
+        char *unit_str = UNIT_TO_STR(step->as.hidden_single.unit_type);
+        int unit_idx = step->as.hidden_single.unit_idx;
+
+        ui_print_message(ui, true, "[Hidden Single (%s %d)] Set r%dc%d to %d\n",
+                         unit_str, unit_idx + 1, row + 1, col + 1, value);
     } break;
     default: break;
     }
