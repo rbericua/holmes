@@ -50,6 +50,16 @@ bool grid_is_solved(Grid *grid) {
     return grid->empty_cells == 0;
 }
 
+void grid_fill_cell(Grid *grid, Cell *cell, int value) {
+    cell->value = value;
+    cell_clear_cands(cell);
+    grid->empty_cells--;
+
+    for (int i = 0; i < NUM_NEIGHBOURS; i++) {
+        cell_remove_cand(grid->neighbours[cell_idx(cell)][i], value);
+    }
+}
+
 static CandSet grid_cell_initial_cands(Grid *grid, Cell *cell) {
     CandSet row_missing_values = cells_missing_values(grid->rows[cell->row], 9);
     CandSet col_missing_values = cells_missing_values(grid->cols[cell->col], 9);

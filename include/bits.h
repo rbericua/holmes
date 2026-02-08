@@ -7,5 +7,6 @@
 #define IS_BIT_SET(x, n) ((x) & BIT(n))
 
 int count_ones(unsigned int x);
+int find_first_set(unsigned int x);
 
 #endif

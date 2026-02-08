@@ -38,6 +38,10 @@ void cand_set_clear(CandSet *set) {
     set->len = 0;
 }
 
+int cand_set_only(CandSet set) {
+    return find_first_set(set.cands);
+}
+
 CandSet cand_set_intersection(int num_sets, ...) {
     CandSet result = cand_set_full();
 

@@ -10,6 +10,7 @@
 
 #include "cell.h"
 #include "grid.h"
+#include "step.h"
 
 #define GRID_WIDTH 91
 #define GRID_HEIGHT 37
@@ -103,4 +104,18 @@ void ui_print_grid(Ui *ui, Grid *grid) {
     }
     waddwstr(ui->grid_win, bottom);
     wrefresh(ui->grid_win);
+}
+
+void ui_print_step(Ui *ui, Step *step) {
+    switch (step->tech) {
+    case TECH_NAKED_SINGLE: {
+        int row = ROW_FROM_IDX(step->as.naked_single.idx);
+        int col = COL_FROM_IDX(step->as.naked_single.idx);
+        int value = step->as.naked_single.value;
+
+        ui_print_message(ui, true, "[Naked Single] Set r%dc%d to %d\n", row + 1,
+                         col + 1, value);
+    } break;
+    default: break;
+    }
 }

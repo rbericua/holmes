@@ -47,11 +47,15 @@ void cell_add_cand(Cell *cell, int cand) {
 }
 
 void cell_remove_cand(Cell *cell, int cand) {
-    cand_set_add(&cell->cands, cand);
+    cand_set_remove(&cell->cands, cand);
 }
 
 void cell_clear_cands(Cell *cell) {
     cand_set_clear(&cell->cands);
+}
+
+int cell_only_cand(Cell *cell) {
+    return cand_set_only(cell->cands);
 }
 
 CandSet cells_missing_values(Cell *cells[], int num_cells) {

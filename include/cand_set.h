@@ -14,6 +14,7 @@ bool cand_set_has(CandSet set, int cand);
 void cand_set_add(CandSet *set, int cand);
 void cand_set_remove(CandSet *set, int cand);
 void cand_set_clear(CandSet *set);
+int cand_set_only(CandSet set);
 CandSet cand_set_intersection(int num_sets, ...);
 CandSet cand_set_union(int num_sets, ...);
 

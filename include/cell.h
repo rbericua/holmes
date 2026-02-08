@@ -31,6 +31,7 @@ bool cell_has_cand(Cell *cell, int cand);
 void cell_add_cand(Cell *cell, int cand);
 void cell_remove_cand(Cell *cell, int cand);
 void cell_clear_cands(Cell *cell);
+int cell_only_cand(Cell *cell);
 
 CandSet cells_missing_values(Cell *cells[], int num_cells);
 

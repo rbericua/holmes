@@ -21,5 +21,6 @@ typedef struct {
 Grid *grid_create(char *grid_str);
 void grid_destroy(Grid *grid);
 bool grid_is_solved(Grid *grid);
+void grid_fill_cell(Grid *grid, Cell *cell, int value);
 
 #endif
