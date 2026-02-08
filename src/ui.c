@@ -1,0 +1,106 @@
+#include "ui.h"
+
+#include <locale.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <wchar.h>
+
+#define NCURSES_WIDECHAR 1
+#include <ncurses.h>
+
+#include "cell.h"
+#include "grid.h"
+
+#define GRID_WIDTH 91
+#define GRID_HEIGHT 37
+
+void ui_init(Ui *ui) {
+    setlocale(LC_ALL, "");
+    initscr();
+    cbreak();
+    noecho();
+    curs_set(0);
+
+    ui->grid_win = newwin(GRID_HEIGHT, GRID_WIDTH, 0, (COLS - GRID_WIDTH) / 2);
+    ui->info_win = newwin(LINES - GRID_HEIGHT, COLS, GRID_HEIGHT, 0);
+
+    refresh();
+}
+
+void ui_deinit(Ui *ui) {
+    delwin(ui->grid_win);
+    delwin(ui->info_win);
+    endwin();
+}
+
+void ui_print_message(Ui *ui, bool clear, char *format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    if (clear) {
+        wclear(ui->info_win);
+    }
+    vw_printw(ui->info_win, format, args);
+    wrefresh(ui->info_win);
+
+    va_end(args);
+}
+
+void ui_print_grid(Ui *ui, Grid *grid) {
+    wchar_t *top = L"┏━━━━━━━━━┯━━━━━━━━━┯━━━━━━━━━┳━━━━━━━━━┯━━━━━━━━━┯━━━━━━━"
+                   L"━━┳━━━━━━━━━┯━━━━━━━━━┯━━━━━━━━━┓";
+    wchar_t *row_sep = L"┠─────────┼─────────┼─────────╂─────────┼─────────┼───"
+                       L"──────╂─────────┼─────────┼─────────┨";
+    wchar_t *band_sep = L"┣━━━━━━━━━┿━━━━━━━━━┿━━━━━━━━━╋━━━━━━━━━┿━━━━━━━━━┿━━"
+                        L"━━━━━━━╋━━━━━━━━━┿━━━━━━━━━┿━━━━━━━━━┫";
+    wchar_t *bottom = L"┗━━━━━━━━━┷━━━━━━━━━┷━━━━━━━━━┻━━━━━━━━━┷━━━━━━━━━┷━━━━"
+                      L"━━━━━┻━━━━━━━━━┷━━━━━━━━━┷━━━━━━━━━┛";
+
+    wclear(ui->grid_win);
+    for (int row = 0; row < 9; row++) {
+        if (row == 0) {
+            waddwstr(ui->grid_win, top);
+        } else if (row % 3 == 0) {
+            waddwstr(ui->grid_win, band_sep);
+        } else {
+            waddwstr(ui->grid_win, row_sep);
+        }
+
+        for (int subrow = 0; subrow < 3; subrow++) {
+            for (int col = 0; col < 9; col++) {
+                if (col % 3 == 0) {
+                    waddwstr(ui->grid_win, L"┃");
+                } else {
+                    waddwstr(ui->grid_win, L"│");
+                }
+
+                Cell *cell = grid->rows[row][col];
+                if (cell_is_empty(cell)) {
+                    waddstr(ui->grid_win, " ");
+                    for (int cand = subrow * 3 + 1; cand <= subrow * 3 + 3;
+                         cand++) {
+                        if (cell_has_cand(cell, cand)) {
+                            wprintw(ui->grid_win, "%d", cand);
+                        } else {
+                            waddstr(ui->grid_win, " ");
+                        }
+
+                        if (cand != subrow * 3 + 3) {
+                            waddstr(ui->grid_win, "  ");
+                        }
+                    }
+                    waddstr(ui->grid_win, " ");
+                } else {
+                    if (subrow == 1) {
+                        wprintw(ui->grid_win, "    %d    ", cell->value);
+                    } else {
+                        waddstr(ui->grid_win, "         ");
+                    }
+                }
+            }
+            waddwstr(ui->grid_win, L"┃");
+        }
+    }
+    waddwstr(ui->grid_win, bottom);
+    wrefresh(ui->grid_win);
+}
