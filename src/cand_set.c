@@ -52,7 +52,14 @@ int cand_set_only(CandSet set) {
     return find_first_set(set.cands);
 }
 
-CandSet cand_set_intersection(int num_sets, ...) {
+CandSet cand_set_difference(CandSet a, CandSet b) {
+    CandSet result;
+    result.cands = a.cands & ~b.cands;
+    result.len = count_ones(result.cands);
+    return result;
+}
+
+CandSet cand_set_intersection_from_va(int num_sets, ...) {
     CandSet result = cand_set_full();
 
     va_list sets;
@@ -69,7 +76,19 @@ CandSet cand_set_intersection(int num_sets, ...) {
     return result;
 }
 
-CandSet cand_set_union(int num_sets, ...) {
+CandSet cand_set_intersection_from_arr(CandSet sets[], int num_sets) {
+    CandSet result = cand_set_full();
+
+    for (int i = 0; i < num_sets; i++) {
+        result.cands &= sets[i].cands;
+    }
+
+    result.len = count_ones(result.cands);
+
+    return result;
+}
+
+CandSet cand_set_union_from_va(int num_sets, ...) {
     CandSet result = cand_set_empty();
 
     va_list sets;
@@ -80,6 +99,18 @@ CandSet cand_set_union(int num_sets, ...) {
     }
 
     va_end(sets);
+
+    result.len = count_ones(result.cands);
+
+    return result;
+}
+
+CandSet cand_set_union_from_arr(CandSet sets[], int num_sets) {
+    CandSet result = cand_set_empty();
+
+    for (int i = 0; i < num_sets; i++) {
+        result.cands |= sets[i].cands;
+    }
 
     result.len = count_ones(result.cands);
 

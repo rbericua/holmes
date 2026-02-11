@@ -7,10 +7,11 @@
 #include "step.h"
 
 #include "techniques/hidden_single.h"
+#include "techniques/naked_set.h"
 #include "techniques/naked_single.h"
 
 typedef bool (*TechniqueFn)(Grid *, Step *);
 
-TechniqueFn techniques[] = {naked_single, hidden_single};
+TechniqueFn techniques[] = {naked_single, hidden_single, naked_set};
 
 #endif

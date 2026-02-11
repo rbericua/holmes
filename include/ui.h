@@ -6,6 +6,7 @@
 #define NCURSES_WIDECHAR 1
 #include <ncurses.h>
 
+#include "cand_set.h"
 #include "grid.h"
 #include "step.h"
 
@@ -23,6 +24,8 @@ typedef enum {
 void ui_init(Ui *ui);
 void ui_deinit(Ui *ui);
 void ui_print_message(Ui *ui, bool clear, char *format, ...);
+void ui_print_cand_set(Ui *ui, CandSet set);
+void ui_print_idxs(Ui *ui, int idxs[], int num_idxs);
 void ui_print_grid(Ui *ui, Grid *grid, Step *step);
 void ui_print_step(Ui *ui, Step *step);
 
