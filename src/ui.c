@@ -156,69 +156,89 @@ void ui_print_grid(Ui *ui, Grid *grid, Step *step) {
 void ui_print_step(Ui *ui, Step *step) {
     switch (step->tech) {
     case TECH_NAKED_SINGLE: {
-        NakedSingleStep *naked_single = &step->as.naked_single;
+        NakedSingleStep *s = &step->as.naked_single;
 
-        int row = ROW_FROM_IDX(naked_single->idx);
-        int col = COL_FROM_IDX(naked_single->idx);
+        int row = ROW_FROM_IDX(s->idx);
+        int col = COL_FROM_IDX(s->idx);
 
         ui_print_message(ui, true, "[Naked Single] Set r%dc%d to %d\n", row + 1,
-                         col + 1, naked_single->value);
+                         col + 1, s->value);
     } break;
     case TECH_HIDDEN_SINGLE: {
-        HiddenSingleStep *hidden_single = &step->as.hidden_single;
+        HiddenSingleStep *s = &step->as.hidden_single;
 
-        int row = ROW_FROM_IDX(hidden_single->idx);
-        int col = COL_FROM_IDX(hidden_single->idx);
-        char *unit_str = UNIT_TO_STR(hidden_single->unit_type);
+        int row = ROW_FROM_IDX(s->idx);
+        int col = COL_FROM_IDX(s->idx);
+        char *unit_str = UNIT_TO_STR(s->unit_type);
 
         ui_print_message(ui, true, "[Hidden Single (%s %d)] Set r%dc%d to %d\n",
-                         unit_str, hidden_single->unit_idx + 1, row + 1,
-                         col + 1, hidden_single->value);
+                         unit_str, s->unit_idx + 1, row + 1, col + 1, s->value);
     } break;
     case TECH_NAKED_PAIR:
     case TECH_NAKED_TRIPLE:
     case TECH_NAKED_QUAD: {
-        NakedSetStep *naked_set = &step->as.naked_set;
+        NakedSetStep *s = &step->as.naked_set;
 
-        char *unit_str = UNIT_TO_STR(naked_set->unit_type);
-        char *set_name = SET_NAME_FROM_SIZE(naked_set->size);
+        char *unit_str = UNIT_TO_STR(s->unit_type);
+        char *set_name = SET_NAME_FROM_SIZE(s->size);
 
         ui_print_message(ui, true, "[Naked %s (%s %d)] ", set_name, unit_str,
-                         naked_set->unit_idx + 1);
-        ui_print_cand_set(ui, naked_set->cands);
+                         s->unit_idx + 1);
+        ui_print_cand_set(ui, s->cands);
         ui_print_message(ui, false, " in ");
-        ui_print_idxs(ui, naked_set->idxs, naked_set->size);
+        ui_print_idxs(ui, s->idxs, s->size);
         ui_print_message(ui, false, ":\n");
-        for (int i = 0; i < naked_set->num_removals; i++) {
-            int row = ROW_FROM_IDX(naked_set->removal_idxs[i]);
-            int col = COL_FROM_IDX(naked_set->removal_idxs[i]);
+        for (int i = 0; i < s->num_removals; i++) {
+            int row = ROW_FROM_IDX(s->removal_idxs[i]);
+            int col = COL_FROM_IDX(s->removal_idxs[i]);
 
             ui_print_message(ui, false, "- Removed ");
-            ui_print_cand_set(ui, naked_set->removed_cands[i]);
+            ui_print_cand_set(ui, s->removed_cands[i]);
             ui_print_message(ui, false, " from r%dc%d\n", row + 1, col + 1);
         }
     } break;
     case TECH_HIDDEN_PAIR:
     case TECH_HIDDEN_TRIPLE:
     case TECH_HIDDEN_QUAD: {
-        HiddenSetStep *hidden_set = &step->as.hidden_set;
+        HiddenSetStep *s = &step->as.hidden_set;
 
-        char *unit_str = UNIT_TO_STR(hidden_set->unit_type);
-        char *set_name = SET_NAME_FROM_SIZE(hidden_set->size);
+        char *unit_str = UNIT_TO_STR(s->unit_type);
+        char *set_name = SET_NAME_FROM_SIZE(s->size);
 
         ui_print_message(ui, true, "[Hidden %s (%s %d)] ", set_name, unit_str,
-                         hidden_set->unit_idx + 1);
-        ui_print_cand_set(ui, hidden_set->cands);
+                         s->unit_idx + 1);
+        ui_print_cand_set(ui, s->cands);
         ui_print_message(ui, false, " in ");
-        ui_print_idxs(ui, hidden_set->idxs, hidden_set->size);
+        ui_print_idxs(ui, s->idxs, s->size);
         ui_print_message(ui, false, ":\n");
-        for (int i = 0; i < hidden_set->num_removals; i++) {
-            int row = ROW_FROM_IDX(hidden_set->removal_idxs[i]);
-            int col = COL_FROM_IDX(hidden_set->removal_idxs[i]);
+        for (int i = 0; i < s->num_removals; i++) {
+            int row = ROW_FROM_IDX(s->removal_idxs[i]);
+            int col = COL_FROM_IDX(s->removal_idxs[i]);
 
             ui_print_message(ui, false, "- Removed ");
-            ui_print_cand_set(ui, hidden_set->removed_cands[i]);
+            ui_print_cand_set(ui, s->removed_cands[i]);
             ui_print_message(ui, false, " from r%dc%d\n", row + 1, col + 1);
+        }
+
+    }; break;
+    case TECH_POINTING_SET: {
+        PointingSetStep *s = &step->as.pointing_set;
+
+        char *trigger_unit_str = UNIT_TO_STR(s->trigger_unit_type);
+        char *removal_unit_str = UNIT_TO_STR(s->removal_unit_type);
+        char *set_name = SET_NAME_FROM_SIZE(s->size);
+
+        ui_print_message(ui, true, "[Pointing %s (%s %d -> %s %d)] {%d} in ",
+                         set_name, trigger_unit_str, s->trigger_unit_idx + 1,
+                         removal_unit_str, s->removal_unit_idx + 1, s->value);
+        ui_print_idxs(ui, s->idxs, s->size);
+        ui_print_message(ui, false, ":\n");
+        for (int i = 0; i < s->num_removals; i++) {
+            int row = ROW_FROM_IDX(s->removal_idxs[i]);
+            int col = COL_FROM_IDX(s->removal_idxs[i]);
+
+            ui_print_message(ui, false, "- Removed {%d} from r%dc%d\n",
+                             s->value, row + 1, col + 1);
         }
 
     }; break;
@@ -229,52 +249,67 @@ void ui_print_step(Ui *ui, Step *step) {
 static void generate_colors(Step *step, ColorPair out_colors[81][9]) {
     switch (step->tech) {
     case TECH_NAKED_SINGLE: {
-        NakedSingleStep *naked_single = &step->as.naked_single;
+        NakedSingleStep *s = &step->as.naked_single;
 
-        out_colors[naked_single->idx][naked_single->value - 1] = CP_TRIGGER;
+        out_colors[s->idx][s->value - 1] = CP_TRIGGER;
         for (int i = 0; i < NUM_PEERS; i++) {
-            int peer_idx = naked_single->peer_idxs[i];
-            out_colors[peer_idx][naked_single->value - 1] = CP_REMOVAL;
+            int peer_idx = s->peer_idxs[i];
+            out_colors[peer_idx][s->value - 1] = CP_REMOVAL;
         }
     } break;
     case TECH_HIDDEN_SINGLE: {
-        HiddenSingleStep *hidden_single = &step->as.hidden_single;
+        HiddenSingleStep *s = &step->as.hidden_single;
 
-        out_colors[hidden_single->idx][hidden_single->value - 1] = CP_TRIGGER;
+        out_colors[s->idx][s->value - 1] = CP_TRIGGER;
         for (int i = 0; i < NUM_PEERS; i++) {
-            int peer_idx = hidden_single->peer_idxs[i];
-            out_colors[peer_idx][hidden_single->value - 1] = CP_REMOVAL;
+            int peer_idx = s->peer_idxs[i];
+            out_colors[peer_idx][s->value - 1] = CP_REMOVAL;
         }
     } break;
     case TECH_NAKED_PAIR:
     case TECH_NAKED_TRIPLE:
     case TECH_NAKED_QUAD: {
-        NakedSetStep *naked_set = &step->as.naked_set;
+        NakedSetStep *s = &step->as.naked_set;
 
         int cands[4];
-        cand_set_to_arr(naked_set->cands, cands);
+        cand_set_to_arr(s->cands, cands);
 
-        for (int i = 0; i < naked_set->size; i++) {
+        for (int i = 0; i < s->size; i++) {
             int cand = cands[i];
-            for (int j = 0; j < naked_set->size; j++) {
-                out_colors[naked_set->idxs[j]][cand - 1] = CP_TRIGGER;
+            for (int j = 0; j < s->size; j++) {
+                int idx = s->idxs[j];
+                out_colors[idx][cand - 1] = CP_TRIGGER;
             }
-            for (int j = 0; j < naked_set->num_removals; j++) {
-                out_colors[naked_set->removal_idxs[j]][cand - 1] = CP_REMOVAL;
+            for (int j = 0; j < s->num_removals; j++) {
+                int idx = s->removal_idxs[j];
+                out_colors[idx][cand - 1] = CP_REMOVAL;
             }
         }
     }; break;
     case TECH_HIDDEN_PAIR:
     case TECH_HIDDEN_TRIPLE:
     case TECH_HIDDEN_QUAD: {
-        HiddenSetStep *hidden_set = &step->as.hidden_set;
+        HiddenSetStep *s = &step->as.hidden_set;
 
-        for (int i = 0; i < hidden_set->size; i++) {
+        for (int i = 0; i < s->size; i++) {
+            int idx = s->idxs[i];
             for (int cand = 1; cand <= 9; cand++) {
-                out_colors[hidden_set->idxs[i]][cand - 1] =
-                    cand_set_has(hidden_set->cands, cand) ? CP_TRIGGER
-                                                          : CP_REMOVAL;
+                out_colors[idx][cand - 1] = cand_set_has(s->cands, cand)
+                                                ? CP_TRIGGER
+                                                : CP_REMOVAL;
             }
+        }
+    } break;
+    case TECH_POINTING_SET: {
+        PointingSetStep *s = &step->as.pointing_set;
+
+        for (int i = 0; i < s->size; i++) {
+            int idx = s->idxs[i];
+            out_colors[idx][s->value - 1] = CP_TRIGGER;
+        }
+        for (int i = 0; i < s->num_removals; i++) {
+            int idx = s->removal_idxs[i];
+            out_colors[idx][s->value - 1] = CP_REMOVAL;
         }
     } break;
     default: break;

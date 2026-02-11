@@ -26,7 +26,8 @@ bool hidden_single(Grid *grid, Step *out_step) {
 
 static bool hidden_single_unit(Grid *grid, Cell *units[9][9], Step *out_step,
                                UnitType unit_type) {
-    out_step->as.hidden_single.unit_type = unit_type;
+    HiddenSingleStep *s = &out_step->as.hidden_single;
+    s->unit_type = unit_type;
 
     for (int unit_i = 0; unit_i < 9; unit_i++) {
         Cell **unit = units[unit_i];
@@ -46,11 +47,10 @@ static bool hidden_single_unit(Grid *grid, Cell *units[9][9], Step *out_step,
 
             int idx = cell_idx(possible_cells[0]);
 
-            out_step->as.hidden_single.idx = idx;
-            out_step->as.hidden_single.value = value;
-            out_step->as.hidden_single.unit_idx = unit_i;
-            cells_idxs(grid->peers[idx], NUM_PEERS,
-                       out_step->as.hidden_single.peer_idxs);
+            s->idx = idx;
+            s->value = value;
+            s->unit_idx = unit_i;
+            cells_idxs(grid->peers[idx], NUM_PEERS, s->peer_idxs);
 
             return true;
         }

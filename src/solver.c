@@ -17,34 +17,38 @@ SolveStatus solver_next_step(Grid *grid, Step *out_step) {
 void solver_apply_step(Grid *grid, Step *step) {
     switch (step->tech) {
     case TECH_NAKED_SINGLE: {
-        NakedSingleStep *naked_single = &step->as.naked_single;
+        NakedSingleStep *s = &step->as.naked_single;
 
-        grid_fill_cell(grid, grid->cells[naked_single->idx],
-                       naked_single->value);
+        grid_fill_cell(grid, grid->cells[s->idx], s->value);
     } break;
     case TECH_HIDDEN_SINGLE: {
-        HiddenSingleStep *hidden_single = &step->as.hidden_single;
+        HiddenSingleStep *s = &step->as.hidden_single;
 
-        grid_fill_cell(grid, grid->cells[hidden_single->idx],
-                       hidden_single->value);
+        grid_fill_cell(grid, grid->cells[s->idx], s->value);
     } break;
     case TECH_NAKED_PAIR:
     case TECH_NAKED_TRIPLE:
     case TECH_NAKED_QUAD: {
-        NakedSetStep *naked_set = &step->as.naked_set;
+        NakedSetStep *s = &step->as.naked_set;
 
-        for (int i = 0; i < naked_set->num_removals; i++) {
-            cell_remove_cands(grid->cells[naked_set->removal_idxs[i]],
-                              naked_set->cands);
+        for (int i = 0; i < s->num_removals; i++) {
+            cell_remove_cands(grid->cells[s->removal_idxs[i]], s->cands);
         }
     } break;
     case TECH_HIDDEN_PAIR:
     case TECH_HIDDEN_TRIPLE:
     case TECH_HIDDEN_QUAD: {
-        HiddenSetStep *hidden_set = &step->as.hidden_set;
+        HiddenSetStep *s = &step->as.hidden_set;
 
-        for (int i = 0; i < hidden_set->size; i++) {
-            grid->cells[hidden_set->idxs[i]]->cands = hidden_set->cands;
+        for (int i = 0; i < s->size; i++) {
+            grid->cells[s->idxs[i]]->cands = s->cands;
+        }
+    } break;
+    case TECH_POINTING_SET: {
+        PointingSetStep *s = &step->as.pointing_set;
+
+        for (int i = 0; i < s->num_removals; i++) {
+            cell_remove_cand(grid->cells[s->removal_idxs[i]], s->value);
         }
     } break;
     default: break;

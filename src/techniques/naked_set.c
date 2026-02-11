@@ -77,7 +77,8 @@ bool naked_quad(Grid *grid, Step *out_step) {
 
 static bool naked_n_set_unit(Grid *grid, Cell *units[9][9], Step *out_step,
                              int set_size, UnitType unit_type) {
-    out_step->as.naked_set.unit_type = unit_type;
+    NakedSetStep *s = &out_step->as.naked_set;
+    s->unit_type = unit_type;
 
     for (int unit_i = 0; unit_i < 9; unit_i++) {
         Cell **unit = units[unit_i];
@@ -106,16 +107,15 @@ static bool naked_n_set_unit(Grid *grid, Cell *units[9][9], Step *out_step,
             Cell *removal_cells[MAX_COMMON_PEERS];
             int num_removals = cells_with_removals(
                 common_peers, num_common_peers, comb_cands, removal_cells,
-                out_step->as.naked_set.removed_cands);
+                s->removed_cands);
 
             if (num_removals == 0) continue;
 
-            cells_idxs(comb, set_size, out_step->as.naked_set.idxs);
-            out_step->as.naked_set.cands = comb_cands;
-            cells_idxs(removal_cells, num_removals,
-                       out_step->as.naked_set.removal_idxs);
-            out_step->as.naked_set.num_removals = num_removals;
-            out_step->as.naked_set.unit_idx = unit_i;
+            cells_idxs(comb, set_size, s->idxs);
+            s->cands = comb_cands;
+            cells_idxs(removal_cells, num_removals, s->removal_idxs);
+            s->num_removals = num_removals;
+            s->unit_idx = unit_i;
 
             free_combinations(combs);
 
