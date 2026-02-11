@@ -118,6 +118,18 @@ int cells_with_cand(Cell *cells[], int num_cells, int cand, Cell *out[]) {
     return count;
 }
 
+int cells_with_cands_some(Cell *cells[], int num_cells, CandSet cands,
+                          Cell *out[]) {
+    int count = 0;
+    for (int i = 0; i < num_cells; i++) {
+        Cell *cell = cells[i];
+        if (cand_set_intersection_from_va(2, cell->cands, cands).len != 0) {
+            out[count++] = cell;
+        }
+    }
+    return count;
+}
+
 int cells_with_n_cands_max(Cell *cells[], int num_cells, int n, Cell *out[]) {
     int count = 0;
     for (int i = 0; i < num_cells; i++) {

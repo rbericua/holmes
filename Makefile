@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Iinclude -Wall -Wextra -Werror -fsanitize=address,undefined -g
+CFLAGS := -Iinclude -Wall -Wextra -Werror -fsanitize=address,undefined -g -MMD -MP
 LDFLAGS := -lncurses
 
 SRC_DIR := src
@@ -9,6 +9,7 @@ TARGET := $(BUILD_DIR)/holmes
 
 SRCS := $(shell find $(SRC_DIR) -type f -name '*.c')
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
+DEPS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.d, $(SRCS))
 
 .PHONY: all
 all: makedirs $(TARGET)
@@ -20,6 +21,8 @@ $(TARGET): $(OBJS)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@$(CC) $(CFLAGS) -c -o $@ $<
 	@echo "Compiled $@"
+
+-include $(DEPS)
 
 .PHONY: makedirs
 makedirs:

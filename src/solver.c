@@ -28,12 +28,23 @@ void solver_apply_step(Grid *grid, Step *step) {
         grid_fill_cell(grid, grid->cells[hidden_single->idx],
                        hidden_single->value);
     } break;
-    case TECH_NAKED_SET: {
+    case TECH_NAKED_PAIR:
+    case TECH_NAKED_TRIPLE:
+    case TECH_NAKED_QUAD: {
         NakedSetStep *naked_set = &step->as.naked_set;
 
         for (int i = 0; i < naked_set->num_removals; i++) {
             cell_remove_cands(grid->cells[naked_set->removal_idxs[i]],
-                              naked_set->set_cands);
+                              naked_set->cands);
+        }
+    } break;
+    case TECH_HIDDEN_PAIR:
+    case TECH_HIDDEN_TRIPLE:
+    case TECH_HIDDEN_QUAD: {
+        HiddenSetStep *hidden_set = &step->as.hidden_set;
+
+        for (int i = 0; i < hidden_set->size; i++) {
+            grid->cells[hidden_set->idxs[i]]->cands = hidden_set->cands;
         }
     } break;
     default: break;

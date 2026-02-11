@@ -16,6 +16,14 @@ CandSet cand_set_full(void) {
     return (CandSet){.cands = ALL_CANDS, .len = 9};
 }
 
+CandSet cand_set_from_arr(int arr[], int arr_len) {
+    CandSet set = cand_set_empty();
+    for (int i = 0; i < arr_len; i++) {
+        cand_set_add(&set, arr[i]);
+    }
+    return set;
+}
+
 int cand_set_to_arr(CandSet set, int out[]) {
     int count = 0;
     for (int value = 1; value <= 9; value++) {

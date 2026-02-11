@@ -12,8 +12,6 @@ static bool naked_n_set_unit(Grid *grid, Cell *units[9][9], Step *out_step,
                              int n, UnitType unit_type);
 
 bool naked_set(Grid *grid, Step *out_step) {
-    out_step->tech = TECH_NAKED_SET;
-
     bool pair_result = naked_pair(grid, out_step);
     if (pair_result) return true;
 
@@ -27,7 +25,8 @@ bool naked_set(Grid *grid, Step *out_step) {
 }
 
 bool naked_pair(Grid *grid, Step *out_step) {
-    out_step->as.naked_set.set_size = 2;
+    out_step->tech = TECH_NAKED_PAIR;
+    out_step->as.naked_set.size = 2;
 
     bool row_result = naked_n_set_unit(grid, grid->rows, out_step, 2, UNIT_ROW);
     if (row_result) return true;
@@ -43,7 +42,8 @@ bool naked_pair(Grid *grid, Step *out_step) {
 }
 
 bool naked_triple(Grid *grid, Step *out_step) {
-    out_step->as.naked_set.set_size = 3;
+    out_step->tech = TECH_NAKED_TRIPLE;
+    out_step->as.naked_set.size = 3;
 
     bool row_result = naked_n_set_unit(grid, grid->rows, out_step, 3, UNIT_ROW);
     if (row_result) return true;
@@ -59,7 +59,8 @@ bool naked_triple(Grid *grid, Step *out_step) {
 }
 
 bool naked_quad(Grid *grid, Step *out_step) {
-    out_step->as.naked_set.set_size = 4;
+    out_step->tech = TECH_NAKED_QUAD;
+    out_step->as.naked_set.size = 4;
 
     bool row_result = naked_n_set_unit(grid, grid->rows, out_step, 4, UNIT_ROW);
     if (row_result) return true;
@@ -109,8 +110,8 @@ static bool naked_n_set_unit(Grid *grid, Cell *units[9][9], Step *out_step,
 
             if (num_removals == 0) continue;
 
-            cells_idxs(comb, set_size, out_step->as.naked_set.set_idxs);
-            out_step->as.naked_set.set_cands = comb_cands;
+            cells_idxs(comb, set_size, out_step->as.naked_set.idxs);
+            out_step->as.naked_set.cands = comb_cands;
             cells_idxs(removal_cells, num_removals,
                        out_step->as.naked_set.removal_idxs);
             out_step->as.naked_set.num_removals = num_removals;

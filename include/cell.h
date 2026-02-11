@@ -40,6 +40,8 @@ int cells_missing_values_to_arr(Cell *cells[], int num_cells, int out[]);
 CandSet cells_cand_intersection(Cell *cells[], int num_cells);
 CandSet cells_cand_union(Cell *cells[], int num_cells);
 int cells_with_cand(Cell *cells[], int num_cells, int cand, Cell *out[]);
+int cells_with_cands_some(Cell *cells[], int num_cells, CandSet cands,
+                          Cell *out[]);
 int cells_with_n_cands_max(Cell *cells[], int num_cells, int n, Cell *out[]);
 int cells_with_removals(Cell *cells[], int num_cells, CandSet cands,
                         Cell *out_cells[], CandSet out_cands[]);
