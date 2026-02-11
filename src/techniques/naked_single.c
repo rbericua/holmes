@@ -18,6 +18,8 @@ bool naked_single(Grid *grid, Step *out_step) {
 
         out_step->as.naked_single.idx = i;
         out_step->as.naked_single.value = value;
+        cells_idxs(grid->peers[i], NUM_PEERS,
+                   out_step->as.naked_single.peer_idxs);
 
         return true;
     }

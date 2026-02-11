@@ -20,11 +20,13 @@ typedef enum {
 typedef struct {
     int idx;
     int value;
+    int peer_idxs[NUM_PEERS];
 } NakedSingleStep;
 
 typedef struct {
     int idx;
     int value;
+    int peer_idxs[NUM_PEERS];
     UnitType unit_type;
     int unit_idx;
 } HiddenSingleStep;
