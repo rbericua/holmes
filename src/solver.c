@@ -5,10 +5,10 @@
 #include "step.h"
 #include "techniques/techniques.h"
 
-SolveStatus solver_next_step(Grid *grid, Step *out_step) {
+SolveStatus solver_next_step(Grid *grid, Step *step) {
     for (int i = 0; i < NUM_TECHNIQUES; i++) {
         if (grid_is_solved(grid)) return SOLVE_COMPLETE;
-        if (techniques[i](grid, out_step)) return SOLVE_ONGOING;
+        if (techniques[i](grid, step)) return SOLVE_ONGOING;
     }
 
     return SOLVE_STUCK;

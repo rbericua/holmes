@@ -20,7 +20,7 @@
     ((u) == UNIT_ROW ? "Row" : (u) == UNIT_COL ? "Column" : "Box")
 #define SET_NAME_FROM_SIZE(n) ((n) == 2 ? "Pair" : (n) == 3 ? "Triple" : "Quad")
 
-static void generate_colors(Step *step, ColorPair out_colors[81][9]);
+static void generate_colors(Step *step, ColorPair colors[81][9]);
 
 void ui_init(Ui *ui) {
     setlocale(LC_ALL, "");
@@ -246,24 +246,24 @@ void ui_print_step(Ui *ui, Step *step) {
     }
 }
 
-static void generate_colors(Step *step, ColorPair out_colors[81][9]) {
+static void generate_colors(Step *step, ColorPair colors[81][9]) {
     switch (step->tech) {
     case TECH_NAKED_SINGLE: {
         NakedSingleStep *s = &step->as.naked_single;
 
-        out_colors[s->idx][s->value - 1] = CP_TRIGGER;
+        colors[s->idx][s->value - 1] = CP_TRIGGER;
         for (int i = 0; i < NUM_PEERS; i++) {
             int peer_idx = s->peer_idxs[i];
-            out_colors[peer_idx][s->value - 1] = CP_REMOVAL;
+            colors[peer_idx][s->value - 1] = CP_REMOVAL;
         }
     } break;
     case TECH_HIDDEN_SINGLE: {
         HiddenSingleStep *s = &step->as.hidden_single;
 
-        out_colors[s->idx][s->value - 1] = CP_TRIGGER;
+        colors[s->idx][s->value - 1] = CP_TRIGGER;
         for (int i = 0; i < NUM_PEERS; i++) {
             int peer_idx = s->peer_idxs[i];
-            out_colors[peer_idx][s->value - 1] = CP_REMOVAL;
+            colors[peer_idx][s->value - 1] = CP_REMOVAL;
         }
     } break;
     case TECH_NAKED_PAIR:
@@ -278,11 +278,11 @@ static void generate_colors(Step *step, ColorPair out_colors[81][9]) {
             int cand = cands[i];
             for (int j = 0; j < s->size; j++) {
                 int idx = s->idxs[j];
-                out_colors[idx][cand - 1] = CP_TRIGGER;
+                colors[idx][cand - 1] = CP_TRIGGER;
             }
             for (int j = 0; j < s->num_removals; j++) {
                 int idx = s->removal_idxs[j];
-                out_colors[idx][cand - 1] = CP_REMOVAL;
+                colors[idx][cand - 1] = CP_REMOVAL;
             }
         }
     }; break;
@@ -294,9 +294,9 @@ static void generate_colors(Step *step, ColorPair out_colors[81][9]) {
         for (int i = 0; i < s->size; i++) {
             int idx = s->idxs[i];
             for (int cand = 1; cand <= 9; cand++) {
-                out_colors[idx][cand - 1] = cand_set_has(s->cands, cand)
-                                                ? CP_TRIGGER
-                                                : CP_REMOVAL;
+                colors[idx][cand - 1] = cand_set_has(s->cands, cand)
+                                            ? CP_TRIGGER
+                                            : CP_REMOVAL;
             }
         }
     } break;
@@ -305,11 +305,11 @@ static void generate_colors(Step *step, ColorPair out_colors[81][9]) {
 
         for (int i = 0; i < s->size; i++) {
             int idx = s->idxs[i];
-            out_colors[idx][s->value - 1] = CP_TRIGGER;
+            colors[idx][s->value - 1] = CP_TRIGGER;
         }
         for (int i = 0; i < s->num_removals; i++) {
             int idx = s->removal_idxs[i];
-            out_colors[idx][s->value - 1] = CP_REMOVAL;
+            colors[idx][s->value - 1] = CP_REMOVAL;
         }
     } break;
     default: break;

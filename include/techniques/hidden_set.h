@@ -6,9 +6,9 @@
 #include "grid.h"
 #include "step.h"
 
-bool hidden_set(Grid *grid, Step *out_step);
-bool hidden_pair(Grid *grid, Step *out_step);
-bool hidden_triple(Grid *grid, Step *out_step);
-bool hidden_quad(Grid *grid, Step *out_step);
+bool hidden_set(Grid *grid, Step *step);
+bool hidden_pair(Grid *grid, Step *step);
+bool hidden_triple(Grid *grid, Step *step);
+bool hidden_quad(Grid *grid, Step *step);
 
 #endif

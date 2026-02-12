@@ -10,7 +10,7 @@ typedef enum {
     SOLVE_STUCK
 } SolveStatus;
 
-SolveStatus solver_next_step(Grid *grid, Step *out_step);
+SolveStatus solver_next_step(Grid *grid, Step *step);
 void solver_apply_step(Grid *grid, Step *step);
 
 #endif
