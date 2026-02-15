@@ -8,9 +8,8 @@
 
 static bool pointing_set_unit(Grid *grid, Cell *units[9][9], Step *step,
                               UnitType unit_type);
-static void find_removal_unit(Cell *cells[], int num_cells,
-                              UnitType trigger_type, UnitType *out_type,
-                              int *out_idx);
+static void find_removal_unit(Cell *cells[], UnitType trigger_type,
+                              UnitType *out_type, int *out_idx);
 
 bool pointing_set(Grid *grid, Step *step) {
     step->tech = TECH_POINTING_SET;
@@ -64,8 +63,8 @@ static bool pointing_set_unit(Grid *grid, Cell *units[9][9], Step *step,
             cells_idxs(removal_cells, num_removals, s->removal_idxs);
             s->num_removals = num_removals;
             s->trigger_unit_idx = unit_i;
-            find_removal_unit(possible_cells, num_possible_cells, unit_type,
-                              &s->removal_unit_type, &s->removal_unit_idx);
+            find_removal_unit(possible_cells, unit_type, &s->removal_unit_type,
+                              &s->removal_unit_idx);
 
             return true;
         }
@@ -74,24 +73,12 @@ static bool pointing_set_unit(Grid *grid, Cell *units[9][9], Step *step,
     return false;
 }
 
-static void find_removal_unit(Cell *cells[], int num_cells,
-                              UnitType trigger_type, UnitType *out_type,
-                              int *out_idx) {
+static void find_removal_unit(Cell *cells[], UnitType trigger_type,
+                              UnitType *out_type, int *out_idx) {
     if (trigger_type != UNIT_BOX) {
         *out_type = UNIT_BOX;
         *out_idx = cells[0]->box;
-        return;
-    }
-
-    bool same_row = true;
-    for (int i = 1; i < num_cells; i++) {
-        if (cells[i]->row != cells[0]->row) {
-            same_row = false;
-            break;
-        }
-    }
-
-    if (same_row) {
+    } else if (cells[0]->row == cells[1]->row) {
         *out_type = UNIT_ROW;
         *out_idx = cells[0]->row;
     } else {
