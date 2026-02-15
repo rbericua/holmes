@@ -51,6 +51,15 @@ void solver_apply_step(Grid *grid, Step *step) {
             cell_remove_cand(grid->cells[s->removal_idxs[i]], s->value);
         }
     } break;
+    case TECH_X_WING:
+    case TECH_SWORDFISH:
+    case TECH_JELLYFISH: {
+        BasicFishStep *s = &step->as.basic_fish;
+
+        for (int i = 0; i < s->num_removals; i++) {
+            cell_remove_cand(grid->cells[s->removal_idxs[i]], s->value);
+        }
+    } break;
     default: break;
     }
 }

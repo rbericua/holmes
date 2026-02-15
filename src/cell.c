@@ -134,7 +134,7 @@ int cells_with_n_cands_max(Cell *cells[], int num_cells, int n, Cell *out[]) {
     int count = 0;
     for (int i = 0; i < num_cells; i++) {
         Cell *cell = cells[i];
-        if (cell->cands.len != 0 && cell->cands.len <= n) {
+        if (cell->cands.len > 0 && cell->cands.len <= n) {
             out[count++] = cell;
         }
     }

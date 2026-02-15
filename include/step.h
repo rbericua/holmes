@@ -14,6 +14,9 @@ typedef enum {
     TECH_HIDDEN_TRIPLE,
     TECH_HIDDEN_QUAD,
     TECH_POINTING_SET,
+    TECH_X_WING,
+    TECH_SWORDFISH,
+    TECH_JELLYFISH,
 
     NUM_TECHNIQUES
 } TechniqueType;
@@ -67,6 +70,16 @@ typedef struct {
 } PointingSetStep;
 
 typedef struct {
+    int base_idxs[4];
+    int cover_idxs[4];
+    int size;
+    int value;
+    int removal_idxs[20];
+    int num_removals;
+    UnitType unit_type;
+} BasicFishStep;
+
+typedef struct {
     TechniqueType tech;
     union {
         NakedSingleStep naked_single;
@@ -74,6 +87,7 @@ typedef struct {
         NakedSetStep naked_set;
         HiddenSetStep hidden_set;
         PointingSetStep pointing_set;
+        BasicFishStep basic_fish;
     } as;
 } Step;
 
