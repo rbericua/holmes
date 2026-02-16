@@ -32,6 +32,7 @@ void ui_init(Ui *ui) {
     cbreak();
     noecho();
     curs_set(0);
+    keypad(stdscr, true);
 
     start_color();
     use_default_colors();
@@ -279,6 +280,18 @@ void ui_print_step(Ui *ui, Step *step) {
         }
     }
     default: break;
+    }
+}
+
+InputAction ui_wait_for_input(void) {
+    while (true) {
+        switch (getch()) {
+        case 'q': return ACTION_QUIT;
+        case 'n':
+        case ' ':
+        case '\n':
+        case KEY_RIGHT: return ACTION_NEXT;
+        }
     }
 }
 

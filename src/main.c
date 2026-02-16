@@ -1,8 +1,5 @@
 #include <stdio.h>
 
-#define NCURSES_WIDECHAR 1
-#include <ncurses.h>
-
 #include "grid.h"
 #include "solver.h"
 #include "step.h"
@@ -20,7 +17,11 @@ int main(int argc, char *argv[]) {
     ui_init(&ui);
 
     ui_print_grid(&ui, grid, NULL);
-    getch();
+
+    switch (ui_wait_for_input()) {
+    case ACTION_QUIT: goto cleanup;
+    case ACTION_NEXT: break;
+    }
 
     SolveStatus status;
     while (1) {
@@ -31,7 +32,11 @@ int main(int argc, char *argv[]) {
 
         ui_print_grid(&ui, grid, &step);
         ui_print_step(&ui, &step);
-        getch();
+
+        switch (ui_wait_for_input()) {
+        case ACTION_QUIT: goto cleanup;
+        case ACTION_NEXT: break;
+        }
 
         solver_apply_step(grid, &step);
     }
@@ -50,8 +55,12 @@ int main(int argc, char *argv[]) {
     default: break;
     }
 
-    getch();
+    switch (ui_wait_for_input()) {
+    case ACTION_QUIT: goto cleanup;
+    case ACTION_NEXT: break;
+    }
 
+cleanup:
     ui_deinit(&ui);
     grid_destroy(grid);
 
