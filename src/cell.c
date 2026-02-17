@@ -5,15 +5,15 @@
 
 #include "cand_set.h"
 
-Cell *cell_create(int idx, int value) {
+Cell *cell_create(int idx, int value, CandSet cands, bool is_clue) {
     Cell *cell = malloc(sizeof(Cell));
 
     cell->value = value;
-    cell->cands = cand_set_empty();
+    cell->cands = cands;
     cell->row = ROW_FROM_IDX(idx);
     cell->col = COL_FROM_IDX(idx);
     cell->box = BOX_FROM_IDX(idx);
-    cell->is_clue = value != 0;
+    cell->is_clue = is_clue;
 
     return cell;
 }

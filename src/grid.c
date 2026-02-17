@@ -2,38 +2,23 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cand_set.h"
 #include "cell.h"
 
+static Grid *grid_from_values(char *grid_str);
+static Grid *grid_from_cands(char *grid_str);
 static CandSet grid_cell_initial_cands(Grid *grid, Cell *cell);
 static void grid_generate_peers(Grid *grid);
 
 Grid *grid_create(char *grid_str) {
-    Grid *grid = malloc(sizeof(Grid));
+    Grid *grid;
 
-    grid->empty_cells = 81;
-
-    for (int i = 0; i < 81; i++) {
-        char c = grid_str[i];
-        int value = c >= '1' && c <= '9' ? c - '0' : 0;
-
-        Cell *cell = cell_create(i, value);
-
-        grid->rows[cell->row][cell->col] = cell;
-        grid->cols[cell->col][cell->row] = cell;
-        grid->boxes[cell->box][BOX_POSITION_FROM_IDX(i)] = cell;
-
-        if (!cell_is_empty(cell)) {
-            grid->empty_cells--;
-        }
-    }
-
-    for (int i = 0; i < 81; i++) {
-        Cell *cell = grid->cells[i];
-        if (cell_is_empty(cell)) {
-            cell->cands = grid_cell_initial_cands(grid, cell);
-        }
+    if (strncmp(grid_str, "S9B", 3) == 0) {
+        grid = grid_from_cands(grid_str + 3);
+    } else {
+        grid = grid_from_values(grid_str);
     }
 
     grid_generate_peers(grid);
@@ -79,6 +64,79 @@ int grid_common_peers(Grid *grid, Cell *cells[], int num_cells, Cell *out[]) {
         }
     }
     return count;
+}
+
+static Grid *grid_from_values(char *grid_str) {
+    Grid *grid = malloc(sizeof(Grid));
+
+    grid->empty_cells = 81;
+
+    for (int i = 0; i < 81; i++) {
+        char c = grid_str[i];
+        int value = c >= '1' && c <= '9' ? c - '0' : 0;
+
+        Cell *cell = cell_create(i, value, cand_set_empty(), value != 0);
+
+        grid->rows[cell->row][cell->col] = cell;
+        grid->cols[cell->col][cell->row] = cell;
+        grid->boxes[cell->box][BOX_POSITION_FROM_IDX(i)] = cell;
+
+        if (!cell_is_empty(cell)) {
+            grid->empty_cells--;
+        }
+    }
+
+    for (int i = 0; i < 81; i++) {
+        Cell *cell = grid->cells[i];
+        if (cell_is_empty(cell)) {
+            cell->cands = grid_cell_initial_cands(grid, cell);
+        }
+    }
+
+    return grid;
+}
+
+// The encoding format is defined here:
+// https://www.sudokuwiki.org/Sudoku_String_Definitions
+static Grid *grid_from_cands(char *grid_str) {
+    Grid *grid = malloc(sizeof(Grid));
+
+    grid->empty_cells = 81;
+
+    for (int i = 0; i < 81; i++) {
+        char cell_str[3] = {grid_str[i * 2], grid_str[i * 2 + 1], '\0'};
+        unsigned long cell_bits = strtoul(cell_str, NULL, 36);
+
+        int value;
+        CandSet cands;
+        bool is_clue;
+
+        if (cell_bits <= 9) {
+            value = cell_bits;
+            cands = cand_set_empty();
+            is_clue = true;
+        } else if (cell_bits <= 18) {
+            value = cell_bits - 9;
+            cands = cand_set_empty();
+            is_clue = false;
+        } else {
+            value = 0;
+            cands = cand_set_from_mask(cell_bits - 18);
+            is_clue = false;
+        }
+
+        Cell *cell = cell_create(i, value, cands, is_clue);
+
+        grid->rows[cell->row][cell->col] = cell;
+        grid->cols[cell->col][cell->row] = cell;
+        grid->boxes[cell->box][BOX_POSITION_FROM_IDX(i)] = cell;
+
+        if (!cell_is_empty(cell)) {
+            grid->empty_cells--;
+        }
+    }
+
+    return grid;
 }
 
 static CandSet grid_cell_initial_cands(Grid *grid, Cell *cell) {

@@ -22,7 +22,7 @@ typedef struct {
     bool is_clue;
 } Cell;
 
-Cell *cell_create(int idx, int value);
+Cell *cell_create(int idx, int value, CandSet cands, bool is_clue);
 void cell_destroy(Cell *cell);
 int cell_idx(Cell *cell);
 bool cell_is_empty(Cell *cell);

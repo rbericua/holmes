@@ -16,6 +16,13 @@ CandSet cand_set_full(void) {
     return (CandSet){.cands = ALL_CANDS, .len = 9};
 }
 
+CandSet cand_set_from_mask(unsigned int mask) {
+    CandSet result;
+    result.cands = mask;
+    result.len = count_ones(result.cands);
+    return result;
+}
+
 CandSet cand_set_from_arr(int arr[], int arr_len) {
     CandSet set = cand_set_empty();
     for (int i = 0; i < arr_len; i++) {
