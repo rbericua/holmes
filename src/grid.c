@@ -15,7 +15,9 @@ Grid *grid_create(char *grid_str) {
     grid->empty_cells = 81;
 
     for (int i = 0; i < 81; i++) {
-        int value = grid_str[i] - '0';
+        char c = grid_str[i];
+        int value = c >= '1' && c <= '9' ? c - '0' : 0;
+
         Cell *cell = cell_create(i, value);
 
         grid->rows[cell->row][cell->col] = cell;
