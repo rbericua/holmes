@@ -42,6 +42,7 @@ void ui_init(Ui *ui) {
 
     start_color();
     use_default_colors();
+    init_pair(CP_CLUE, COLOR_BLUE, -1);
     init_pair(CP_REMOVAL, COLOR_BLACK, COLOR_RED);
     init_pair(CP_TRIGGER, COLOR_BLACK, COLOR_GREEN);
 
@@ -125,7 +126,11 @@ void ui_print_grid(Ui *ui, Grid *grid, Step *step) {
                     wprintw(ui->grid_win, " ");
                 } else {
                     if (subrow == 1) {
+                        if (cell->is_clue) {
+                            wattron(ui->grid_win, COLOR_PAIR(CP_CLUE));
+                        }
                         wprintw(ui->grid_win, "    %d    ", cell->value);
+                        wattroff(ui->grid_win, COLOR_PAIR(CP_CLUE));
                     } else {
                         wprintw(ui->grid_win, "         ");
                     }

@@ -19,6 +19,7 @@ typedef struct {
     int row;
     int col;
     int box;
+    bool is_clue;
 } Cell;
 
 Cell *cell_create(int idx, int value);

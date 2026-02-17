@@ -19,6 +19,7 @@ typedef struct {
 
 typedef enum {
     CP_DEFAULT,
+    CP_CLUE,
     CP_REMOVAL,
     CP_TRIGGER,
 } ColorPair;

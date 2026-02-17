@@ -13,6 +13,7 @@ Cell *cell_create(int idx, int value) {
     cell->row = ROW_FROM_IDX(idx);
     cell->col = COL_FROM_IDX(idx);
     cell->box = BOX_FROM_IDX(idx);
+    cell->is_clue = value != 0;
 
     return cell;
 }
