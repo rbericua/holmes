@@ -101,7 +101,7 @@ static bool naked_n_set_unit(Grid *grid, Cell *units[9][9], Step *step,
             int num_common_peers = grid_common_peers(grid, comb, size,
                                                      common_peers);
 
-            Cell *removal_cells[MAX_COMMON_PEERS];
+            Cell *removal_cells[MAX_NAKED_SET_REMOVALS];
             int num_removals = cells_with_removals(
                 common_peers, num_common_peers, comb_cands, removal_cells,
                 s->removed_cands);

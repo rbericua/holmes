@@ -99,7 +99,7 @@ static bool hidden_n_set_unit(Cell *units[9][9], Step *step, int size,
 
             if (num_possible_cells != size) continue;
 
-            Cell *removal_cells[4];
+            Cell *removal_cells[MAX_HIDDEN_SET_REMOVALS];
             int num_removals = cells_with_removals(
                 possible_cells, num_possible_cells,
                 cand_set_difference(cand_set_full(), comb_set), removal_cells,

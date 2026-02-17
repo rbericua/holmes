@@ -10,7 +10,7 @@
 
 typedef struct {
     int unit_idx;
-    int cell_idxs[4];
+    int cell_idxs[MAX_BASIC_FISH_SIZE];
     int num_cells;
 } BaseSet;
 
@@ -18,9 +18,11 @@ static bool n_fish_unit(Grid *grid, Cell *units[9][9], Step *step, int size,
                         UnitType unit_type);
 static int find_base_sets(Cell *units[9][9], int value, int size,
                           BaseSet out[9]);
-static bool is_valid_fish(BaseSet base_sets[4], int size, int out_covers[4]);
-static int find_removals(Cell *units[9][9], int base_idxs[4], int cover_idxs[4],
-                         int size, int value, int out[20]);
+static bool is_valid_fish(BaseSet base_sets[MAX_BASIC_FISH_SIZE], int size,
+                          int out_covers[MAX_BASIC_FISH_SIZE]);
+static int find_removals(Cell *units[9][9], int base_idxs[MAX_BASIC_FISH_SIZE],
+                         int cover_idxs[MAX_BASIC_FISH_SIZE], int size,
+                         int value, int out[MAX_BASIC_FISH_REMOVALS]);
 
 bool x_wing(Grid *grid, Step *step) {
     step->tech = TECH_X_WING;
@@ -128,11 +130,12 @@ static int find_base_sets(Cell *units[9][9], int size, int value,
 
 // Since BaseSet.cell_idxs contains numbers from 0 to 8, it's necessary to add 1
 // to each index to make them compatible with CandSet
-static bool is_valid_fish(BaseSet base_sets[4], int size, int out_covers[4]) {
-    CandSet sets[4];
+static bool is_valid_fish(BaseSet base_sets[MAX_BASIC_FISH_SIZE], int size,
+                          int out_covers[MAX_BASIC_FISH_SIZE]) {
+    CandSet sets[MAX_BASIC_FISH_SIZE];
 
     for (int i = 0; i < size; i++) {
-        int adjusted_idxs[4];
+        int adjusted_idxs[MAX_BASIC_FISH_SIZE];
         for (int j = 0; j < base_sets[i].num_cells; j++) {
             adjusted_idxs[j] = base_sets[i].cell_idxs[j] + 1;
             sets[i] = cand_set_from_arr(adjusted_idxs, size);
@@ -151,8 +154,9 @@ static bool is_valid_fish(BaseSet base_sets[4], int size, int out_covers[4]) {
     return true;
 }
 
-static int find_removals(Cell *units[9][9], int base_idxs[4], int cover_idxs[4],
-                         int size, int value, int out[20]) {
+static int find_removals(Cell *units[9][9], int base_idxs[MAX_BASIC_FISH_SIZE],
+                         int cover_idxs[MAX_BASIC_FISH_SIZE], int size,
+                         int value, int out[MAX_BASIC_FISH_REMOVALS]) {
     int count = 0;
     int base_i = 0;
     for (int cell_i = 0; cell_i < 9; cell_i++) {

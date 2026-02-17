@@ -35,33 +35,42 @@ typedef struct {
     int unit_idx;
 } HiddenSingleStep;
 
+#define MAX_NAKED_SET_SIZE 4
+#define MAX_NAKED_SET_REMOVALS MAX_COMMON_PEERS
+
 typedef struct {
-    int idxs[4];
+    int idxs[MAX_NAKED_SET_SIZE];
     int size;
     CandSet cands;
-    int removal_idxs[MAX_COMMON_PEERS];
-    CandSet removed_cands[MAX_COMMON_PEERS];
+    int removal_idxs[MAX_NAKED_SET_REMOVALS];
+    CandSet removed_cands[MAX_NAKED_SET_REMOVALS];
     int num_removals;
     UnitType unit_type;
     int unit_idx;
 } NakedSetStep;
 
+#define MAX_HIDDEN_SET_SIZE 4
+#define MAX_HIDDEN_SET_REMOVALS 4
+
 typedef struct {
-    int idxs[4];
+    int idxs[MAX_HIDDEN_SET_SIZE];
     int size;
     CandSet cands;
-    int removal_idxs[4];
-    CandSet removed_cands[4];
+    int removal_idxs[MAX_HIDDEN_SET_REMOVALS];
+    CandSet removed_cands[MAX_HIDDEN_SET_REMOVALS];
     int num_removals;
     UnitType unit_type;
     int unit_idx;
 } HiddenSetStep;
 
+#define MAX_POINTING_SET_SIZE 3
+#define MAX_POINTING_SET_REMOVALS 6
+
 typedef struct {
-    int idxs[3];
+    int idxs[MAX_POINTING_SET_SIZE];
     int size;
     int value;
-    int removal_idxs[6];
+    int removal_idxs[MAX_POINTING_SET_REMOVALS];
     int num_removals;
     UnitType trigger_unit_type;
     int trigger_unit_idx;
@@ -69,12 +78,15 @@ typedef struct {
     int removal_unit_idx;
 } PointingSetStep;
 
+#define MAX_BASIC_FISH_SIZE 4
+#define MAX_BASIC_FISH_REMOVALS 20
+
 typedef struct {
-    int base_idxs[4];
-    int cover_idxs[4];
+    int base_idxs[MAX_BASIC_FISH_SIZE];
+    int cover_idxs[MAX_BASIC_FISH_SIZE];
     int size;
     int value;
-    int removal_idxs[20];
+    int removal_idxs[MAX_BASIC_FISH_REMOVALS];
     int num_removals;
     UnitType unit_type;
 } BasicFishStep;
