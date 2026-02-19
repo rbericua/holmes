@@ -17,10 +17,25 @@ CandSet cand_set_full(void) {
 }
 
 CandSet cand_set_from_mask(unsigned int mask) {
-    CandSet result;
-    result.cands = mask;
-    result.len = count_ones(result.cands);
-    return result;
+    CandSet set;
+    set.cands = mask;
+    set.len = count_ones(set.cands);
+    return set;
+}
+
+CandSet cand_set_from_values(int num_values, ...) {
+    CandSet set;
+
+    va_list values;
+    va_start(values, num_values);
+
+    for (int i = 0; i < num_values; i++) {
+        cand_set_add(&set, va_arg(values, int));
+    }
+
+    va_end(values);
+
+    return set;
 }
 
 CandSet cand_set_from_arr(int arr[], int arr_len) {

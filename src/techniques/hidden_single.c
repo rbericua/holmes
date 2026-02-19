@@ -5,7 +5,6 @@
 #include "cell.h"
 #include "grid.h"
 #include "step.h"
-
 static bool hidden_single_unit(Grid *grid, Cell *units[9][9], Step *step,
                                UnitType unit_type);
 
@@ -47,10 +46,17 @@ static bool hidden_single_unit(Grid *grid, Cell *units[9][9], Step *step,
 
             int idx = cell_idx(possible_cells[0]);
 
+            Cell *removal_cells[MAX_HIDDEN_SINGLE_REMOVALS];
+            int num_removals = cells_with_cand(grid->peers[idx], NUM_PEERS,
+                                               value, removal_cells);
+
             s->idx = idx;
             s->value = value;
+            cells_idxs(removal_cells, num_removals,
+                       step->as.naked_single.removal_idxs);
+            s->num_removals = num_removals;
+            s->old_cands = possible_cells[0]->cands;
             s->unit_idx = unit_i;
-            cells_idxs(grid->peers[idx], NUM_PEERS, s->peer_idxs);
 
             return true;
         }

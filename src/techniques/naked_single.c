@@ -16,9 +16,15 @@ bool naked_single(Grid *grid, Step *step) {
 
         int value = cell_only_cand(cell);
 
+        Cell *removal_cells[MAX_NAKED_SINGLE_REMOVALS];
+        int num_removals = cells_with_cand(grid->peers[i], NUM_PEERS, value,
+                                           removal_cells);
+
         step->as.naked_single.idx = i;
         step->as.naked_single.value = value;
-        cells_idxs(grid->peers[i], NUM_PEERS, step->as.naked_single.peer_idxs);
+        cells_idxs(removal_cells, num_removals,
+                   step->as.naked_single.removal_idxs);
+        step->as.naked_single.num_removals = num_removals;
 
         return true;
     }

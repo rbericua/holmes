@@ -11,6 +11,7 @@ typedef struct {
 CandSet cand_set_empty(void);
 CandSet cand_set_full(void);
 CandSet cand_set_from_mask(unsigned int mask);
+CandSet cand_set_from_values(int num_values, ...);
 CandSet cand_set_from_arr(int arr[], int arr_len);
 int cand_set_to_arr(CandSet set, int out[]);
 bool cand_set_has(CandSet set, int cand);

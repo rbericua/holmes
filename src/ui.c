@@ -26,6 +26,7 @@
 #define FISH_NAME_FROM_SIZE(n) \
     ((n) == 2 ? "X-Wing" : (n) == 3 ? "Swordfish" : "Jellyfish")
 
+static void ui_explain_step(Ui *ui, Step *step);
 static void ui_print_cand_set(Ui *ui, CandSet set);
 static void ui_print_idxs(Ui *ui, int idxs[], int num_idxs);
 static void ui_print_scroll_indicators(Ui *ui);
@@ -66,6 +67,9 @@ void ui_print_message(Ui *ui, char *format, ...) {
 
     wclear(ui->info_win);
     vw_printw(ui->info_win, format, args);
+
+    ui->curr_line = 0;
+    ui->max_line = getcury(ui->info_win) - 1;
     ui_refresh_info(ui);
 
     va_end(args);
@@ -145,6 +149,47 @@ void ui_print_grid(Ui *ui, Grid *grid, Step *step) {
 
 void ui_print_step(Ui *ui, Step *step) {
     wclear(ui->info_win);
+
+    ui_explain_step(ui, step);
+
+    ui->curr_line = 0;
+    ui->max_line = getcury(ui->info_win) - 1;
+    ui_refresh_info(ui);
+}
+
+void ui_scroll(Ui *ui, int delta) {
+    ui->curr_line += delta;
+    if (ui->curr_line > ui->max_line - INFO_HEIGHT + 1) {
+        ui->curr_line = ui->max_line - INFO_HEIGHT + 1;
+    }
+    if (ui->curr_line < 0) {
+        ui->curr_line = 0;
+    }
+
+    ui_refresh_info(ui);
+}
+
+InputAction ui_wait_for_input(void) {
+    while (true) {
+        switch (getch()) {
+        case 'q': return ACTION_QUIT;
+        case 'p':
+        case KEY_BACKSPACE:
+        case KEY_LEFT: return ACTION_PREV;
+        case 'n':
+        case ' ':
+        case '\n':
+        case KEY_RIGHT: return ACTION_NEXT;
+        case 'k':
+        case KEY_UP: return ACTION_SCROLL_UP;
+        case 'j':
+        case KEY_DOWN: return ACTION_SCROLL_DOWN;
+        }
+    }
+}
+
+static void ui_explain_step(Ui *ui, Step *step) {
+    if (!step) return;
 
     switch (step->tech) {
     case TECH_NAKED_SINGLE: {
@@ -268,38 +313,6 @@ void ui_print_step(Ui *ui, Step *step) {
     }
     default: break;
     }
-
-    ui->curr_line = 0;
-    ui->max_line = getcury(ui->info_win) - 1;
-    ui_refresh_info(ui);
-}
-
-void ui_scroll(Ui *ui, int delta) {
-    ui->curr_line += delta;
-    if (ui->curr_line > ui->max_line - INFO_HEIGHT + 1) {
-        ui->curr_line = ui->max_line - INFO_HEIGHT + 1;
-    }
-    if (ui->curr_line < 0) {
-        ui->curr_line = 0;
-    }
-
-    ui_refresh_info(ui);
-}
-
-InputAction ui_wait_for_input(void) {
-    while (true) {
-        switch (getch()) {
-        case 'q': return ACTION_QUIT;
-        case 'n':
-        case ' ':
-        case '\n':
-        case KEY_RIGHT: return ACTION_NEXT;
-        case 'j':
-        case KEY_DOWN: return ACTION_SCROLL_DOWN;
-        case 'k':
-        case KEY_UP: return ACTION_SCROLL_UP;
-        }
-    }
 }
 
 static void ui_print_cand_set(Ui *ui, CandSet set) {
@@ -358,9 +371,9 @@ static void generate_colors(Step *step, ColorPair colors[81][9]) {
         NakedSingleStep *s = &step->as.naked_single;
 
         colors[s->idx][s->value - 1] = CP_TRIGGER;
-        for (int i = 0; i < NUM_PEERS; i++) {
-            int peer_idx = s->peer_idxs[i];
-            colors[peer_idx][s->value - 1] = CP_REMOVAL;
+        for (int i = 0; i < s->num_removals; i++) {
+            int removal_idx = s->removal_idxs[i];
+            colors[removal_idx][s->value - 1] = CP_REMOVAL;
         }
     } break;
     case TECH_HIDDEN_SINGLE: {
@@ -370,9 +383,9 @@ static void generate_colors(Step *step, ColorPair colors[81][9]) {
             colors[s->idx][cand - 1] = cand == s->value ? CP_TRIGGER
                                                         : CP_REMOVAL;
         }
-        for (int i = 0; i < NUM_PEERS; i++) {
-            int peer_idx = s->peer_idxs[i];
-            colors[peer_idx][s->value - 1] = CP_REMOVAL;
+        for (int i = 0; i < s->num_removals; i++) {
+            int removal_idx = s->removal_idxs[i];
+            colors[removal_idx][s->value - 1] = CP_REMOVAL;
         }
     } break;
     case TECH_NAKED_PAIR:

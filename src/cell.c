@@ -47,6 +47,10 @@ void cell_add_cand(Cell *cell, int cand) {
     cand_set_add(&cell->cands, cand);
 }
 
+void cell_add_cands(Cell *cell, CandSet cands) {
+    cell->cands = cand_set_union_from_va(2, cell->cands, cands);
+}
+
 void cell_remove_cand(Cell *cell, int cand) {
     cand_set_remove(&cell->cands, cand);
 }

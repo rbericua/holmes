@@ -12,5 +12,6 @@ typedef enum {
 
 SolveStatus solver_next_step(Grid *grid, Step *step);
 void solver_apply_step(Grid *grid, Step *step);
+void solver_revert_step(Grid *grid, Step *step);
 
 #endif

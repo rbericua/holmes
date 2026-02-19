@@ -30,6 +30,7 @@ bool cell_eq(Cell *a, Cell *b);
 bool cell_is_peer(Cell *a, Cell *b);
 bool cell_has_cand(Cell *cell, int cand);
 void cell_add_cand(Cell *cell, int cand);
+void cell_add_cands(Cell *cell, CandSet cands);
 void cell_remove_cand(Cell *cell, int cand);
 void cell_remove_cands(Cell *cell, CandSet cands);
 void cell_clear_cands(Cell *cell);

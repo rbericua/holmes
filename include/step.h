@@ -21,16 +21,23 @@ typedef enum {
     NUM_TECHNIQUES
 } TechniqueType;
 
-typedef struct {
-    int idx;
-    int value;
-    int peer_idxs[NUM_PEERS];
-} NakedSingleStep;
+#define MAX_NAKED_SINGLE_REMOVALS NUM_PEERS
 
 typedef struct {
     int idx;
     int value;
-    int peer_idxs[NUM_PEERS];
+    int removal_idxs[MAX_NAKED_SINGLE_REMOVALS];
+    int num_removals;
+} NakedSingleStep;
+
+#define MAX_HIDDEN_SINGLE_REMOVALS NUM_PEERS
+
+typedef struct {
+    int idx;
+    int value;
+    int removal_idxs[MAX_HIDDEN_SINGLE_REMOVALS];
+    int num_removals;
+    CandSet old_cands;
     UnitType unit_type;
     int unit_idx;
 } HiddenSingleStep;
@@ -102,5 +109,11 @@ typedef struct {
         BasicFishStep basic_fish;
     } as;
 } Step;
+
+typedef struct {
+    Step *elems;
+    int len;
+    int cap;
+} Steps;
 
 #endif
