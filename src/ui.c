@@ -366,7 +366,10 @@ static void generate_colors(Step *step, ColorPair colors[81][9]) {
     case TECH_HIDDEN_SINGLE: {
         HiddenSingleStep *s = &step->as.hidden_single;
 
-        colors[s->idx][s->value - 1] = CP_TRIGGER;
+        for (int cand = 1; cand <= 9; cand++) {
+            colors[s->idx][cand - 1] = cand == s->value ? CP_TRIGGER
+                                                        : CP_REMOVAL;
+        }
         for (int i = 0; i < NUM_PEERS; i++) {
             int peer_idx = s->peer_idxs[i];
             colors[peer_idx][s->value - 1] = CP_REMOVAL;
