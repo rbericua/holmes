@@ -20,9 +20,13 @@ int main(int argc, char *argv[]) {
 
     ui_print_grid(&ui, grid, NULL);
 
-    switch (ui_wait_for_input()) {
-    case ACTION_QUIT: goto cleanup;
-    default: break;
+    bool waiting = true;
+    while (waiting) {
+        switch (ui_wait_for_input()) {
+        case ACTION_QUIT: goto cleanup;
+        case ACTION_NEXT: waiting = false;
+        default: break;
+        }
     }
 
     SolveStatus status;
@@ -36,26 +40,29 @@ int main(int argc, char *argv[]) {
         ui_print_step(&ui, &step);
         history_add(&hist, step);
 
-    input:
-        switch (ui_wait_for_input()) {
-        case ACTION_QUIT: goto cleanup;
-        case ACTION_PREV:
-            if (!history_undo(&hist, grid)) {
-                ui_print_message(&ui, "Already at initial state\n");
-            } else {
+        waiting = true;
+        while (waiting) {
+            switch (ui_wait_for_input()) {
+            case ACTION_QUIT: goto cleanup;
+            case ACTION_PREV:
+                if (!history_undo(&hist, grid)) {
+                    ui_print_message(&ui, "Already at initial state\n");
+                } else {
+                    ui_print_grid(&ui, grid, history_curr(&hist));
+                    ui_print_step(&ui, history_curr(&hist));
+                }
+                break;
+            case ACTION_NEXT:
+                if (!history_redo(&hist, grid)) {
+                    waiting = false;
+                    break;
+                }
                 ui_print_grid(&ui, grid, history_curr(&hist));
                 ui_print_step(&ui, history_curr(&hist));
-            }
-            goto input;
-        case ACTION_NEXT:
-            if (!history_redo(&hist, grid)) {
                 break;
+            case ACTION_SCROLL_UP: ui_scroll(&ui, -1); break;
+            case ACTION_SCROLL_DOWN: ui_scroll(&ui, 1); break;
             }
-            ui_print_grid(&ui, grid, history_curr(&hist));
-            ui_print_step(&ui, history_curr(&hist));
-            goto input;
-        case ACTION_SCROLL_UP: ui_scroll(&ui, -1); goto input;
-        case ACTION_SCROLL_DOWN: ui_scroll(&ui, 1); goto input;
         }
 
         solver_apply_step(grid, &step);
@@ -74,7 +81,14 @@ int main(int argc, char *argv[]) {
     default: break;
     }
 
-    ui_wait_for_input();
+    waiting = true;
+    while (waiting) {
+        switch (ui_wait_for_input()) {
+        case ACTION_QUIT:
+        case ACTION_NEXT: waiting = false;
+        default: break;
+        }
+    }
 
 cleanup:
     ui_deinit(&ui);
