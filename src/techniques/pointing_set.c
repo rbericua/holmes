@@ -14,15 +14,9 @@ static void find_removal_unit(Cell *cells[], UnitType trigger_type,
 bool pointing_set(Grid *grid, Step *step) {
     step->tech = TECH_POINTING_SET;
 
-    bool row_result = pointing_set_unit(grid, grid->rows, step, UNIT_ROW);
-    if (row_result) return true;
-
-    bool col_result = pointing_set_unit(grid, grid->cols, step, UNIT_COL);
-    if (col_result) return true;
-
-    bool box_result = pointing_set_unit(grid, grid->boxes, step, UNIT_BOX);
-    if (box_result) return true;
-
+    if (pointing_set_unit(grid, grid->rows, step, UNIT_ROW)) return true;
+    if (pointing_set_unit(grid, grid->cols, step, UNIT_COL)) return true;
+    if (pointing_set_unit(grid, grid->boxes, step, UNIT_BOX)) return true;
     return false;
 }
 

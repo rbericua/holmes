@@ -11,15 +11,9 @@ static bool hidden_single_unit(Grid *grid, Cell *units[9][9], Step *step,
 bool hidden_single(Grid *grid, Step *step) {
     step->tech = TECH_HIDDEN_SINGLE;
 
-    bool row_result = hidden_single_unit(grid, grid->rows, step, UNIT_ROW);
-    if (row_result) return true;
-
-    bool col_result = hidden_single_unit(grid, grid->cols, step, UNIT_COL);
-    if (col_result) return true;
-
-    bool box_result = hidden_single_unit(grid, grid->boxes, step, UNIT_BOX);
-    if (box_result) return true;
-
+    if (hidden_single_unit(grid, grid->rows, step, UNIT_ROW)) return true;
+    if (hidden_single_unit(grid, grid->cols, step, UNIT_COL)) return true;
+    if (hidden_single_unit(grid, grid->boxes, step, UNIT_BOX)) return true;
     return false;
 }
 

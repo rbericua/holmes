@@ -12,15 +12,9 @@ static bool hidden_n_set_unit(Cell *units[9][9], Step *step, int size,
                               UnitType unit_type);
 
 bool hidden_set(Grid *grid, Step *step) {
-    bool pair_result = hidden_pair(grid, step);
-    if (pair_result) return true;
-
-    bool triple_result = hidden_triple(grid, step);
-    if (triple_result) return true;
-
-    bool quad_result = hidden_quad(grid, step);
-    if (quad_result) return true;
-
+    if (hidden_pair(grid, step)) return true;
+    if (hidden_triple(grid, step)) return true;
+    if (hidden_quad(grid, step)) return true;
     return false;
 }
 
@@ -28,15 +22,9 @@ bool hidden_pair(Grid *grid, Step *step) {
     step->tech = TECH_HIDDEN_PAIR;
     step->as.hidden_set.size = 2;
 
-    bool row_result = hidden_n_set_unit(grid->rows, step, 2, UNIT_ROW);
-    if (row_result) return true;
-
-    bool col_result = hidden_n_set_unit(grid->cols, step, 2, UNIT_COL);
-    if (col_result) return true;
-
-    bool box_result = hidden_n_set_unit(grid->boxes, step, 2, UNIT_BOX);
-    if (box_result) return true;
-
+    if (hidden_n_set_unit(grid->rows, step, 2, UNIT_ROW)) return true;
+    if (hidden_n_set_unit(grid->cols, step, 2, UNIT_COL)) return true;
+    if (hidden_n_set_unit(grid->boxes, step, 2, UNIT_BOX)) return true;
     return false;
 }
 
@@ -44,15 +32,9 @@ bool hidden_triple(Grid *grid, Step *step) {
     step->tech = TECH_HIDDEN_TRIPLE;
     step->as.hidden_set.size = 3;
 
-    bool row_result = hidden_n_set_unit(grid->rows, step, 3, UNIT_ROW);
-    if (row_result) return true;
-
-    bool col_result = hidden_n_set_unit(grid->cols, step, 3, UNIT_COL);
-    if (col_result) return true;
-
-    bool box_result = hidden_n_set_unit(grid->boxes, step, 3, UNIT_BOX);
-    if (box_result) return true;
-
+    if (hidden_n_set_unit(grid->rows, step, 3, UNIT_ROW)) return true;
+    if (hidden_n_set_unit(grid->cols, step, 3, UNIT_COL)) return true;
+    if (hidden_n_set_unit(grid->boxes, step, 3, UNIT_BOX)) return true;
     return false;
 }
 
@@ -60,15 +42,9 @@ bool hidden_quad(Grid *grid, Step *step) {
     step->tech = TECH_HIDDEN_QUAD;
     step->as.hidden_set.size = 4;
 
-    bool row_result = hidden_n_set_unit(grid->rows, step, 4, UNIT_ROW);
-    if (row_result) return true;
-
-    bool col_result = hidden_n_set_unit(grid->cols, step, 4, UNIT_COL);
-    if (col_result) return true;
-
-    bool box_result = hidden_n_set_unit(grid->boxes, step, 4, UNIT_BOX);
-    if (box_result) return true;
-
+    if (hidden_n_set_unit(grid->rows, step, 4, UNIT_ROW)) return true;
+    if (hidden_n_set_unit(grid->cols, step, 4, UNIT_COL)) return true;
+    if (hidden_n_set_unit(grid->boxes, step, 4, UNIT_BOX)) return true;
     return false;
 }
 

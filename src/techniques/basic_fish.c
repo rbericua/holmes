@@ -27,36 +27,24 @@ static int find_removals(Cell *units[9][9], int base_idxs[MAX_BASIC_FISH_SIZE],
 bool x_wing(Grid *grid, Step *step) {
     step->tech = TECH_X_WING;
 
-    bool row_result = n_fish_unit(grid, grid->rows, step, 2, UNIT_ROW);
-    if (row_result) return true;
-
-    bool col_result = n_fish_unit(grid, grid->cols, step, 2, UNIT_COL);
-    if (col_result) return true;
-
+    if (n_fish_unit(grid, grid->rows, step, 2, UNIT_ROW)) return true;
+    if (n_fish_unit(grid, grid->cols, step, 2, UNIT_COL)) return true;
     return false;
 }
 
 bool swordfish(Grid *grid, Step *step) {
     step->tech = TECH_SWORDFISH;
 
-    bool row_result = n_fish_unit(grid, grid->rows, step, 3, UNIT_ROW);
-    if (row_result) return true;
-
-    bool col_result = n_fish_unit(grid, grid->cols, step, 3, UNIT_COL);
-    if (col_result) return true;
-
+    if (n_fish_unit(grid, grid->rows, step, 3, UNIT_ROW)) return true;
+    if (n_fish_unit(grid, grid->cols, step, 3, UNIT_COL)) return true;
     return false;
 }
 
 bool jellyfish(Grid *grid, Step *step) {
     step->tech = TECH_JELLYFISH;
 
-    bool row_result = n_fish_unit(grid, grid->rows, step, 4, UNIT_ROW);
-    if (row_result) return true;
-
-    bool col_result = n_fish_unit(grid, grid->cols, step, 4, UNIT_COL);
-    if (col_result) return true;
-
+    if (n_fish_unit(grid, grid->rows, step, 4, UNIT_ROW)) return true;
+    if (n_fish_unit(grid, grid->cols, step, 4, UNIT_COL)) return true;
     return false;
 }
 
