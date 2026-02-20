@@ -5,6 +5,7 @@
 #include "solver.h"
 #include "step.h"
 #include "ui.h"
+#include "techniques/backtrack.h"
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -18,7 +19,25 @@ int main(int argc, char *argv[]) {
     History hist = {0};
     ui_init(&ui);
 
+    int num_solutions = backtrack(grid);
+
     ui_print_grid(&ui, grid, NULL);
+
+    if (num_solutions != 1) {
+        if (num_solutions == 0) {
+            ui_print_message(&ui, "Invalid Sudoku. Found no solutions\n");
+        } else if (num_solutions > 1) {
+            ui_print_message(&ui, "Invalid Sudoku. Found multiple solutions\n");
+        }
+
+        while (true) {
+            switch (ui_wait_for_input()) {
+            case ACTION_QUIT:
+            case ACTION_NEXT: goto cleanup;
+            default: break;
+            }
+        }
+    }
 
     bool waiting = true;
     while (waiting) {
@@ -81,11 +100,10 @@ int main(int argc, char *argv[]) {
     default: break;
     }
 
-    waiting = true;
-    while (waiting) {
+    while (true) {
         switch (ui_wait_for_input()) {
         case ACTION_QUIT:
-        case ACTION_NEXT: waiting = false;
+        case ACTION_NEXT: goto cleanup;
         default: break;
         }
     }
