@@ -25,9 +25,11 @@ int main(int argc, char *argv[]) {
 
     if (num_solutions != 1) {
         if (num_solutions == 0) {
-            ui_print_message(&ui, "Invalid Sudoku. Found no solutions\n");
+            ui_print_message(&ui, true, true,
+                             "Invalid Sudoku. Found no solutions\n");
         } else if (num_solutions > 1) {
-            ui_print_message(&ui, "Invalid Sudoku. Found multiple solutions\n");
+            ui_print_message(&ui, true, true,
+                             "Invalid Sudoku. Found multiple solutions\n");
         }
 
         while (true) {
@@ -65,7 +67,8 @@ int main(int argc, char *argv[]) {
             case ACTION_QUIT: goto cleanup;
             case ACTION_PREV:
                 if (!history_undo(&hist, grid)) {
-                    ui_print_message(&ui, "Already at initial state\n");
+                    ui_print_message(&ui, true, true,
+                                     "Already at initial state\n");
                 } else {
                     ui_print_grid(&ui, grid, history_curr(&hist));
                     ui_print_step(&ui, history_curr(&hist));
@@ -91,11 +94,12 @@ int main(int argc, char *argv[]) {
 
     switch (status) {
     case SOLVE_COMPLETE:
-        ui_print_message(&ui, "Sudoku solved successfully\n");
+        ui_print_message(&ui, true, true, "Sudoku solved successfully\n");
         break;
     case SOLVE_STUCK:
-        ui_print_message(&ui, "Solver stuck. No further progress possible with "
-                              "available techniques\n");
+        ui_print_message(&ui, true, true,
+                         "Solver stuck. No further progress possible with "
+                         "available techniques\n");
         break;
     default: break;
     }

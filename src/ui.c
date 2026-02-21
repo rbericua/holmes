@@ -61,16 +61,23 @@ void ui_deinit(Ui *ui) {
     endwin();
 }
 
-void ui_print_message(Ui *ui, char *format, ...) {
+void ui_print_message(Ui *ui, bool do_clear, bool do_refresh, char *format,
+                      ...) {
     va_list args;
     va_start(args, format);
 
-    wclear(ui->info_win);
+    if (do_clear) {
+        wclear(ui->info_win);
+    }
+
     vw_printw(ui->info_win, format, args);
 
     ui->curr_line = 0;
     ui->max_line = getcury(ui->info_win) - 1;
-    ui_refresh_info(ui);
+
+    if (do_refresh) {
+        ui_refresh_info(ui);
+    }
 
     va_end(args);
 }
@@ -198,8 +205,8 @@ static void ui_explain_step(Ui *ui, Step *step) {
         int row = ROW_FROM_IDX(s->idx);
         int col = COL_FROM_IDX(s->idx);
 
-        wprintw(ui->info_win, "[Naked Single] Set r%dc%d to %d\n", row + 1,
-                col + 1, s->value);
+        ui_print_message(ui, false, false, "[Naked Single] Set r%dc%d to %d\n",
+                         row + 1, col + 1, s->value);
     } break;
     case TECH_HIDDEN_SINGLE: {
         HiddenSingleStep *s = &step->as.hidden_single;
@@ -208,8 +215,9 @@ static void ui_explain_step(Ui *ui, Step *step) {
         int col = COL_FROM_IDX(s->idx);
         char *unit_str = UNIT_TO_STR(s->unit_type);
 
-        wprintw(ui->info_win, "[Hidden Single (%s %d)] Set r%dc%d to %d\n",
-                unit_str, s->unit_idx + 1, row + 1, col + 1, s->value);
+        ui_print_message(ui, false, false,
+                         "[Hidden Single (%s %d)] Set r%dc%d to %d\n", unit_str,
+                         s->unit_idx + 1, row + 1, col + 1, s->value);
     } break;
     case TECH_NAKED_PAIR:
     case TECH_NAKED_TRIPLE:
@@ -219,19 +227,20 @@ static void ui_explain_step(Ui *ui, Step *step) {
         char *unit_str = UNIT_TO_STR(s->unit_type);
         char *set_name = SET_NAME_FROM_SIZE(s->size);
 
-        wprintw(ui->info_win, "[Naked %s (%s %d)] ", set_name, unit_str,
-                s->unit_idx + 1);
+        ui_print_message(ui, false, false, "[Naked %s (%s %d)] ", set_name,
+                         unit_str, s->unit_idx + 1);
         ui_print_cand_set(ui, s->cands);
-        wprintw(ui->info_win, " in ");
+        ui_print_message(ui, false, false, " in ");
         ui_print_idxs(ui, s->idxs, s->size);
-        wprintw(ui->info_win, ":\n");
+        ui_print_message(ui, false, false, ":\n");
         for (int i = 0; i < s->num_removals; i++) {
             int row = ROW_FROM_IDX(s->removal_idxs[i]);
             int col = COL_FROM_IDX(s->removal_idxs[i]);
 
-            wprintw(ui->info_win, "- Removed ");
+            ui_print_message(ui, false, false, "- Removed ");
             ui_print_cand_set(ui, s->removed_cands[i]);
-            wprintw(ui->info_win, " from r%dc%d\n", row + 1, col + 1);
+            ui_print_message(ui, false, false, " from r%dc%d\n", row + 1,
+                             col + 1);
         }
     } break;
     case TECH_HIDDEN_PAIR:
@@ -242,19 +251,20 @@ static void ui_explain_step(Ui *ui, Step *step) {
         char *unit_str = UNIT_TO_STR(s->unit_type);
         char *set_name = SET_NAME_FROM_SIZE(s->size);
 
-        wprintw(ui->info_win, "[Hidden %s (%s %d)] ", set_name, unit_str,
-                s->unit_idx + 1);
+        ui_print_message(ui, false, false, "[Hidden %s (%s %d)] ", set_name,
+                         unit_str, s->unit_idx + 1);
         ui_print_cand_set(ui, s->cands);
-        wprintw(ui->info_win, " in ");
+        ui_print_message(ui, false, false, " in ");
         ui_print_idxs(ui, s->idxs, s->size);
-        wprintw(ui->info_win, ":\n");
+        ui_print_message(ui, false, false, ":\n");
         for (int i = 0; i < s->num_removals; i++) {
             int row = ROW_FROM_IDX(s->removal_idxs[i]);
             int col = COL_FROM_IDX(s->removal_idxs[i]);
 
-            wprintw(ui->info_win, "- Removed ");
+            ui_print_message(ui, false, false, "- Removed ");
             ui_print_cand_set(ui, s->removed_cands[i]);
-            wprintw(ui->info_win, " from r%dc%d\n", row + 1, col + 1);
+            ui_print_message(ui, false, false, " from r%dc%d\n", row + 1,
+                             col + 1);
         }
 
     }; break;
@@ -265,17 +275,18 @@ static void ui_explain_step(Ui *ui, Step *step) {
         char *removal_unit_str = UNIT_TO_STR(s->removal_unit_type);
         char *set_name = SET_NAME_FROM_SIZE(s->size);
 
-        wprintw(ui->info_win, "[Pointing %s (%s %d -> %s %d)] {%d} in ",
-                set_name, trigger_unit_str, s->trigger_unit_idx + 1,
-                removal_unit_str, s->removal_unit_idx + 1, s->value);
+        ui_print_message(ui, false, false,
+                         "[Pointing %s (%s %d -> %s %d)] {%d} in ", set_name,
+                         trigger_unit_str, s->trigger_unit_idx + 1,
+                         removal_unit_str, s->removal_unit_idx + 1, s->value);
         ui_print_idxs(ui, s->idxs, s->size);
-        wprintw(ui->info_win, ":\n");
+        ui_print_message(ui, false, false, ":\n");
         for (int i = 0; i < s->num_removals; i++) {
             int row = ROW_FROM_IDX(s->removal_idxs[i]);
             int col = COL_FROM_IDX(s->removal_idxs[i]);
 
-            wprintw(ui->info_win, "- Removed {%d} from r%dc%d\n", s->value,
-                    row + 1, col + 1);
+            ui_print_message(ui, false, false, "- Removed {%d} from r%dc%d\n",
+                             s->value, row + 1, col + 1);
         }
     }; break;
     case TECH_X_WING:
@@ -288,27 +299,27 @@ static void ui_explain_step(Ui *ui, Step *step) {
         char *cover_str = UNIT_TO_STR_PLURAL(
             s->unit_type == UNIT_ROW ? UNIT_COL : UNIT_ROW);
 
-        wprintw(ui->info_win, "[%s (%s ", fish_name, base_str);
+        ui_print_message(ui, false, false, "[%s (%s ", fish_name, base_str);
         for (int i = 0; i < s->size; i++) {
-            wprintw(ui->info_win, "%d", s->base_idxs[i] + 1);
+            ui_print_message(ui, false, false, "%d", s->base_idxs[i] + 1);
             if (i < s->size - 1) {
-                wprintw(ui->info_win, ", ");
+                ui_print_message(ui, false, false, ", ");
             }
         }
-        wprintw(ui->info_win, " -> %s ", cover_str);
+        ui_print_message(ui, false, false, " -> %s ", cover_str);
         for (int i = 0; i < s->size; i++) {
-            wprintw(ui->info_win, "%d", s->cover_idxs[i] + 1);
+            ui_print_message(ui, false, false, "%d", s->cover_idxs[i] + 1);
             if (i < s->size - 1) {
-                wprintw(ui->info_win, ", ");
+                ui_print_message(ui, false, false, ", ");
             }
         }
-        wprintw(ui->info_win, "] {%d}:\n", s->value);
+        ui_print_message(ui, false, false, "] {%d}:\n", s->value);
         for (int i = 0; i < s->num_removals; i++) {
             int row = ROW_FROM_IDX(s->removal_idxs[i]);
             int col = COL_FROM_IDX(s->removal_idxs[i]);
 
-            wprintw(ui->info_win, "- Removed {%d} from r%dc%d\n", s->value,
-                    row + 1, col + 1);
+            ui_print_message(ui, false, false, "- Removed {%d} from r%dc%d\n",
+                             s->value, row + 1, col + 1);
         }
     }
     default: break;

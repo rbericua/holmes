@@ -34,7 +34,8 @@ typedef enum {
 
 void ui_init(Ui *ui);
 void ui_deinit(Ui *ui);
-void ui_print_message(Ui *ui, char *format, ...);
+void ui_print_message(Ui *ui, bool do_clear, bool do_refresh, char *format,
+                      ...);
 void ui_print_grid(Ui *ui, Grid *grid, Step *step);
 void ui_print_step(Ui *ui, Step *step);
 void ui_scroll(Ui *ui, int delta);
