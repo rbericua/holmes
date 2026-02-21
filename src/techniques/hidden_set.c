@@ -6,7 +6,12 @@
 #include "cell.h"
 #include "grid.h"
 #include "step.h"
+#include "ui.h"
 #include "techniques/combinations.h"
+
+#define UNIT_TO_STR(u) \
+    ((u) == UNIT_ROW ? "Row" : (u) == UNIT_COL ? "Column" : "Box")
+#define SET_NAME_FROM_SIZE(n) ((n) == 2 ? "Pair" : (n) == 3 ? "Triple" : "Quad")
 
 static bool hidden_n_set_unit(Cell *units[9][9], Step *step, int size,
                               UnitType unit_type);
@@ -46,6 +51,56 @@ bool hidden_quad(Grid *grid, Step *step) {
     if (hidden_n_set_unit(grid->cols, step, 4, UNIT_COL)) return true;
     if (hidden_n_set_unit(grid->boxes, step, 4, UNIT_BOX)) return true;
     return false;
+}
+
+void hidden_set_apply(Grid *grid, Step *step) {
+    HiddenSetStep *s = &step->as.hidden_set;
+
+    for (int i = 0; i < s->size; i++) {
+        grid->cells[s->idxs[i]]->cands = s->cands;
+    }
+}
+
+void hidden_set_revert(Grid *grid, Step *step) {
+    HiddenSetStep *s = &step->as.hidden_set;
+
+    for (int i = 0; i < s->size; i++) {
+        cell_add_cands(grid->cells[s->removal_idxs[i]], s->removed_cands[i]);
+    }
+}
+
+void hidden_set_explain(Ui *ui, Step *step) {
+    HiddenSetStep *s = &step->as.hidden_set;
+
+    char *unit_str = UNIT_TO_STR(s->unit_type);
+    char *set_name = SET_NAME_FROM_SIZE(s->size);
+
+    ui_print_message(ui, false, false, "[Hidden %s (%s %d)] ", set_name,
+                     unit_str, s->unit_idx + 1);
+    ui_print_cand_set(ui, s->cands);
+    ui_print_message(ui, false, false, " in ");
+    ui_print_idxs(ui, s->idxs, s->size);
+    ui_print_message(ui, false, false, ":\n");
+    for (int i = 0; i < s->num_removals; i++) {
+        int row = ROW_FROM_IDX(s->removal_idxs[i]);
+        int col = COL_FROM_IDX(s->removal_idxs[i]);
+
+        ui_print_message(ui, false, false, "- Removed ");
+        ui_print_cand_set(ui, s->removed_cands[i]);
+        ui_print_message(ui, false, false, " from r%dc%d\n", row + 1, col + 1);
+    }
+}
+
+void hidden_set_colorise(ColorPair colors[81][9], Step *step) {
+    HiddenSetStep *s = &step->as.hidden_set;
+
+    for (int i = 0; i < s->size; i++) {
+        int idx = s->idxs[i];
+        for (int cand = 1; cand <= 9; cand++) {
+            colors[idx][cand - 1] = cand_set_has(s->cands, cand) ? CP_TRIGGER
+                                                                 : CP_REMOVAL;
+        }
+    }
 }
 
 static bool hidden_n_set_unit(Cell *units[9][9], Step *step, int size,

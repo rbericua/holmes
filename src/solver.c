@@ -1,10 +1,8 @@
 #include "solver.h"
 
-#include "cand_set.h"
-#include "cell.h"
 #include "grid.h"
 #include "step.h"
-#include "techniques/techniques.h"
+#include "techniques/registry.h"
 
 SolveStatus solver_next_step(Grid *grid, Step *step) {
     for (int i = 0; i < NUM_TECHNIQUES; i++) {
@@ -17,118 +15,10 @@ SolveStatus solver_next_step(Grid *grid, Step *step) {
 
 void solver_apply_step(Grid *grid, Step *step) {
     if (!step) return;
-
-    switch (step->tech) {
-    case TECH_NAKED_SINGLE: {
-        NakedSingleStep *s = &step->as.naked_single;
-
-        grid_fill_cell(grid, grid->cells[s->idx], s->value);
-    } break;
-    case TECH_HIDDEN_SINGLE: {
-        HiddenSingleStep *s = &step->as.hidden_single;
-
-        grid_fill_cell(grid, grid->cells[s->idx], s->value);
-    } break;
-    case TECH_NAKED_PAIR:
-    case TECH_NAKED_TRIPLE:
-    case TECH_NAKED_QUAD: {
-        NakedSetStep *s = &step->as.naked_set;
-
-        for (int i = 0; i < s->num_removals; i++) {
-            cell_remove_cands(grid->cells[s->removal_idxs[i]], s->cands);
-        }
-    } break;
-    case TECH_HIDDEN_PAIR:
-    case TECH_HIDDEN_TRIPLE:
-    case TECH_HIDDEN_QUAD: {
-        HiddenSetStep *s = &step->as.hidden_set;
-
-        for (int i = 0; i < s->size; i++) {
-            grid->cells[s->idxs[i]]->cands = s->cands;
-        }
-    } break;
-    case TECH_POINTING_SET: {
-        PointingSetStep *s = &step->as.pointing_set;
-
-        for (int i = 0; i < s->num_removals; i++) {
-            cell_remove_cand(grid->cells[s->removal_idxs[i]], s->value);
-        }
-    } break;
-    case TECH_X_WING:
-    case TECH_SWORDFISH:
-    case TECH_JELLYFISH: {
-        BasicFishStep *s = &step->as.basic_fish;
-
-        for (int i = 0; i < s->num_removals; i++) {
-            cell_remove_cand(grid->cells[s->removal_idxs[i]], s->value);
-        }
-    } break;
-    default: break;
-    }
+    technique_ops[step->tech].apply(grid, step);
 }
 
 void solver_revert_step(Grid *grid, Step *step) {
     if (!step) return;
-
-    switch (step->tech) {
-    case TECH_NAKED_SINGLE: {
-        NakedSingleStep *s = &step->as.naked_single;
-
-        grid->cells[s->idx]->value = 0;
-        grid->cells[s->idx]->cands = cand_set_from_values(1, s->value);
-        grid->empty_cells++;
-
-        for (int i = 0; i < s->num_removals; i++) {
-            cell_add_cand(grid->cells[s->removal_idxs[i]], s->value);
-        }
-    } break;
-    case TECH_HIDDEN_SINGLE: {
-        HiddenSingleStep *s = &step->as.hidden_single;
-
-        grid->cells[s->idx]->value = 0;
-        grid->cells[s->idx]->cands = s->old_cands;
-        grid->empty_cells++;
-
-        for (int i = 0; i < s->num_removals; i++) {
-            cell_add_cand(grid->cells[s->removal_idxs[i]], s->value);
-        }
-    } break;
-    case TECH_NAKED_PAIR:
-    case TECH_NAKED_TRIPLE:
-    case TECH_NAKED_QUAD: {
-        NakedSetStep *s = &step->as.naked_set;
-
-        for (int i = 0; i < s->num_removals; i++) {
-            cell_add_cands(grid->cells[s->removal_idxs[i]],
-                           s->removed_cands[i]);
-        }
-    } break;
-    case TECH_HIDDEN_PAIR:
-    case TECH_HIDDEN_TRIPLE:
-    case TECH_HIDDEN_QUAD: {
-        HiddenSetStep *s = &step->as.hidden_set;
-
-        for (int i = 0; i < s->size; i++) {
-            cell_add_cands(grid->cells[s->removal_idxs[i]],
-                           s->removed_cands[i]);
-        }
-    } break;
-    case TECH_POINTING_SET: {
-        PointingSetStep *s = &step->as.pointing_set;
-
-        for (int i = 0; i < s->num_removals; i++) {
-            cell_add_cand(grid->cells[s->removal_idxs[i]], s->value);
-        }
-    } break;
-    case TECH_X_WING:
-    case TECH_SWORDFISH:
-    case TECH_JELLYFISH: {
-        BasicFishStep *s = &step->as.basic_fish;
-
-        for (int i = 0; i < s->num_removals; i++) {
-            cell_add_cand(grid->cells[s->removal_idxs[i]], s->value);
-        }
-    } break;
-    default: break;
-    }
+    technique_ops[step->tech].revert(grid, step);
 }
