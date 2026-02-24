@@ -17,6 +17,9 @@ typedef enum {
     TECH_X_WING,
     TECH_SWORDFISH,
     TECH_JELLYFISH,
+    TECH_FINNED_X_WING,
+    TECH_FINNED_SWORDFISH,
+    TECH_FINNED_JELLYFISH,
 
     NUM_TECHNIQUES
 } TechniqueType;
@@ -98,6 +101,22 @@ typedef struct {
     UnitType unit_type;
 } BasicFishStep;
 
+#define MAX_FINNED_FISH_SIZE 4
+#define MAX_FINNED_FISH_REMOVALS 20 // I'm sure it's lower. Maybe 4?
+#define MAX_FINS 6                  // Could it be lower?
+
+typedef struct {
+    int base_idxs[MAX_FINNED_FISH_SIZE];
+    int cover_idxs[MAX_FINNED_FISH_SIZE];
+    int size;
+    int value;
+    int removal_idxs[MAX_FINNED_FISH_REMOVALS];
+    int num_removals;
+    int fin_idxs[MAX_FINS];
+    int num_fins;
+    UnitType unit_type;
+} FinnedFishStep;
+
 typedef struct {
     TechniqueType tech;
     union {
@@ -107,6 +126,7 @@ typedef struct {
         HiddenSetStep hidden_set;
         PointingSetStep pointing_set;
         BasicFishStep basic_fish;
+        FinnedFishStep finned_fish;
     } as;
 } Step;
 

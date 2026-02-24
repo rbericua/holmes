@@ -39,6 +39,7 @@ void ui_init(Ui *ui) {
     init_pair(CP_CLUE, COLOR_BLUE, -1);
     init_pair(CP_REMOVAL, COLOR_BLACK, COLOR_RED);
     init_pair(CP_TRIGGER, COLOR_BLACK, COLOR_GREEN);
+    init_pair(CP_SPECIAL, COLOR_BLACK, COLOR_YELLOW);
 
     ui->grid_win = newwin(GRID_HEIGHT, GRID_WIDTH, 0, (COLS - GRID_WIDTH) / 2);
     ui->info_win = newwin(INFO_HEIGHT, INFO_WIDTH + 1, GRID_HEIGHT, 0);

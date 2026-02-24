@@ -35,6 +35,7 @@ typedef enum {
     CP_CLUE,
     CP_REMOVAL,
     CP_TRIGGER,
+    CP_SPECIAL,
 } ColorPair;
 
 typedef enum {

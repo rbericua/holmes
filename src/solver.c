@@ -6,6 +6,7 @@
 
 SolveStatus solver_next_step(Grid *grid, Step *step) {
     for (int i = 0; i < NUM_TECHNIQUES; i++) {
+        // for (int i = 0; i < 3; i++) {
         if (grid_is_solved(grid)) return SOLVE_COMPLETE;
         if (techniques[i](grid, step)) return SOLVE_ONGOING;
     }

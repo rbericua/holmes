@@ -186,6 +186,7 @@ static int find_base_sets(Cell *units[9][9], int size, int value,
 
 // Since BaseSet.cell_idxs contains numbers from 0 to 8, it's necessary to add 1
 // to each index to make them compatible with CandSet
+// FIXME: Is this function right? See Finned Fish version
 static bool is_valid_fish(BaseSet base_sets[MAX_BASIC_FISH_SIZE], int size,
                           int out_covers[MAX_BASIC_FISH_SIZE]) {
     CandSet sets[MAX_BASIC_FISH_SIZE];
