@@ -4,6 +4,7 @@ AllowShortCaseLabelsOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+BreakBeforeBinaryOperators: true
 IncludeCategories:
   - Regex: '["<][^/]*[">]'
     Priority: 1
