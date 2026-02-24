@@ -38,5 +38,5 @@ void history_add(History *hist, Step step) {
 }
 
 void history_free(History *hist) {
-    da_free(&hist->steps);
+    da_deinit(&hist->steps);
 }

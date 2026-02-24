@@ -8,8 +8,9 @@
 #define NCURSES_WIDECHAR 1
 #include <ncurses.h>
 
-#include "cand_set.h"
 #include "cell.h"
+#include "dynarr.h"
+#include "dynstr.h"
 #include "grid.h"
 #include "step.h"
 #include "techniques/registry.h"
@@ -20,8 +21,9 @@
 #define INFO_HEIGHT (LINES - GRID_HEIGHT)
 
 static void ui_explain_step(Ui *ui, Step *step);
-static void ui_print_scroll_indicators(Ui *ui);
 static void ui_refresh_info(Ui *ui);
+static void ui_print_scroll_indicators(Ui *ui);
+static void ui_generate_lines(Ui *ui);
 static void generate_colors(ColorPair colors[81][9], Step *step);
 
 void ui_init(Ui *ui) {
@@ -39,8 +41,10 @@ void ui_init(Ui *ui) {
     init_pair(CP_TRIGGER, COLOR_BLACK, COLOR_GREEN);
 
     ui->grid_win = newwin(GRID_HEIGHT, GRID_WIDTH, 0, (COLS - GRID_WIDTH) / 2);
-    ui->info_win = newpad(LINES, INFO_WIDTH);
+    ui->info_win = newwin(INFO_HEIGHT, INFO_WIDTH + 1, GRID_HEIGHT, 0);
     ui->scroll_win = newwin(INFO_HEIGHT, 1, GRID_HEIGHT, COLS - 1);
+    ds_init(&ui->info_buf);
+    da_init(&ui->lines);
 
     refresh();
 }
@@ -49,28 +53,25 @@ void ui_deinit(Ui *ui) {
     delwin(ui->grid_win);
     delwin(ui->info_win);
     delwin(ui->scroll_win);
+    ds_deinit(&ui->info_buf);
+    da_deinit(&ui->lines);
     endwin();
 }
 
-void ui_print_message(Ui *ui, bool do_clear, bool do_refresh, char *format,
-                      ...) {
+void ui_print_message(Ui *ui, char *format, ...) {
+    wclear(ui->info_win);
+
     va_list args;
     va_start(args, format);
 
-    if (do_clear) {
-        wclear(ui->info_win);
-    }
-
-    vw_printw(ui->info_win, format, args);
-
-    ui->curr_line = 0;
-    ui->max_line = getcury(ui->info_win) - 1;
-
-    if (do_refresh) {
-        ui_refresh_info(ui);
-    }
+    ds_clear(&ui->info_buf);
+    ds_vappendf(&ui->info_buf, format, args);
+    ui_generate_lines(ui);
 
     va_end(args);
+
+    ui->curr_line = 0;
+    ui_refresh_info(ui);
 }
 
 void ui_print_grid(Ui *ui, Grid *grid, Step *step) {
@@ -144,45 +145,16 @@ void ui_print_grid(Ui *ui, Grid *grid, Step *step) {
 }
 
 void ui_print_step(Ui *ui, Step *step) {
-    wclear(ui->info_win);
-
     ui_explain_step(ui, step);
-
+    ui_generate_lines(ui);
     ui->curr_line = 0;
-    ui->max_line = getcury(ui->info_win) - 1;
     ui_refresh_info(ui);
-}
-
-void ui_print_cand_set(Ui *ui, CandSet set) {
-    int arr[9];
-    cand_set_to_arr(set, arr);
-
-    wprintw(ui->info_win, "{");
-    for (int i = 0; i < set.len; i++) {
-        wprintw(ui->info_win, "%d", arr[i]);
-        if (i < set.len - 1) {
-            wprintw(ui->info_win, ", ");
-        }
-    }
-    wprintw(ui->info_win, "}");
-}
-
-void ui_print_idxs(Ui *ui, int idxs[], int num_idxs) {
-    for (int i = 0; i < num_idxs; i++) {
-        int row = ROW_FROM_IDX(idxs[i]);
-        int col = COL_FROM_IDX(idxs[i]);
-
-        wprintw(ui->info_win, "r%dc%d", row + 1, col + 1);
-        if (i < num_idxs - 1) {
-            wprintw(ui->info_win, ", ");
-        }
-    }
 }
 
 void ui_scroll(Ui *ui, int delta) {
     ui->curr_line += delta;
-    if (ui->curr_line > ui->max_line - INFO_HEIGHT + 1) {
-        ui->curr_line = ui->max_line - INFO_HEIGHT + 1;
+    if (ui->curr_line > ui->lines.len - INFO_HEIGHT) {
+        ui->curr_line = ui->lines.len - INFO_HEIGHT;
     }
     if (ui->curr_line < 0) {
         ui->curr_line = 0;
@@ -212,7 +184,27 @@ InputAction ui_wait_for_input(void) {
 
 static void ui_explain_step(Ui *ui, Step *step) {
     if (!step) return;
-    technique_ops[step->tech].explain(ui, step);
+    ds_clear(&ui->info_buf);
+    technique_ops[step->tech].explain(&ui->info_buf, step);
+}
+
+static void ui_refresh_info(Ui *ui) {
+    int num_lines;
+    if (ui->lines.len < INFO_HEIGHT) {
+        num_lines = ui->lines.len;
+    } else {
+        num_lines = INFO_HEIGHT;
+    }
+
+    wclear(ui->info_win);
+    for (int i = 0; i < num_lines; i++) {
+        Line curr_line = ui->lines.elems[ui->curr_line + i];
+
+        wprintw(ui->info_win, "%.*s\n", curr_line.len,
+                ui->info_buf.elems + curr_line.start);
+    }
+    wrefresh(ui->info_win);
+    ui_print_scroll_indicators(ui);
 }
 
 static void ui_print_scroll_indicators(Ui *ui) {
@@ -224,7 +216,7 @@ static void ui_print_scroll_indicators(Ui *ui) {
     }
 
     wmove(ui->scroll_win, getmaxy(ui->scroll_win) - 1, 0);
-    if (ui->max_line - ui->curr_line + 1 > INFO_HEIGHT) {
+    if (ui->lines.len - ui->curr_line > INFO_HEIGHT) {
         waddwstr(ui->scroll_win, L"↓");
     } else {
         wprintw(ui->scroll_win, " ");
@@ -233,10 +225,23 @@ static void ui_print_scroll_indicators(Ui *ui) {
     wrefresh(ui->scroll_win);
 }
 
-static void ui_refresh_info(Ui *ui) {
-    prefresh(ui->info_win, ui->curr_line, 0, GRID_HEIGHT, 0, LINES - 1,
-             INFO_WIDTH - 1);
-    ui_print_scroll_indicators(ui);
+static void ui_generate_lines(Ui *ui) {
+    int line_start = 0;
+    int line_len = 0;
+
+    da_clear(&ui->lines);
+    for (int i = 0; i < ui->info_buf.len; i++) {
+        if (ui->info_buf.elems[i] != '\n' && line_len != INFO_WIDTH) {
+            line_len++;
+            continue;
+        }
+
+        Line line = {.start = line_start, .len = line_len};
+        da_append(&ui->lines, line);
+
+        line_start = line_len == INFO_WIDTH ? i : i + 1;
+        line_len = 0;
+    }
 }
 
 static void generate_colors(ColorPair colors[81][9], Step *step) {

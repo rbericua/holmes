@@ -4,15 +4,12 @@
 
 #include "cand_set.h"
 #include "cell.h"
+#include "dynstr.h"
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
 #include "techniques/combinations.h"
-
-#define UNIT_TO_STR_PLURAL(u) \
-    ((u) == UNIT_ROW ? "Rows" : (u) == UNIT_COL ? "Columns" : "Boxs")
-#define FISH_NAME_FROM_SIZE(n) \
-    ((n) == 2 ? "X-Wing" : (n) == 3 ? "Swordfish" : "Jellyfish")
+#include "techniques/explain.h"
 
 typedef struct {
     int unit_idx;
@@ -70,35 +67,34 @@ void basic_fish_revert(Grid *grid, Step *step) {
     }
 }
 
-void basic_fish_explain(Ui *ui, Step *step) {
+void basic_fish_explain(DynStr *ds, Step *step) {
     BasicFishStep *s = &step->as.basic_fish;
 
     char *fish_name = FISH_NAME_FROM_SIZE(s->size);
     char *base_str = UNIT_TO_STR_PLURAL(s->unit_type);
     char *cover_str = UNIT_TO_STR_PLURAL(s->unit_type == UNIT_ROW ? UNIT_COL
                                                                   : UNIT_ROW);
-
-    ui_print_message(ui, false, false, "[%s (%s ", fish_name, base_str);
+    ds_appendf(ds, "[%s (%s ", fish_name, base_str);
     for (int i = 0; i < s->size; i++) {
-        ui_print_message(ui, false, false, "%d", s->base_idxs[i] + 1);
+        ds_appendf(ds, "%d", s->base_idxs[i] + 1);
         if (i < s->size - 1) {
-            ui_print_message(ui, false, false, ", ");
+            ds_append(ds, ", ");
         }
     }
-    ui_print_message(ui, false, false, " -> %s ", cover_str);
+    ds_appendf(ds, " -> %s ", cover_str);
     for (int i = 0; i < s->size; i++) {
-        ui_print_message(ui, false, false, "%d", s->cover_idxs[i] + 1);
+        ds_appendf(ds, "%d", s->cover_idxs[i] + 1);
         if (i < s->size - 1) {
-            ui_print_message(ui, false, false, ", ");
+            ds_append(ds, ", ");
         }
     }
-    ui_print_message(ui, false, false, "] {%d}:\n", s->value);
+    ds_appendf(ds, "] {%d}:\n", s->value);
     for (int i = 0; i < s->num_removals; i++) {
         int row = ROW_FROM_IDX(s->removal_idxs[i]);
         int col = COL_FROM_IDX(s->removal_idxs[i]);
 
-        ui_print_message(ui, false, false, "- Removed {%d} from r%dc%d\n",
-                         s->value, row + 1, col + 1);
+        ds_appendf(ds, "- Removed {%d} from r%dc%d\n", s->value, row + 1,
+                   col + 1);
     }
 }
 

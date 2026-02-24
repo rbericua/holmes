@@ -4,6 +4,7 @@
 
 #include "cand_set.h"
 #include "cell.h"
+#include "dynstr.h"
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
@@ -52,14 +53,14 @@ void naked_single_revert(Grid *grid, Step *step) {
     }
 }
 
-void naked_single_explain(Ui *ui, Step *step) {
+void naked_single_explain(DynStr *ds, Step *step) {
     NakedSingleStep *s = &step->as.naked_single;
 
     int row = ROW_FROM_IDX(s->idx);
     int col = COL_FROM_IDX(s->idx);
 
-    ui_print_message(ui, false, false, "[Naked Single] Set r%dc%d to %d\n",
-                     row + 1, col + 1, s->value);
+    ds_appendf(ds, "[Naked Single] Set r%dc%d to %d\n", row + 1, col + 1,
+               s->value);
 }
 
 void naked_single_colorise(ColorPair colors[81][9], Step *step) {

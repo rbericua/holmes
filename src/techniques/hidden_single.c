@@ -3,12 +3,11 @@
 #include <stdbool.h>
 
 #include "cell.h"
+#include "dynstr.h"
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
-
-#define UNIT_TO_STR(u) \
-    ((u) == UNIT_ROW ? "Row" : (u) == UNIT_COL ? "Column" : "Box")
+#include "techniques/explain.h"
 
 static bool hidden_single_unit(Grid *grid, Cell *units[9][9], Step *step,
                                UnitType unit_type);
@@ -40,16 +39,15 @@ void hidden_single_revert(Grid *grid, Step *step) {
     }
 }
 
-void hidden_single_explain(Ui *ui, Step *step) {
+void hidden_single_explain(DynStr *ds, Step *step) {
     HiddenSingleStep *s = &step->as.hidden_single;
 
     int row = ROW_FROM_IDX(s->idx);
     int col = COL_FROM_IDX(s->idx);
     char *unit_str = UNIT_TO_STR(s->unit_type);
 
-    ui_print_message(ui, false, false,
-                     "[Hidden Single (%s %d)] Set r%dc%d to %d\n", unit_str,
-                     s->unit_idx + 1, row + 1, col + 1, s->value);
+    ds_appendf(ds, "[Hidden Single (%s %d)] Set r%dc%d to %d\n", unit_str,
+               s->unit_idx + 1, row + 1, col + 1, s->value);
 }
 
 void hidden_single_colorise(ColorPair colors[81][9], Step *step) {

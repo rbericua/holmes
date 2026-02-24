@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include "dynstr.h"
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
@@ -11,7 +12,7 @@ bool naked_single(Grid *grid, Step *step);
 
 void naked_single_apply(Grid *grid, Step *step);
 void naked_single_revert(Grid *grid, Step *step);
-void naked_single_explain(Ui *ui, Step *step);
+void naked_single_explain(DynStr *ds, Step *step);
 void naked_single_colorise(ColorPair colors[81][9], Step *step);
 
 #endif

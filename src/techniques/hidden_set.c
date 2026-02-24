@@ -4,14 +4,12 @@
 
 #include "cand_set.h"
 #include "cell.h"
+#include "dynstr.h"
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
 #include "techniques/combinations.h"
-
-#define UNIT_TO_STR(u) \
-    ((u) == UNIT_ROW ? "Row" : (u) == UNIT_COL ? "Column" : "Box")
-#define SET_NAME_FROM_SIZE(n) ((n) == 2 ? "Pair" : (n) == 3 ? "Triple" : "Quad")
+#include "techniques/explain.h"
 
 static bool hidden_n_set_unit(Cell *units[9][9], Step *step, int size,
                               UnitType unit_type);
@@ -69,25 +67,24 @@ void hidden_set_revert(Grid *grid, Step *step) {
     }
 }
 
-void hidden_set_explain(Ui *ui, Step *step) {
+void hidden_set_explain(DynStr *ds, Step *step) {
     HiddenSetStep *s = &step->as.hidden_set;
 
     char *unit_str = UNIT_TO_STR(s->unit_type);
     char *set_name = SET_NAME_FROM_SIZE(s->size);
 
-    ui_print_message(ui, false, false, "[Hidden %s (%s %d)] ", set_name,
-                     unit_str, s->unit_idx + 1);
-    ui_print_cand_set(ui, s->cands);
-    ui_print_message(ui, false, false, " in ");
-    ui_print_idxs(ui, s->idxs, s->size);
-    ui_print_message(ui, false, false, ":\n");
+    ds_appendf(ds, "[Hidden %s (%s %d)] ", set_name, unit_str, s->unit_idx + 1);
+    print_cand_set(ds, s->cands);
+    ds_append(ds, " in ");
+    print_idxs(ds, s->idxs, s->size);
+    ds_append(ds, ":\n");
     for (int i = 0; i < s->num_removals; i++) {
         int row = ROW_FROM_IDX(s->removal_idxs[i]);
         int col = COL_FROM_IDX(s->removal_idxs[i]);
 
-        ui_print_message(ui, false, false, "- Removed ");
-        ui_print_cand_set(ui, s->removed_cands[i]);
-        ui_print_message(ui, false, false, " from r%dc%d\n", row + 1, col + 1);
+        ds_append(ds, "- Removed ");
+        print_cand_set(ds, s->removed_cands[i]);
+        ds_appendf(ds, " from r%dc%d\n", row + 1, col + 1);
     }
 }
 

@@ -6,6 +6,13 @@
 #define DA_INIT_CAP 32
 #define DA_GROWTH_FACTOR 2
 
+#define da_init(da) \
+    do { \
+        (da)->elems = NULL; \
+        (da)->len = 0; \
+        (da)->cap = 0; \
+    } while (0)
+
 #define da_append(da, elem) \
     do { \
         da_reserve((da), (da)->len + 1); \
@@ -23,6 +30,8 @@
         (da)->elems = realloc((da)->elems, (da)->cap * sizeof(*(da)->elems)); \
     } while (0)
 
-#define da_free(da) free((da)->elems)
+#define da_clear(da) (da)->len = 0;
+
+#define da_deinit(da) free((da)->elems);
 
 #endif

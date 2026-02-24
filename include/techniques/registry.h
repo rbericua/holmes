@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include "dynstr.h"
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
@@ -12,7 +13,7 @@ typedef bool (*TechniqueFn)(Grid *, Step *);
 typedef struct {
     void (*apply)(Grid *, Step *);
     void (*revert)(Grid *, Step *);
-    void (*explain)(Ui *, Step *);
+    void (*explain)(DynStr *, Step *);
     void (*colorise)(ColorPair[81][9], Step *);
 } TechniqueOps;
 
