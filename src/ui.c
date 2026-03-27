@@ -12,11 +12,22 @@
 #include "grid.h"
 #include "step.h"
 #include "techniques/registry.h"
+#include "util/dynarr.h"
+#include "util/dynstr.h"
 
 #define GRID_WIDTH 91
 #define GRID_HEIGHT 37
 
+#define INFO_WIDTH (COLS - SCROLLBAR_WIDTH - 1)
+#define INFO_HEIGHT (LINES - GRID_HEIGHT)
+
+#define SCROLLBAR_WIDTH 1
+#define SCROLLBAR_HEIGHT (LINES - GRID_HEIGHT)
+
 static int color_attr(ColorPair color);
+static void generate_lines(DynStr *buf, Lines *lines);
+static void refresh_info(Ui *ui);
+static void print_scroll_indicators(Ui *ui);
 
 void ui_init(Ui *ui) {
     setlocale(LC_ALL, "");
@@ -33,7 +44,11 @@ void ui_init(Ui *ui) {
     init_pair(CP_REMOVAL, COLOR_RED, -1);   // Reverse
 
     ui->grid_win = newwin(GRID_HEIGHT, GRID_WIDTH, 0, (COLS - GRID_WIDTH) / 2);
-    ui->info_win = newwin(LINES - GRID_HEIGHT, COLS, GRID_HEIGHT, 0);
+    ui->info_win = newwin(INFO_HEIGHT, INFO_WIDTH, GRID_HEIGHT, 0);
+    ui->scrollbar_win = newwin(SCROLLBAR_HEIGHT, SCROLLBAR_WIDTH, GRID_HEIGHT,
+                               COLS - SCROLLBAR_WIDTH);
+    ds_init(&ui->info_buf);
+    da_init(&ui->lines);
 
     refresh();
 }
@@ -41,6 +56,9 @@ void ui_init(Ui *ui) {
 void ui_deinit(Ui *ui) {
     delwin(ui->grid_win);
     delwin(ui->info_win);
+    delwin(ui->scrollbar_win);
+    ds_deinit(&ui->info_buf);
+    da_deinit(&ui->lines);
     endwin();
 }
 
@@ -52,8 +70,23 @@ InputAction ui_wait_for_input(void) {
         case ' ':
         case '\n':
         case KEY_RIGHT: return ACTION_NEXT;
+        case 'j':
+        case KEY_DOWN: return ACTION_SCROLL_DOWN;
+        case 'k':
+        case KEY_UP: return ACTION_SCROLL_UP;
         }
     }
+}
+
+void ui_scroll(Ui *ui, int offset) {
+    ui->curr_line += offset;
+    if (ui->curr_line > ui->lines.len - INFO_HEIGHT) {
+        ui->curr_line = ui->lines.len - INFO_HEIGHT;
+    }
+    if (ui->curr_line < 0) {
+        ui->curr_line = 0;
+    }
+    refresh_info(ui);
 }
 
 void ui_print_message(Ui *ui, char *format, ...) {
@@ -139,10 +172,69 @@ void ui_print_grid(Ui *ui, Grid *grid, Step *step) {
     wrefresh(ui->grid_win);
 }
 
+void ui_print_step(Ui *ui, Step *step) {
+    ds_clear(&ui->info_buf);
+    da_clear(&ui->lines);
+
+    technique_ops[step->type].explain(&ui->info_buf, step);
+    generate_lines(&ui->info_buf, &ui->lines);
+
+    ui->curr_line = 0;
+    refresh_info(ui);
+}
+
 static int color_attr(ColorPair color) {
     int attr = COLOR_PAIR(color);
     if (color == CP_TRIGGER || color == CP_REMOVAL) {
         attr |= A_REVERSE;
     }
     return attr;
+}
+
+static void generate_lines(DynStr *buf, Lines *lines) {
+    int last_start = 0;
+    for (int i = 0; i < buf->len; i++) {
+        int line_len = i - last_start + 1;
+        if (buf->elems[i] != '\n' && line_len < INFO_WIDTH) continue;
+
+        Line line = {
+            .start = last_start,
+            .len = buf->elems[i] == '\n' ? line_len - 1 : line_len,
+        };
+
+        if (line.len > 0) {
+            da_append(lines, line);
+        }
+        last_start = i + 1;
+    }
+
+    if (last_start < buf->len) {
+        da_append(lines, ((Line){last_start, buf->len - last_start}));
+    }
+}
+
+static void refresh_info(Ui *ui) {
+    wclear(ui->info_win);
+    for (int i = ui->curr_line;
+         i < ui->lines.len && i - ui->curr_line < INFO_HEIGHT; i++) {
+        Line line = ui->lines.elems[i];
+        wprintw(ui->info_win, "%.*s", line.len,
+                &ui->info_buf.elems[line.start]);
+        if (line.len < INFO_WIDTH) {
+            wprintw(ui->info_win, "\n");
+        }
+    }
+    wrefresh(ui->info_win);
+    print_scroll_indicators(ui);
+}
+
+static void print_scroll_indicators(Ui *ui) {
+    wclear(ui->scrollbar_win);
+    if (ui->curr_line > 0) {
+        mvwaddwstr(ui->scrollbar_win, 0, 0, L"↑");
+    }
+    if (ui->lines.len - ui->curr_line > INFO_HEIGHT) {
+        mvwaddwstr(ui->scrollbar_win, SCROLLBAR_HEIGHT - 1, 0, L"↓");
+    }
+    wrefresh(ui->scrollbar_win);
 }

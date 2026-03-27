@@ -4,6 +4,7 @@
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
+#include "util/dynstr.h"
 
 bool naked_single(Grid *grid, Step *step) {
     step->type = TECH_NAKED_SINGLE;
@@ -27,6 +28,13 @@ void naked_single_apply(Grid *grid, Step *step) {
     NakedSingleStep *s = &step->as.naked_single;
 
     grid_fill_cell(grid, s->cell, s->value);
+}
+
+void naked_single_explain(DynStr *buf, Step *step) {
+    NakedSingleStep *s = &step->as.naked_single;
+
+    ds_append(buf, "[Naked Single] Set r%dc%d to %d\n", cell_row(s->cell) + 1,
+              cell_col(s->cell) + 1, s->value);
 }
 
 void naked_single_colorise(ColorPair colors[81][9], Step *step) {

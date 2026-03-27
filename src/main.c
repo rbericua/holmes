@@ -27,7 +27,8 @@ int main(int argc, char *argv[]) {
     while (waiting) {
         switch (ui_wait_for_input()) {
         case ACTION_QUIT: goto cleanup;
-        case ACTION_NEXT: waiting = false;
+        case ACTION_NEXT: waiting = false; break;
+        default: break;
         }
     }
 
@@ -38,12 +39,15 @@ int main(int argc, char *argv[]) {
         if (status != SOLVE_ONGOING) break;
 
         ui_print_grid(&ui, grid, &step);
+        ui_print_step(&ui, &step);
 
         waiting = true;
         while (waiting) {
             switch (ui_wait_for_input()) {
             case ACTION_QUIT: goto cleanup;
-            case ACTION_NEXT: waiting = false;
+            case ACTION_NEXT: waiting = false; break;
+            case ACTION_SCROLL_DOWN: ui_scroll(&ui, 1); break;
+            case ACTION_SCROLL_UP: ui_scroll(&ui, -1); break;
             }
         }
 
@@ -67,7 +71,8 @@ int main(int argc, char *argv[]) {
     while (waiting) {
         switch (ui_wait_for_input()) {
         case ACTION_QUIT:
-        case ACTION_NEXT: waiting = false;
+        case ACTION_NEXT: waiting = false; break;
+        default: break;
         }
     }
 

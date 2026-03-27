@@ -7,6 +7,7 @@
 #define TECHNIQUE_OPS(tech) \
     { \
         .apply = tech##_apply, \
+        .explain = tech##_explain, \
         .colorise = tech##_colorise, \
     }
 

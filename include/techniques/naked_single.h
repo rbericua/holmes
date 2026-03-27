@@ -6,10 +6,12 @@
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
+#include "util/dynstr.h"
 
 bool naked_single(Grid *grid, Step *step);
 
 void naked_single_apply(Grid *grid, Step *step);
+void naked_single_explain(DynStr *buf, Step *step);
 void naked_single_colorise(ColorPair colors[81][9], Step *step);
 
 #endif
