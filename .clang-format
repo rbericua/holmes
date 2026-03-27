@@ -1,0 +1,17 @@
+AlignEscapedNewlines: DontAlign
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: WithoutElse
+BreakBeforeBinaryOperators: NonAssignment
+IndentWidth: 4
+IncludeCategories:
+  - Regex: '["<][^/]*[">]'
+    Priority: 1
+  - Regex: '["<][^/]*/[^/]*[">]'
+    Priority: 2
+  - Regex: '["<][^/]*/[^/]*/[^/]*[">]'
+    Priority: 3
+  - Regex: '["<].*[">]'
+    Priority: 4
+PenaltyBreakAssignment: 100
