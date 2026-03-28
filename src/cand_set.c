@@ -40,3 +40,19 @@ void cand_set_clear(unsigned int *set) {
 int cand_set_first(unsigned int set) {
     return __builtin_ffs(set);
 }
+
+unsigned int cand_set_intersection(unsigned int sets[], int num_sets) {
+    unsigned int result = CAND_SET_FULL;
+    for (int i = 0; i < num_sets; i++) {
+        result &= sets[i];
+    }
+    return result;
+}
+
+unsigned int cand_set_union(unsigned int sets[], int num_sets) {
+    unsigned int result = CAND_SET_EMPTY;
+    for (int i = 0; i < num_sets; i++) {
+        result |= sets[i];
+    }
+    return result;
+}

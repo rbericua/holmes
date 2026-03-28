@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "cand_set.h"
 #include "geometry.h"
 #include "util/dynstr.h"
 
@@ -12,6 +13,15 @@ char *explain_unit(UnitType unit) {
     case UNIT_ROW: return strdup("Row");
     case UNIT_COL: return strdup("Column");
     case UNIT_BOX: return strdup("Box");
+    default: return "";
+    }
+}
+
+char *explain_set(int set_size) {
+    switch (set_size) {
+    case 2: return strdup("Pair");
+    case 3: return strdup("Triple");
+    case 4: return strdup("Quad");
     default: return "";
     }
 }
@@ -28,6 +38,33 @@ char *explain_units(int units[3]) {
 
             first = false;
         }
+    }
+
+    return ds.elems;
+}
+
+char *explain_cand_set(unsigned int cands) {
+    DynStr ds = {0};
+
+    int cands_arr[9];
+    int num_cands = cand_set_to_arr(cands, cands_arr);
+
+    ds_append(&ds, "{");
+    for (int i = 0; i < num_cands; i++) {
+        ds_append(&ds, "%d%s", cands_arr[i], i == num_cands - 1 ? "" : ", ");
+    }
+    ds_append(&ds, "}");
+
+    return ds.elems;
+}
+
+char *explain_cells(int cells[], int num_cells) {
+    DynStr ds = {0};
+
+    for (int i = 0; i < num_cells; i++) {
+        int row = cell_row(cells[i]) + 1;
+        int col = cell_col(cells[i]) + 1;
+        ds_append(&ds, "r%dc%d%s", row, col, i == num_cells - 1 ? "" : ", ");
     }
 
     return ds.elems;

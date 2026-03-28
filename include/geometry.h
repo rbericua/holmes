@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #define NUM_PEERS 20
+#define MAX_COMMON_PEERS 13
 
 typedef enum {
     UNIT_ROW,
@@ -24,5 +25,9 @@ int cell_idx_in_box(int cell);
 int cell_from_row_col(int row, int col);
 
 bool cells_are_peers(int a, int b);
+bool cells_in_same_row(int cells[], int num_cells);
+bool cells_in_same_col(int cells[], int num_cells);
+bool cells_in_same_box(int cells[], int num_cells);
+int cells_common_peers(int cells[], int num_cells, int out[]);
 
 #endif

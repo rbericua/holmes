@@ -45,6 +45,10 @@ int grid_cell_value(Grid *grid, int cell) {
     return grid->values[cell];
 }
 
+int grid_cell_cands(Grid *grid, int cell) {
+    return grid->cands[cell];
+}
+
 int grid_cell_num_cands(Grid *grid, int cell) {
     return cand_set_len(grid->cands[cell]);
 }
@@ -65,8 +69,16 @@ void grid_cell_add_cand(Grid *grid, int cell, int cand) {
     cand_set_add(&grid->cands[cell], cand);
 }
 
+void grid_cell_add_cands(Grid *grid, int cell, unsigned int cands) {
+    grid->cands[cell] |= cands;
+}
+
 void grid_cell_remove_cand(Grid *grid, int cell, int cand) {
     cand_set_remove(&grid->cands[cell], cand);
+}
+
+void grid_cell_remove_cands(Grid *grid, int cell, unsigned int cands) {
+    grid->cands[cell] &= ~cands;
 }
 
 void grid_cell_clear_cands(Grid *grid, int cell) {
@@ -75,6 +87,35 @@ void grid_cell_clear_cands(Grid *grid, int cell) {
 
 int grid_cell_first_cand(Grid *grid, int cell) {
     return cand_set_first(grid->cands[cell]);
+}
+
+unsigned int grid_region_cands_intersection(Grid *grid, int region[],
+                                            int region_len) {
+    unsigned int *sets = malloc(region_len * sizeof(unsigned int));
+
+    for (int i = 0; i < region_len; i++) {
+        sets[i] = grid->cands[region[i]];
+    }
+
+    unsigned int result = cand_set_intersection(sets, region_len);
+
+    free(sets);
+
+    return result;
+}
+
+unsigned int grid_region_cands_union(Grid *grid, int region[], int region_len) {
+    unsigned int *sets = malloc(region_len * sizeof(unsigned int));
+
+    for (int i = 0; i < region_len; i++) {
+        sets[i] = grid->cands[region[i]];
+    }
+
+    unsigned int result = cand_set_union(sets, region_len);
+
+    free(sets);
+
+    return result;
 }
 
 int grid_region_missing_values(Grid *grid, int region[], int region_len,
@@ -91,6 +132,18 @@ int grid_region_with_cand(Grid *grid, int region[], int region_len, int cand,
     int count = 0;
     for (int i = 0; i < region_len; i++) {
         if (grid_cell_has_cand(grid, region[i], cand)) {
+            out[count++] = region[i];
+        }
+    }
+    return count;
+}
+
+int grid_region_with_n_cands_max(Grid *grid, int region[], int region_len,
+                                 int n, int out[]) {
+    int count = 0;
+    for (int i = 0; i < region_len; i++) {
+        int num_cands = grid_cell_num_cands(grid, region[i]);
+        if (num_cands > 0 && num_cands <= n) {
             out[count++] = region[i];
         }
     }
