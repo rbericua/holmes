@@ -77,6 +77,15 @@ int grid_cell_first_cand(Grid *grid, int cell) {
     return cand_set_first(grid->cands[cell]);
 }
 
+int grid_region_missing_values(Grid *grid, int region[], int region_len,
+                               int out[]) {
+    unsigned int missing_values = CAND_SET_FULL;
+    for (int i = 0; i < region_len; i++) {
+        cand_set_remove(&missing_values, grid_cell_value(grid, region[i]));
+    }
+    return cand_set_to_arr(missing_values, out);
+}
+
 int grid_region_with_cand(Grid *grid, int region[], int region_len, int cand,
                           int out[]) {
     int count = 0;

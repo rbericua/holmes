@@ -25,6 +25,8 @@ void grid_cell_remove_cand(Grid *grid, int cell, int cand);
 void grid_cell_clear_cands(Grid *grid, int cell);
 int grid_cell_first_cand(Grid *grid, int cell);
 
+int grid_region_missing_values(Grid *grid, int region[], int region_len,
+                               int out[]);
 int grid_region_with_cand(Grid *grid, int region[], int region_len, int cand,
                           int out[]);
 

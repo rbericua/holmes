@@ -1,6 +1,6 @@
 #include "geometry.h"
 
-int units[3][81][81];
+int units[3][9][9];
 int peers[81][NUM_PEERS];
 
 void geometry_init(void) {
@@ -22,6 +22,15 @@ void geometry_init(void) {
                 peers[i][count++] = j;
             }
         }
+    }
+}
+
+int cell_unit(int cell, UnitType unit) {
+    switch (unit) {
+    case UNIT_ROW: return cell_row(cell);
+    case UNIT_COL: return cell_col(cell);
+    case UNIT_BOX: return cell_box(cell);
+    default: return -1;
     }
 }
 

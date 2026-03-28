@@ -11,11 +11,12 @@ typedef enum {
     UNIT_BOX
 } UnitType;
 
-extern int units[3][81][81];
+extern int units[3][9][9];
 extern int peers[81][NUM_PEERS];
 
 void geometry_init(void);
 
+int cell_unit(int cell, UnitType unit);
 int cell_row(int cell);
 int cell_col(int cell);
 int cell_box(int cell);

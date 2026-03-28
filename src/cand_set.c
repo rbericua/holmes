@@ -5,19 +5,31 @@
 
 #include "util/bits.h"
 
+int cand_set_to_arr(unsigned int set, int arr[]) {
+    int count = 0;
+    for (int value = 1; value <= 9; value++) {
+        if (cand_set_has(set, value)) {
+            arr[count++] = value;
+        }
+    }
+    return count;
+}
+
 int cand_set_len(unsigned int set) {
     return __builtin_popcount(set);
 }
 
 bool cand_set_has(unsigned int set, int cand) {
-    return IS_BIT_SET(set, cand - 1);
+    return cand != 0 && IS_BIT_SET(set, cand - 1);
 }
 
 void cand_set_add(unsigned int *set, int cand) {
+    if (cand == 0) return;
     *set = SET_BIT(*set, cand - 1);
 }
 
 void cand_set_remove(unsigned int *set, int cand) {
+    if (cand == 0) return;
     *set = UNSET_BIT(*set, cand - 1);
 }
 
