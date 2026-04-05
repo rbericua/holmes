@@ -9,6 +9,9 @@ typedef enum {
     TECH_NAKED_PAIR,
     TECH_NAKED_TRIPLE,
     TECH_NAKED_QUAD,
+    TECH_HIDDEN_PAIR,
+    TECH_HIDDEN_TRIPLE,
+    TECH_HIDDEN_QUAD,
 
     NUM_TECHNIQUES
 } TechniqueType;
@@ -45,12 +48,26 @@ typedef struct {
     int units[3];
 } NakedSetStep;
 
+#define MAX_HIDDEN_SET_SIZE 4
+#define MAX_HIDDEN_SET_REMOVALS MAX_HIDDEN_SET_SIZE
+
+typedef struct {
+    int set_cells[MAX_HIDDEN_SET_SIZE];
+    int set_size;
+    unsigned int set_cands;
+    int removal_cells[MAX_HIDDEN_SET_REMOVALS];
+    unsigned int removal_cands[MAX_HIDDEN_SET_REMOVALS];
+    int num_removals;
+    int units[3];
+} HiddenSetStep;
+
 typedef struct {
     TechniqueType type;
     union {
         NakedSingleStep naked_single;
         HiddenSingleStep hidden_single;
         NakedSetStep naked_set;
+        HiddenSetStep hidden_set;
     } as;
 } Step;
 

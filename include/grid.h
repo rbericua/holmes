@@ -37,5 +37,7 @@ int grid_region_with_cand(Grid *grid, int region[], int region_len, int cand,
                           int out[]);
 int grid_region_with_n_cands_max(Grid *grid, int region[], int region_len,
                                  int n, int out[]);
+int grid_region_with_cands_some(Grid *grid, int region[], int region_len,
+                                unsigned int cands, int out[]);
 
 #endif

@@ -150,6 +150,17 @@ int grid_region_with_n_cands_max(Grid *grid, int region[], int region_len,
     return count;
 }
 
+int grid_region_with_cands_some(Grid *grid, int region[], int region_len,
+                                unsigned int cands, int out[]) {
+    int count = 0;
+    for (int i = 0; i < region_len; i++) {
+        if (cand_set_len(grid->cands[region[i]] & cands) > 0) {
+            out[count++] = region[i];
+        }
+    }
+    return count;
+}
+
 static Grid *grid_from_values(char *grid_str) {
     Grid *grid = malloc(sizeof(Grid));
     grid->num_empty = 81;

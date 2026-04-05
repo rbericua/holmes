@@ -5,6 +5,14 @@
 
 #include "util/bits.h"
 
+unsigned int cand_set_from_arr(int arr[], int len) {
+    unsigned int set;
+    for (int i = 0; i < len; i++) {
+        cand_set_add(&set, arr[i]);
+    }
+    return set;
+}
+
 int cand_set_to_arr(unsigned int set, int arr[]) {
     int count = 0;
     for (int value = 1; value <= 9; value++) {
@@ -39,6 +47,10 @@ void cand_set_clear(unsigned int *set) {
 
 int cand_set_first(unsigned int set) {
     return __builtin_ffs(set);
+}
+
+unsigned int cand_set_difference(unsigned int a, unsigned int b) {
+    return a & ~b;
 }
 
 unsigned int cand_set_intersection(unsigned int sets[], int num_sets) {
