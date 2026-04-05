@@ -69,3 +69,28 @@ char *explain_cells(int cells[], int num_cells) {
 
     return ds.elems;
 }
+
+char *explain_value_removal(int cell, int value) {
+    DynStr ds = {0};
+
+    int row = cell_row(cell) + 1;
+    int col = cell_col(cell) + 1;
+
+    ds_append(&ds, "- Removed {%d} from r%dc%d", value, row, col);
+
+    return ds.elems;
+}
+
+char *explain_cands_removal(int cell, unsigned int cands) {
+    DynStr ds = {0};
+
+    char *cands_str = explain_cand_set(cands);
+    int row = cell_row(cell) + 1;
+    int col = cell_col(cell) + 1;
+
+    ds_append(&ds, "- Removed %s from r%dc%d", cands_str, row, col);
+
+    free(cands_str);
+
+    return ds.elems;
+}

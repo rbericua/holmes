@@ -61,14 +61,10 @@ void hidden_set_explain(DynStr *buf, Step *step) {
     for (int i = 0; i < s->set_size; i++) {
         if (cand_set_len(s->removal_cands[i]) == 0) continue;
 
-        char *removal_cands_str = explain_cand_set(s->removal_cands[i]);
-        int row = cell_row(s->set_cells[i]) + 1;
-        int col = cell_col(s->set_cells[i]) + 1;
-
-        ds_append(buf, "- Removed %s from r%dc%d\n", removal_cands_str, row,
-                  col);
-
-        free(removal_cands_str);
+        char *removal_msg = explain_cands_removal(s->set_cells[i],
+                                                  s->removal_cands[i]);
+        ds_append(buf, "%s\n", removal_msg);
+        free(removal_msg);
     }
 }
 

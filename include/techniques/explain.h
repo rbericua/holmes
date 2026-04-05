@@ -8,5 +8,7 @@ char *explain_set_name(int set_size);
 char *explain_units(int units[3]);
 char *explain_cand_set(unsigned int cands);
 char *explain_cells(int cells[], int num_cells);
+char *explain_value_removal(int cell, int value);
+char *explain_cands_removal(int cell, unsigned int cands);
 
 #endif
