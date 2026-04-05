@@ -47,7 +47,7 @@ void naked_set_apply(Grid *grid, Step *step) {
 void naked_set_explain(DynStr *buf, Step *step) {
     NakedSetStep *s = &step->as.naked_set;
 
-    char *set_name = explain_set(s->set_size);
+    char *set_name = explain_set_name(s->set_size);
     char *units_str = explain_units(s->units);
     char *cands_str = explain_cand_set(s->set_cands);
     char *idxs_str = explain_cells(s->set_cells, s->set_size);

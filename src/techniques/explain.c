@@ -8,7 +8,7 @@
 #include "geometry.h"
 #include "util/dynstr.h"
 
-char *explain_unit(UnitType unit) {
+char *explain_unit_name(UnitType unit) {
     switch (unit) {
     case UNIT_ROW: return strdup("Row");
     case UNIT_COL: return strdup("Column");
@@ -17,7 +17,7 @@ char *explain_unit(UnitType unit) {
     }
 }
 
-char *explain_set(int set_size) {
+char *explain_set_name(int set_size) {
     switch (set_size) {
     case 2: return strdup("Pair");
     case 3: return strdup("Triple");
@@ -32,7 +32,7 @@ char *explain_units(int units[3]) {
     bool first = true;
     for (int i = 0; i < 3; i++) {
         if (units[i] != -1) {
-            char *unit_str = explain_unit(i);
+            char *unit_str = explain_unit_name(i);
             ds_append(&ds, "%s%s %d", first ? "" : "/", unit_str, units[i] + 1);
             free(unit_str);
 
