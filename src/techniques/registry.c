@@ -6,6 +6,7 @@
 #include "techniques/hidden_single.h"
 #include "techniques/naked_set.h"
 #include "techniques/naked_single.h"
+#include "techniques/pointing_set.h"
 
 #define TECHNIQUE_OPS(tech) \
     { \
@@ -16,7 +17,7 @@
 
 TechniqueFn techniques[] = {naked_single, hidden_single, naked_pair,
                             hidden_pair,  naked_triple,  hidden_triple,
-                            naked_quad,   hidden_quad};
+                            naked_quad,   hidden_quad,   pointing_set};
 
 TechniqueOps technique_ops[] = {
     [TECH_NAKED_SINGLE] = TECHNIQUE_OPS(naked_single),
@@ -27,4 +28,5 @@ TechniqueOps technique_ops[] = {
     [TECH_HIDDEN_PAIR] = TECHNIQUE_OPS(hidden_set),
     [TECH_HIDDEN_TRIPLE] = TECHNIQUE_OPS(hidden_set),
     [TECH_HIDDEN_QUAD] = TECHNIQUE_OPS(hidden_set),
+    [TECH_POINTING_SET] = TECHNIQUE_OPS(pointing_set),
 };

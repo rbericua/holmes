@@ -12,6 +12,7 @@ typedef enum {
     TECH_HIDDEN_PAIR,
     TECH_HIDDEN_TRIPLE,
     TECH_HIDDEN_QUAD,
+    TECH_POINTING_SET,
 
     NUM_TECHNIQUES
 } TechniqueType;
@@ -61,6 +62,21 @@ typedef struct {
     int units[3];
 } HiddenSetStep;
 
+#define MAX_POINTING_SET_SIZE 3
+#define MAX_POINTING_SET_REMOVALS 6
+
+typedef struct {
+    int set_cells[MAX_POINTING_SET_SIZE];
+    int set_size;
+    int value;
+    int removal_cells[MAX_POINTING_SET_REMOVALS];
+    int num_removals;
+    UnitType trigger_unit_type;
+    int trigger_unit_idx;
+    UnitType removal_unit_type;
+    int removal_unit_idx;
+} PointingSetStep;
+
 typedef struct {
     TechniqueType type;
     union {
@@ -68,6 +84,7 @@ typedef struct {
         HiddenSingleStep hidden_single;
         NakedSetStep naked_set;
         HiddenSetStep hidden_set;
+        PointingSetStep pointing_set;
     } as;
 } Step;
 
