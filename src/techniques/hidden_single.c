@@ -69,7 +69,9 @@ void hidden_single_explain(DynStr *buf, Step *step) {
 void hidden_single_colorise(ColorPair colors[81][9], Step *step) {
     HiddenSingleStep *s = &step->as.hidden_single;
 
-    colors[s->cell][s->value - 1] = CP_TRIGGER;
+    for (int cand = 1; cand <= 9; cand++) {
+        colors[s->cell][cand - 1] = cand == s->value ? CP_TRIGGER : CP_REMOVAL;
+    }
     for (int i = 0; i < s->num_removals; i++) {
         colors[s->removal_cells[i]][s->value - 1] = CP_REMOVAL;
     }
