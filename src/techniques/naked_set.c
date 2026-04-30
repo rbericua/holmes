@@ -44,6 +44,14 @@ void naked_set_apply(Grid *grid, Step *step) {
     }
 }
 
+void naked_set_revert(Grid *grid, Step *step) {
+    NakedSetStep *s = &step->as.naked_set;
+
+    for (int i = 0; i < s->num_removals; i++) {
+        grid_cell_add_cands(grid, s->removal_cells[i], s->removal_cands[i]);
+    }
+}
+
 void naked_set_explain(DynStr *buf, Step *step) {
     NakedSetStep *s = &step->as.naked_set;
 

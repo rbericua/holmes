@@ -36,6 +36,7 @@ bool hidden_single(Grid *grid, Step *step) {
 
                 s->cell = possible_cells[0];
                 s->value = value;
+                s->old_cands = grid_cell_cands(grid, s->cell);
                 s->num_removals = grid_region_with_cand(
                     grid, peers[s->cell], NUM_PEERS, value, s->removal_cells);
                 find_units(s->cell, s->removal_cells, s->num_removals,
@@ -53,6 +54,16 @@ void hidden_single_apply(Grid *grid, Step *step) {
     HiddenSingleStep *s = &step->as.hidden_single;
 
     grid_fill_cell(grid, s->cell, s->value);
+}
+
+void hidden_single_revert(Grid *grid, Step *step) {
+    HiddenSingleStep *s = &step->as.hidden_single;
+
+    grid_clear_cell(grid, s->cell, s->old_cands);
+
+    for (int i = 0; i < s->num_removals; i++) {
+        grid_cell_add_cand(grid, s->removal_cells[i], s->value);
+    }
 }
 
 void hidden_single_explain(DynStr *buf, Step *step) {

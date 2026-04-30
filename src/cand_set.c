@@ -5,6 +5,10 @@
 
 #include "util/bits.h"
 
+unsigned int cand_set_from_value(int value) {
+    return BIT(value - 1);
+}
+
 unsigned int cand_set_from_arr(int arr[], int len) {
     unsigned int set;
     for (int i = 0; i < len; i++) {

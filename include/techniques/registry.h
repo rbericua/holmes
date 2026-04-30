@@ -10,6 +10,7 @@ typedef bool (*TechniqueFn)(Grid *, Step *);
 
 typedef struct {
     void (*apply)(Grid *, Step *);
+    void (*revert)(Grid *, Step *);
     void (*explain)(DynStr *, Step *);
     void (*colorise)(ColorPair[81][9], Step *);
 } TechniqueOps;

@@ -11,6 +11,7 @@
 bool hidden_single(Grid *grid, Step *step);
 
 void hidden_single_apply(Grid *grid, Step *step);
+void hidden_single_revert(Grid *grid, Step *step);
 void hidden_single_explain(DynStr *buf, Step *step);
 void hidden_single_colorise(ColorPair colors[81][9], Step *step);
 

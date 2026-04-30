@@ -38,6 +38,7 @@ typedef enum {
 typedef enum {
     ACTION_QUIT,
     ACTION_NEXT,
+    ACTION_PREV,
     ACTION_SCROLL_DOWN,
     ACTION_SCROLL_UP
 } InputAction;

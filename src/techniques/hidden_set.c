@@ -42,6 +42,14 @@ void hidden_set_apply(Grid *grid, Step *step) {
     }
 }
 
+void hidden_set_revert(Grid *grid, Step *step) {
+    HiddenSetStep *s = &step->as.hidden_set;
+
+    for (int i = 0; i < s->set_size; i++) {
+        grid_cell_add_cands(grid, s->set_cells[i], s->removal_cands[i]);
+    }
+}
+
 void hidden_set_explain(DynStr *buf, Step *step) {
     HiddenSetStep *s = &step->as.hidden_set;
 

@@ -14,6 +14,7 @@ Grid *grid_create(char *grid_str);
 void grid_destroy(Grid *grid);
 bool grid_is_solved(Grid *grid);
 void grid_fill_cell(Grid *grid, int cell, int value);
+void grid_clear_cell(Grid *grid, int cell, unsigned int cands);
 
 int grid_cell_value(Grid *grid, int cell);
 int grid_cell_cands(Grid *grid, int cell);

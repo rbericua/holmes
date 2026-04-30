@@ -13,5 +13,11 @@ SolveStatus solver_next_step(Grid *grid, Step *step) {
 }
 
 void solver_apply_step(Grid *grid, Step *step) {
+    if (!step) return;
     technique_ops[step->type].apply(grid, step);
+}
+
+void solver_revert_step(Grid *grid, Step *step) {
+    if (!step) return;
+    technique_ops[step->type].revert(grid, step);
 }

@@ -41,6 +41,12 @@ void grid_fill_cell(Grid *grid, int cell, int value) {
     }
 }
 
+void grid_clear_cell(Grid *grid, int cell, unsigned int cands) {
+    grid->values[cell] = 0;
+    grid->cands[cell] = cands;
+    grid->num_empty++;
+}
+
 int grid_cell_value(Grid *grid, int cell) {
     return grid->values[cell];
 }

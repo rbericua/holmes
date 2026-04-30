@@ -31,6 +31,7 @@ typedef struct {
 typedef struct {
     int cell;
     int value;
+    unsigned int old_cands;
     int removal_cells[MAX_HIDDEN_SINGLE_REMOVALS];
     int num_removals;
     int units[3];
@@ -56,7 +57,6 @@ typedef struct {
     int set_cells[MAX_HIDDEN_SET_SIZE];
     int set_size;
     unsigned int set_cands;
-    int removal_cells[MAX_HIDDEN_SET_REMOVALS];
     unsigned int removal_cands[MAX_HIDDEN_SET_REMOVALS];
     int num_removals;
     int units[3];
@@ -87,5 +87,11 @@ typedef struct {
         PointingSetStep pointing_set;
     } as;
 } Step;
+
+typedef struct {
+    Step *elems;
+    int len;
+    int cap;
+} Steps;
 
 #endif

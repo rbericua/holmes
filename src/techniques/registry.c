@@ -11,6 +11,7 @@
 #define TECHNIQUE_OPS(tech) \
     { \
         .apply = tech##_apply, \
+        .revert = tech##_revert, \
         .explain = tech##_explain, \
         .colorise = tech##_colorise, \
     }

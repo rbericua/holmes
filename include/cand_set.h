@@ -6,6 +6,7 @@
 #define CAND_SET_EMPTY 0x0
 #define CAND_SET_FULL 0x1ff
 
+unsigned int cand_set_from_value(int value);
 unsigned int cand_set_from_arr(int arr[], int len);
 int cand_set_to_arr(unsigned int set, int arr[]);
 int cand_set_len(unsigned int set);

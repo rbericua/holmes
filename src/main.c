@@ -2,6 +2,7 @@
 
 #include "geometry.h"
 #include "grid.h"
+#include "history.h"
 #include "solver.h"
 #include "step.h"
 #include "ui.h"
@@ -13,12 +14,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    Ui ui;
-
     log_init();
     log_set_level(LOG_DEBUG);
+
+    Ui ui;
+
     geometry_init();
     Grid *grid = grid_create(argv[1]);
+    History hist = {0};
     ui_init(&ui);
 
     ui_print_grid(&ui, grid, NULL);
@@ -38,6 +41,7 @@ int main(int argc, char *argv[]) {
         status = solver_next_step(grid, &step);
         if (status != SOLVE_ONGOING) break;
 
+        history_save(&hist, step);
         ui_print_grid(&ui, grid, &step);
         ui_print_step(&ui, &step);
 
@@ -45,7 +49,22 @@ int main(int argc, char *argv[]) {
         while (waiting) {
             switch (ui_wait_for_input()) {
             case ACTION_QUIT: goto cleanup;
-            case ACTION_NEXT: waiting = false; break;
+            case ACTION_NEXT:
+                if (history_redo(&hist, grid)) {
+                    ui_print_grid(&ui, grid, history_curr(&hist));
+                    ui_print_step(&ui, history_curr(&hist));
+                } else {
+                    waiting = false;
+                }
+                break;
+            case ACTION_PREV:
+                if (history_undo(&hist, grid)) {
+                    ui_print_grid(&ui, grid, history_curr(&hist));
+                    ui_print_step(&ui, history_curr(&hist));
+                } else {
+                    ui_print_message(&ui, "Already at initial state\n");
+                }
+                break;
             case ACTION_SCROLL_DOWN: ui_scroll(&ui, 1); break;
             case ACTION_SCROLL_UP: ui_scroll(&ui, -1); break;
             }
@@ -78,6 +97,7 @@ int main(int argc, char *argv[]) {
 
 cleanup:
     ui_deinit(&ui);
+    history_deinit(&hist);
     grid_destroy(grid);
     log_deinit();
 

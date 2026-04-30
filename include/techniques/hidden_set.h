@@ -13,6 +13,7 @@ bool hidden_triple(Grid *grid, Step *step);
 bool hidden_quad(Grid *grid, Step *step);
 
 void hidden_set_apply(Grid *grid, Step *step);
+void hidden_set_revert(Grid *grid, Step *step);
 void hidden_set_explain(DynStr *buf, Step *step);
 void hidden_set_colorise(ColorPair colors[81][9], Step *step);
 

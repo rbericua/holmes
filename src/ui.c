@@ -70,6 +70,9 @@ InputAction ui_wait_for_input(void) {
         case ' ':
         case '\n':
         case KEY_RIGHT: return ACTION_NEXT;
+        case 'p':
+        case KEY_BACKSPACE:
+        case KEY_LEFT: return ACTION_PREV;
         case 'j':
         case KEY_DOWN: return ACTION_SCROLL_DOWN;
         case 'k':
@@ -176,8 +179,10 @@ void ui_print_step(Ui *ui, Step *step) {
     ds_clear(&ui->info_buf);
     da_clear(&ui->lines);
 
-    technique_ops[step->type].explain(&ui->info_buf, step);
-    generate_lines(&ui->info_buf, &ui->lines);
+    if (step) {
+        technique_ops[step->type].explain(&ui->info_buf, step);
+        generate_lines(&ui->info_buf, &ui->lines);
+    }
 
     ui->curr_line = 0;
     refresh_info(ui);

@@ -1,5 +1,6 @@
 #include "techniques/naked_single.h"
 
+#include "cand_set.h"
 #include "geometry.h"
 #include "grid.h"
 #include "step.h"
@@ -28,6 +29,16 @@ void naked_single_apply(Grid *grid, Step *step) {
     NakedSingleStep *s = &step->as.naked_single;
 
     grid_fill_cell(grid, s->cell, s->value);
+}
+
+void naked_single_revert(Grid *grid, Step *step) {
+    NakedSingleStep *s = &step->as.naked_single;
+
+    grid_clear_cell(grid, s->cell, cand_set_from_value(s->value));
+
+    for (int i = 0; i < s->num_removals; i++) {
+        grid_cell_add_cand(grid, s->removal_cells[i], s->value);
+    }
 }
 
 void naked_single_explain(DynStr *buf, Step *step) {

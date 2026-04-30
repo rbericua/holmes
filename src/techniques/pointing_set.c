@@ -32,6 +32,14 @@ void pointing_set_apply(Grid *grid, Step *step) {
     }
 }
 
+void pointing_set_revert(Grid *grid, Step *step) {
+    PointingSetStep *s = &step->as.pointing_set;
+
+    for (int i = 0; i < s->num_removals; i++) {
+        grid_cell_add_cand(grid, s->removal_cells[i], s->value);
+    }
+}
+
 void pointing_set_explain(DynStr *buf, Step *step) {
     PointingSetStep *s = &step->as.pointing_set;
 
