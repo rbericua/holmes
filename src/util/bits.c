@@ -15,7 +15,7 @@
     } \
     int bitset##n##_to_arr(Bitset##n set, int arr[]) { \
         int count = 0; \
-        for (int value = 0; value < 8; value++) { \
+        for (int value = 0; value < n; value++) { \
             if (bitset##n##_has(set, value)) { \
                 arr[count++] = value; \
             } \
