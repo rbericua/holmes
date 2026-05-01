@@ -43,7 +43,7 @@ char *explain_units(int units[3]) {
     return ds.elems;
 }
 
-char *explain_cand_set(unsigned int cands) {
+char *explain_cand_set(CandSet cands) {
     DynStr ds = {0};
 
     int cands_arr[9];
@@ -81,7 +81,7 @@ char *explain_value_removal(int cell, int value) {
     return ds.elems;
 }
 
-char *explain_cands_removal(int cell, unsigned int cands) {
+char *explain_cands_removal(int cell, CandSet cands) {
     DynStr ds = {0};
 
     char *cands_str = explain_cand_set(cands);

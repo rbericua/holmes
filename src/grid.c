@@ -41,7 +41,7 @@ void grid_fill_cell(Grid *grid, int cell, int value) {
     }
 }
 
-void grid_clear_cell(Grid *grid, int cell, unsigned int cands) {
+void grid_clear_cell(Grid *grid, int cell, CandSet cands) {
     grid->values[cell] = 0;
     grid->cands[cell] = cands;
     grid->num_empty++;
@@ -75,7 +75,7 @@ void grid_cell_add_cand(Grid *grid, int cell, int cand) {
     cand_set_add(&grid->cands[cell], cand);
 }
 
-void grid_cell_add_cands(Grid *grid, int cell, unsigned int cands) {
+void grid_cell_add_cands(Grid *grid, int cell, CandSet cands) {
     grid->cands[cell] |= cands;
 }
 
@@ -83,7 +83,7 @@ void grid_cell_remove_cand(Grid *grid, int cell, int cand) {
     cand_set_remove(&grid->cands[cell], cand);
 }
 
-void grid_cell_remove_cands(Grid *grid, int cell, unsigned int cands) {
+void grid_cell_remove_cands(Grid *grid, int cell, CandSet cands) {
     grid->cands[cell] &= ~cands;
 }
 
@@ -95,29 +95,29 @@ int grid_cell_first_cand(Grid *grid, int cell) {
     return cand_set_first(grid->cands[cell]);
 }
 
-unsigned int grid_region_cands_intersection(Grid *grid, int region[],
-                                            int region_len) {
-    unsigned int *sets = malloc(region_len * sizeof(unsigned int));
+CandSet grid_region_cands_intersection(Grid *grid, int region[],
+                                       int region_len) {
+    CandSet *sets = malloc(region_len * sizeof(CandSet));
 
     for (int i = 0; i < region_len; i++) {
         sets[i] = grid->cands[region[i]];
     }
 
-    unsigned int result = cand_set_intersection(sets, region_len);
+    CandSet result = cand_set_intersection(sets, region_len);
 
     free(sets);
 
     return result;
 }
 
-unsigned int grid_region_cands_union(Grid *grid, int region[], int region_len) {
-    unsigned int *sets = malloc(region_len * sizeof(unsigned int));
+CandSet grid_region_cands_union(Grid *grid, int region[], int region_len) {
+    CandSet *sets = malloc(region_len * sizeof(CandSet));
 
     for (int i = 0; i < region_len; i++) {
         sets[i] = grid->cands[region[i]];
     }
 
-    unsigned int result = cand_set_union(sets, region_len);
+    CandSet result = cand_set_union(sets, region_len);
 
     free(sets);
 
@@ -126,7 +126,7 @@ unsigned int grid_region_cands_union(Grid *grid, int region[], int region_len) {
 
 int grid_region_missing_values(Grid *grid, int region[], int region_len,
                                int out[]) {
-    unsigned int missing_values = CAND_SET_FULL;
+    CandSet missing_values = CAND_SET_FULL;
     for (int i = 0; i < region_len; i++) {
         cand_set_remove(&missing_values, grid_cell_value(grid, region[i]));
     }
@@ -157,7 +157,7 @@ int grid_region_with_n_cands_max(Grid *grid, int region[], int region_len,
 }
 
 int grid_region_with_cands_some(Grid *grid, int region[], int region_len,
-                                unsigned int cands, int out[]) {
+                                CandSet cands, int out[]) {
     int count = 0;
     for (int i = 0; i < region_len; i++) {
         if (cand_set_len(grid->cands[region[i]] & cands) > 0) {

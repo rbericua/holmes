@@ -1,6 +1,7 @@
 #ifndef STEP_H
 #define STEP_H
 
+#include "cand_set.h"
 #include "geometry.h"
 
 typedef enum {
@@ -31,7 +32,7 @@ typedef struct {
 typedef struct {
     int cell;
     int value;
-    unsigned int old_cands;
+    CandSet old_cands;
     int removal_cells[MAX_HIDDEN_SINGLE_REMOVALS];
     int num_removals;
     int units[3];
@@ -43,9 +44,9 @@ typedef struct {
 typedef struct {
     int set_cells[MAX_NAKED_SET_SIZE];
     int set_size;
-    unsigned int set_cands;
+    CandSet set_cands;
     int removal_cells[MAX_NAKED_SET_REMOVALS];
-    unsigned int removal_cands[MAX_NAKED_SET_REMOVALS];
+    CandSet removal_cands[MAX_NAKED_SET_REMOVALS];
     int num_removals;
     int units[3];
 } NakedSetStep;
@@ -56,8 +57,8 @@ typedef struct {
 typedef struct {
     int set_cells[MAX_HIDDEN_SET_SIZE];
     int set_size;
-    unsigned int set_cands;
-    unsigned int removal_cands[MAX_HIDDEN_SET_REMOVALS];
+    CandSet set_cands;
+    CandSet removal_cands[MAX_HIDDEN_SET_REMOVALS];
     int num_removals;
     int units[3];
 } HiddenSetStep;

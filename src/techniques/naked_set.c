@@ -14,9 +14,8 @@
 #include "util/dynstr.h"
 
 static bool naked_n_set(Grid *grid, Step *step, int set_size);
-static int find_removals(Grid *grid, int cells[], int num_cells,
-                         unsigned int cands, int out_cells[],
-                         unsigned int out_cands[]);
+static int find_removals(Grid *grid, int cells[], int num_cells, CandSet cands,
+                         int out_cells[], CandSet out_cands[]);
 static void find_units(int set_cells[], int set_size, int removal_cells[],
                        int num_removals, int unit_idx, UnitType unit_type,
                        int units[3]);
@@ -116,8 +115,8 @@ static bool naked_n_set(Grid *grid, Step *step, int set_size) {
             for (int set_i = 0; set_i < num_possible_sets; set_i++) {
                 int *set = possible_sets[set_i];
 
-                unsigned int set_cands = grid_region_cands_union(grid, set,
-                                                                 set_size);
+                CandSet set_cands = grid_region_cands_union(grid, set,
+                                                            set_size);
 
                 if (cand_set_len(set_cands) != set_size) continue;
 
@@ -149,12 +148,11 @@ static bool naked_n_set(Grid *grid, Step *step, int set_size) {
     return false;
 }
 
-static int find_removals(Grid *grid, int cells[], int num_cells,
-                         unsigned int cands, int out_cells[],
-                         unsigned int out_cands[]) {
+static int find_removals(Grid *grid, int cells[], int num_cells, CandSet cands,
+                         int out_cells[], CandSet out_cands[]) {
     int count = 0;
     for (int i = 0; i < num_cells; i++) {
-        unsigned int common_cands = grid_cell_cands(grid, cells[i]) & cands;
+        CandSet common_cands = grid_cell_cands(grid, cells[i]) & cands;
 
         if (cand_set_len(common_cands) > 0) {
             out_cells[count] = cells[i];
