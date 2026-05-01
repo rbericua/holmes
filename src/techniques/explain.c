@@ -13,7 +13,7 @@ char *explain_unit_name(UnitType unit) {
     case UNIT_ROW: return strdup("Row");
     case UNIT_COL: return strdup("Column");
     case UNIT_BOX: return strdup("Box");
-    default: return "";
+    default: return strdup("");
     }
 }
 
@@ -22,7 +22,7 @@ char *explain_set_name(int set_size) {
     case 2: return strdup("Pair");
     case 3: return strdup("Triple");
     case 4: return strdup("Quad");
-    default: return "";
+    default: return strdup("");
     }
 }
 
