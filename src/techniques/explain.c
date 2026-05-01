@@ -17,11 +17,29 @@ char *explain_unit_name(UnitType unit) {
     }
 }
 
+char *explain_unit_name_plural(UnitType unit) {
+    switch (unit) {
+    case UNIT_ROW: return strdup("Rows");
+    case UNIT_COL: return strdup("Columns");
+    case UNIT_BOX: return strdup("Boxes");
+    default: return strdup("");
+    }
+}
+
 char *explain_set_name(int set_size) {
     switch (set_size) {
     case 2: return strdup("Pair");
     case 3: return strdup("Triple");
     case 4: return strdup("Quad");
+    default: return strdup("");
+    }
+}
+
+char *explain_fish_name(int fish_size) {
+    switch (fish_size) {
+    case 2: return strdup("X-Wing");
+    case 3: return strdup("Swordfish");
+    case 4: return strdup("Jellyfish");
     default: return strdup("");
     }
 }
@@ -65,6 +83,16 @@ char *explain_cells(int cells[], int num_cells) {
         int row = cell_row(cells[i]) + 1;
         int col = cell_col(cells[i]) + 1;
         ds_append(&ds, "r%dc%d%s", row, col, i == num_cells - 1 ? "" : ", ");
+    }
+
+    return ds.elems;
+}
+
+char *explain_nums_plus_one(int nums[], int len) {
+    DynStr ds = {0};
+
+    for (int i = 0; i < len; i++) {
+        ds_append(&ds, "%d%s", nums[i] + 1, i == len - 1 ? "" : ", ");
     }
 
     return ds.elems;
