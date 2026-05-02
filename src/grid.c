@@ -27,6 +27,10 @@ void grid_destroy(Grid *grid) {
     free(grid);
 }
 
+int grid_num_empty(Grid *grid) {
+    return grid->num_empty;
+}
+
 bool grid_is_solved(Grid *grid) {
     return grid->num_empty == 0;
 }

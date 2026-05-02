@@ -6,6 +6,7 @@
 #include "solver.h"
 #include "step.h"
 #include "ui.h"
+#include "techniques/backtrack.h"
 #include "util/log.h"
 
 int main(int argc, char *argv[]) {
@@ -24,13 +25,35 @@ int main(int argc, char *argv[]) {
     History hist = {0};
     ui_init(&ui);
 
+    bool bad_sudoku = false;
+
+    int num_clues = 81 - grid_num_empty(grid);
+    if (num_clues < 17) {
+        ui_print_message(&ui, "Invalid Sudoku. Must have at least 17 clues\n");
+        bad_sudoku = true;
+    } else {
+        int num_solutions = backtrack(grid);
+        if (num_solutions != 1) {
+            ui_print_message(&ui, "Invalid Sudoku. Found %s solutions\n",
+                             num_solutions == 0 ? "no" : "multiple");
+            bad_sudoku = true;
+        }
+    }
+
     ui_print_grid(&ui, grid, NULL);
 
     bool waiting = true;
     while (waiting) {
         switch (ui_wait_for_input()) {
         case ACTION_QUIT: goto cleanup;
-        case ACTION_NEXT: waiting = false; break;
+        case ACTION_NEXT: {
+            if (bad_sudoku) {
+                goto cleanup;
+            } else {
+                waiting = false;
+            }
+            break;
+        }
         default: break;
         }
     }

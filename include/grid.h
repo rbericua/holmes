@@ -14,6 +14,7 @@ typedef struct {
 
 Grid *grid_create(char *grid_str);
 void grid_destroy(Grid *grid);
+int grid_num_empty(Grid *grid);
 bool grid_is_solved(Grid *grid);
 void grid_fill_cell(Grid *grid, int cell, int value);
 void grid_clear_cell(Grid *grid, int cell, CandSet cands);
