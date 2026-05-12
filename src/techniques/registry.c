@@ -3,6 +3,7 @@
 #include "step.h"
 
 #include "techniques/basic_fish.h"
+#include "techniques/finned_fish.h"
 #include "techniques/hidden_set.h"
 #include "techniques/hidden_single.h"
 #include "techniques/naked_set.h"
@@ -18,9 +19,10 @@
     }
 
 TechniqueFn techniques[] = {
-    naked_single, hidden_single, naked_pair, hidden_pair,
-    naked_triple, hidden_triple, naked_quad, hidden_quad,
-    pointing_set, x_wing,        swordfish,  jellyfish,
+    naked_single,  hidden_single,    naked_pair,       hidden_pair,
+    naked_triple,  hidden_triple,    naked_quad,       hidden_quad,
+    pointing_set,  x_wing,           swordfish,        jellyfish,
+    finned_x_wing, finned_swordfish, finned_jellyfish,
 };
 
 TechniqueOps technique_ops[] = {
@@ -36,4 +38,7 @@ TechniqueOps technique_ops[] = {
     [TECH_X_WING] = TECHNIQUE_OPS(basic_fish),
     [TECH_SWORDFISH] = TECHNIQUE_OPS(basic_fish),
     [TECH_JELLYFISH] = TECHNIQUE_OPS(basic_fish),
+    [TECH_FINNED_X_WING] = TECHNIQUE_OPS(finned_fish),
+    [TECH_FINNED_SWORDFISH] = TECHNIQUE_OPS(finned_fish),
+    [TECH_FINNED_JELLYFISH] = TECHNIQUE_OPS(finned_fish),
 };

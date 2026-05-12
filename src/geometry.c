@@ -101,3 +101,7 @@ int cells_common_peers(int cells[], int num_cells, int out[]) {
     }
     return count;
 }
+
+UnitType other_line(UnitType unit) {
+    return unit == UNIT_ROW ? UNIT_COL : UNIT_ROW;
+}

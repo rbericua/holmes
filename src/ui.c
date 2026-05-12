@@ -40,8 +40,9 @@ void ui_init(Ui *ui) {
     start_color();
     use_default_colors();
     init_pair(CP_CLUE, COLOR_BLUE, -1);
-    init_pair(CP_TRIGGER, COLOR_GREEN, -1); // Reverse
-    init_pair(CP_REMOVAL, COLOR_RED, -1);   // Reverse
+    init_pair(CP_TRIGGER, COLOR_GREEN, -1);  // Reverse
+    init_pair(CP_REMOVAL, COLOR_RED, -1);    // Reverse
+    init_pair(CP_SPECIAL, COLOR_YELLOW, -1); // Reverse
 
     ui->grid_win = newwin(GRID_HEIGHT, GRID_WIDTH, 0, (COLS - GRID_WIDTH) / 2);
     ui->info_win = newwin(INFO_HEIGHT, INFO_WIDTH, GRID_HEIGHT, 0);
@@ -190,7 +191,7 @@ void ui_print_step(Ui *ui, Step *step) {
 
 static int color_attr(ColorPair color) {
     int attr = COLOR_PAIR(color);
-    if (color == CP_TRIGGER || color == CP_REMOVAL) {
+    if (color == CP_TRIGGER || color == CP_REMOVAL || color == CP_SPECIAL) {
         attr |= A_REVERSE;
     }
     return attr;

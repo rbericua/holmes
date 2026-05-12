@@ -30,4 +30,6 @@ bool cells_in_same_col(int cells[], int num_cells);
 bool cells_in_same_box(int cells[], int num_cells);
 int cells_common_peers(int cells[], int num_cells, int out[]);
 
+UnitType other_line(UnitType unit);
+
 #endif
