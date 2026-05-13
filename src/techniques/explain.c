@@ -26,8 +26,8 @@ char *explain_unit_name_plural(UnitType unit) {
     }
 }
 
-char *explain_set_name(int set_size) {
-    switch (set_size) {
+char *explain_set_name(int size) {
+    switch (size) {
     case 2: return strdup("Pair");
     case 3: return strdup("Triple");
     case 4: return strdup("Quad");
@@ -35,8 +35,8 @@ char *explain_set_name(int set_size) {
     }
 }
 
-char *explain_fish_name(int fish_size) {
-    switch (fish_size) {
+char *explain_fish_name(int size) {
+    switch (size) {
     case 2: return strdup("X-Wing");
     case 3: return strdup("Swordfish");
     case 4: return strdup("Jellyfish");

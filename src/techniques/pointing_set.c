@@ -43,10 +43,10 @@ void pointing_set_revert(Grid *grid, Step *step) {
 void pointing_set_explain(DynStr *buf, Step *step) {
     PointingSetStep *s = &step->as.pointing_set;
 
-    char *set_name = explain_set_name(s->set_size);
+    char *set_name = explain_set_name(s->size);
     char *from_unit_name = explain_unit_name(s->trigger_unit_type);
     char *to_unit_name = explain_unit_name(s->removal_unit_type);
-    char *idxs_str = explain_cells(s->set_cells, s->set_size);
+    char *idxs_str = explain_cells(s->set_cells, s->size);
 
     ds_append(buf, "[Pointing %s (%s %d -> %s %d)] {%d} on %s:\n", set_name,
               from_unit_name, s->trigger_unit_idx + 1, to_unit_name,
@@ -68,7 +68,7 @@ void pointing_set_explain(DynStr *buf, Step *step) {
 void pointing_set_colorise(ColorPair colors[81][9], Step *step) {
     PointingSetStep *s = &step->as.pointing_set;
 
-    for (int i = 0; i < s->set_size; i++) {
+    for (int i = 0; i < s->size; i++) {
         colors[s->set_cells[i]][s->value - 1] = CP_TRIGGER;
     }
     for (int i = 0; i < s->num_removals; i++) {
@@ -106,7 +106,7 @@ static bool pointing_set_unit(Grid *grid, Step *step, UnitType unit_type) {
 
             memcpy(s->set_cells, possible_cells,
                    num_possible_cells * sizeof(int));
-            s->set_size = num_possible_cells;
+            s->size = num_possible_cells;
             s->value = value;
             s->trigger_unit_type = unit_type;
             s->trigger_unit_idx = unit_i;

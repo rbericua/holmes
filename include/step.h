@@ -49,7 +49,7 @@ typedef struct {
 
 typedef struct {
     int set_cells[MAX_NAKED_SET_SIZE];
-    int set_size;
+    int size;
     CandSet set_cands;
     int removal_cells[MAX_NAKED_SET_REMOVALS];
     CandSet removal_cands[MAX_NAKED_SET_REMOVALS];
@@ -62,7 +62,7 @@ typedef struct {
 
 typedef struct {
     int set_cells[MAX_HIDDEN_SET_SIZE];
-    int set_size;
+    int size;
     CandSet set_cands;
     CandSet removal_cands[MAX_HIDDEN_SET_REMOVALS];
     int num_removals;
@@ -74,7 +74,7 @@ typedef struct {
 
 typedef struct {
     int set_cells[MAX_POINTING_SET_SIZE];
-    int set_size;
+    int size;
     int value;
     int removal_cells[MAX_POINTING_SET_REMOVALS];
     int num_removals;
@@ -90,7 +90,7 @@ typedef struct {
 typedef struct {
     int base_idxs[MAX_BASIC_FISH_SIZE];
     int cover_idxs[MAX_BASIC_FISH_SIZE];
-    int fish_size;
+    int size;
     int value;
     int removal_cells[MAX_BASIC_FISH_REMOVALS];
     int num_removals;
@@ -107,7 +107,7 @@ typedef struct {
     int cover_idxs[MAX_FINNED_FISH_SIZE];
     int fins[MAX_FINS];
     int num_fins;
-    int fish_size;
+    int size;
     int value;
     int removal_cells[MAX_FINNED_FISH_REMOVALS];
     int num_removals;

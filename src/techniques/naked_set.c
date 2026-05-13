@@ -13,10 +13,10 @@
 #include "util/combinations.h"
 #include "util/dynstr.h"
 
-static bool naked_n_set(Grid *grid, Step *step, int set_size);
+static bool naked_n_set(Grid *grid, Step *step, int size);
 static int find_removals(Grid *grid, int cells[], int num_cells, CandSet cands,
                          int out_cells[], CandSet out_cands[]);
-static void find_units(int set_cells[], int set_size, int removal_cells[],
+static void find_units(int set_cells[], int size, int removal_cells[],
                        int num_removals, int unit_idx, UnitType unit_type,
                        int units[3]);
 
@@ -54,10 +54,10 @@ void naked_set_revert(Grid *grid, Step *step) {
 void naked_set_explain(DynStr *buf, Step *step) {
     NakedSetStep *s = &step->as.naked_set;
 
-    char *set_name = explain_set_name(s->set_size);
+    char *set_name = explain_set_name(s->size);
     char *units_str = explain_units(s->units);
     char *cands_str = explain_cand_set(s->set_cands);
-    char *idxs_str = explain_cells(s->set_cells, s->set_size);
+    char *idxs_str = explain_cells(s->set_cells, s->size);
 
     ds_append(buf, "[Naked %s (%s)] %s on %s:\n", set_name, units_str,
               cands_str, idxs_str);
@@ -78,7 +78,7 @@ void naked_set_explain(DynStr *buf, Step *step) {
 void naked_set_colorise(ColorPair colors[81][9], Step *step) {
     NakedSetStep *s = &step->as.naked_set;
 
-    for (int i = 0; i < s->set_size; i++) {
+    for (int i = 0; i < s->size; i++) {
         for (int value = 1; value <= 9; value++) {
             if (cand_set_has(s->set_cands, value)) {
                 colors[s->set_cells[i]][value - 1] = CP_TRIGGER;
@@ -94,7 +94,7 @@ void naked_set_colorise(ColorPair colors[81][9], Step *step) {
     }
 }
 
-static bool naked_n_set(Grid *grid, Step *step, int set_size) {
+static bool naked_n_set(Grid *grid, Step *step, int size) {
     NakedSetStep *s = &step->as.naked_set;
 
     for (int unit_type = 0; unit_type < 3; unit_type++) {
@@ -103,25 +103,24 @@ static bool naked_n_set(Grid *grid, Step *step, int set_size) {
 
             int possible_cells[9];
             int num_possible_cells = grid_region_with_n_cands_max(
-                grid, unit, 9, set_size, possible_cells);
+                grid, unit, 9, size, possible_cells);
 
-            if (num_possible_cells < set_size) continue;
+            if (num_possible_cells < size) continue;
 
             int num_possible_sets;
             int **possible_sets = generate_combinations(
-                possible_cells, num_possible_cells, set_size, sizeof(int),
+                possible_cells, num_possible_cells, size, sizeof(int),
                 &num_possible_sets);
 
             for (int set_i = 0; set_i < num_possible_sets; set_i++) {
                 int *set = possible_sets[set_i];
 
-                CandSet set_cands = grid_region_cands_union(grid, set,
-                                                            set_size);
+                CandSet set_cands = grid_region_cands_union(grid, set, size);
 
-                if (cand_set_len(set_cands) != set_size) continue;
+                if (cand_set_len(set_cands) != size) continue;
 
                 int common_peers[MAX_COMMON_PEERS];
-                int num_common_peers = cells_common_peers(set, set_size,
+                int num_common_peers = cells_common_peers(set, size,
                                                           common_peers);
 
                 s->num_removals = find_removals(
@@ -130,11 +129,11 @@ static bool naked_n_set(Grid *grid, Step *step, int set_size) {
 
                 if (s->num_removals == 0) continue;
 
-                memcpy(s->set_cells, set, set_size * sizeof(int));
-                s->set_size = set_size;
+                memcpy(s->set_cells, set, size * sizeof(int));
+                s->size = size;
                 s->set_cands = set_cands;
-                find_units(set, set_size, s->removal_cells, s->num_removals,
-                           unit_i, unit_type, s->units);
+                find_units(set, size, s->removal_cells, s->num_removals, unit_i,
+                           unit_type, s->units);
 
                 free_combinations(possible_sets);
 
@@ -162,13 +161,13 @@ static int find_removals(Grid *grid, int cells[], int num_cells, CandSet cands,
     return count;
 }
 
-static void find_units(int set_cells[], int set_size, int removal_cells[],
+static void find_units(int set_cells[], int size, int removal_cells[],
                        int num_removals, int unit_idx, UnitType unit_type,
                        int units[3]) {
     units[UNIT_ROW] = unit_type == UNIT_ROW ? unit_idx : -1;
     units[UNIT_COL] = unit_type == UNIT_COL ? unit_idx : -1;
     units[UNIT_BOX] = unit_type == UNIT_BOX
-                              || cells_in_same_box(set_cells, set_size)
+                              || cells_in_same_box(set_cells, size)
                           ? cell_box(set_cells[0])
                           : -1;
 

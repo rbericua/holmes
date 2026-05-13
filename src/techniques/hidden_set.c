@@ -13,7 +13,7 @@
 #include "util/combinations.h"
 #include "util/dynstr.h"
 
-static bool hidden_n_set(Grid *grid, Step *step, int set_size);
+static bool hidden_n_set(Grid *grid, Step *step, int size);
 static int find_removals(Grid *grid, int cells[], int num_cells, CandSet cands,
                          CandSet out[]);
 static void find_units(int cells[], int num_cells, int unit_idx, int unit_type,
@@ -37,7 +37,7 @@ bool hidden_quad(Grid *grid, Step *step) {
 void hidden_set_apply(Grid *grid, Step *step) {
     HiddenSetStep *s = &step->as.hidden_set;
 
-    for (int i = 0; i < s->set_size; i++) {
+    for (int i = 0; i < s->size; i++) {
         grid_cell_remove_cands(grid, s->set_cells[i], s->removal_cands[i]);
     }
 }
@@ -45,7 +45,7 @@ void hidden_set_apply(Grid *grid, Step *step) {
 void hidden_set_revert(Grid *grid, Step *step) {
     HiddenSetStep *s = &step->as.hidden_set;
 
-    for (int i = 0; i < s->set_size; i++) {
+    for (int i = 0; i < s->size; i++) {
         grid_cell_add_cands(grid, s->set_cells[i], s->removal_cands[i]);
     }
 }
@@ -53,10 +53,10 @@ void hidden_set_revert(Grid *grid, Step *step) {
 void hidden_set_explain(DynStr *buf, Step *step) {
     HiddenSetStep *s = &step->as.hidden_set;
 
-    char *set_name = explain_set_name(s->set_size);
+    char *set_name = explain_set_name(s->size);
     char *units_str = explain_units(s->units);
     char *cands_str = explain_cand_set(s->set_cands);
-    char *idxs_str = explain_cells(s->set_cells, s->set_size);
+    char *idxs_str = explain_cells(s->set_cells, s->size);
 
     ds_append(buf, "[Hidden %s (%s)] %s on %s:\n", set_name, units_str,
               cands_str, idxs_str);
@@ -66,7 +66,7 @@ void hidden_set_explain(DynStr *buf, Step *step) {
     free(cands_str);
     free(idxs_str);
 
-    for (int i = 0; i < s->set_size; i++) {
+    for (int i = 0; i < s->size; i++) {
         if (cand_set_len(s->removal_cands[i]) == 0) continue;
 
         char *removal_msg = explain_cands_removal(s->set_cells[i],
@@ -79,7 +79,7 @@ void hidden_set_explain(DynStr *buf, Step *step) {
 void hidden_set_colorise(ColorPair colors[81][9], Step *step) {
     HiddenSetStep *s = &step->as.hidden_set;
 
-    for (int i = 0; i < s->set_size; i++) {
+    for (int i = 0; i < s->size; i++) {
         for (int cand = 1; cand <= 9; cand++) {
             colors[s->set_cells[i]][cand - 1] = cand_set_has(s->set_cands, cand)
                                                     ? CP_TRIGGER
@@ -88,7 +88,7 @@ void hidden_set_colorise(ColorPair colors[81][9], Step *step) {
     }
 }
 
-static bool hidden_n_set(Grid *grid, Step *step, int set_size) {
+static bool hidden_n_set(Grid *grid, Step *step, int size) {
     HiddenSetStep *s = &step->as.hidden_set;
 
     for (int unit_type = 0; unit_type < 3; unit_type++) {
@@ -101,27 +101,27 @@ static bool hidden_n_set(Grid *grid, Step *step, int set_size) {
 
             int num_combs;
             int **combs = generate_combinations(missing_values,
-                                                num_missing_values, set_size,
+                                                num_missing_values, size,
                                                 sizeof(int), &num_combs);
 
             for (int comb_i = 0; comb_i < num_combs; comb_i++) {
-                CandSet cands = cand_set_from_arr(combs[comb_i], set_size);
+                CandSet cands = cand_set_from_arr(combs[comb_i], size);
 
                 int possible_set[9];
-                int possible_set_size = grid_region_with_cands_some(
+                int possible_size = grid_region_with_cands_some(
                     grid, unit, 9, cands, possible_set);
 
-                if (possible_set_size != set_size) continue;
+                if (possible_size != size) continue;
 
-                int num_removals = find_removals(grid, possible_set, set_size,
+                int num_removals = find_removals(grid, possible_set, size,
                                                  cands, s->removal_cands);
 
                 if (num_removals == 0) continue;
 
-                memcpy(s->set_cells, possible_set, set_size * sizeof(int));
-                s->set_size = set_size;
+                memcpy(s->set_cells, possible_set, size * sizeof(int));
+                s->size = size;
                 s->set_cands = cands;
-                find_units(s->set_cells, set_size, unit_i, unit_type, s->units);
+                find_units(s->set_cells, size, unit_i, unit_type, s->units);
 
                 free_combinations(combs);
 
