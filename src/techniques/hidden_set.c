@@ -96,8 +96,8 @@ static bool hidden_n_set(Grid *grid, Step *step, int size) {
             int *unit = units[unit_type][unit_i];
 
             int missing_values[9];
-            int num_missing_values = grid_region_missing_values(grid, unit, 9,
-                                                                missing_values);
+            int num_missing_values = grid_region_missing_values_to_arr(
+                grid, unit, 9, missing_values);
 
             int num_combs;
             int **combs = generate_combinations(missing_values,

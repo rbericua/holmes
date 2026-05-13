@@ -8,14 +8,19 @@
 #include "cand_set.h"
 #include "geometry.h"
 
+static CandSet grid_cell_init_cands(Grid *grid, int cell);
+
 static Grid *grid_from_values(char *grid_str);
-static Grid *grid_from_cands(char *grid_str);
+static Grid *grid_from_sudoku_wiki(char *grid_str);
+static Grid *grid_from_hodoku(char *grid_str);
 
 Grid *grid_create(char *grid_str) {
     Grid *grid;
 
     if (strncmp(grid_str, "S9B", 3) == 0) {
-        grid = grid_from_cands(&grid_str[3]);
+        grid = grid_from_sudoku_wiki(&grid_str[3]);
+    } else if (grid_str[0] == ':') {
+        grid = grid_from_hodoku(&grid_str[1]);
     } else {
         grid = grid_from_values(grid_str);
     }
@@ -128,13 +133,19 @@ CandSet grid_region_cands_union(Grid *grid, int region[], int region_len) {
     return result;
 }
 
-int grid_region_missing_values(Grid *grid, int region[], int region_len,
-                               int out[]) {
+CandSet grid_region_missing_values_to_set(Grid *grid, int region[],
+                                          int region_len) {
     CandSet missing_values = CAND_SET_FULL;
     for (int i = 0; i < region_len; i++) {
         cand_set_remove(&missing_values, grid_cell_value(grid, region[i]));
     }
-    return cand_set_to_arr(missing_values, out);
+    return missing_values;
+}
+
+int grid_region_missing_values_to_arr(Grid *grid, int region[], int region_len,
+                                      int out[]) {
+    return cand_set_to_arr(
+        grid_region_missing_values_to_set(grid, region, region_len), out);
 }
 
 int grid_region_with_cand(Grid *grid, int region[], int region_len, int cand,
@@ -171,6 +182,15 @@ int grid_region_with_cands_some(Grid *grid, int region[], int region_len,
     return count;
 }
 
+static CandSet grid_cell_init_cands(Grid *grid, int cell) {
+    CandSet init_cands = CAND_SET_FULL;
+    for (int i = 0; i < 3; i++) {
+        init_cands &= grid_region_missing_values_to_set(
+            grid, units[i][cell_unit(cell, i)], 9);
+    }
+    return init_cands;
+}
+
 static Grid *grid_from_values(char *grid_str) {
     Grid *grid = malloc(sizeof(Grid));
     grid->num_empty = 81;
@@ -192,7 +212,8 @@ static Grid *grid_from_values(char *grid_str) {
     return grid;
 }
 
-static Grid *grid_from_cands(char *grid_str) {
+// See https://www.sudokuwiki.org/Sudoku_String_Definitions
+static Grid *grid_from_sudoku_wiki(char *grid_str) {
     Grid *grid = malloc(sizeof(Grid));
     grid->num_empty = 81;
 
@@ -214,6 +235,55 @@ static Grid *grid_from_cands(char *grid_str) {
         } else {
             grid->cands[i] = cell_bits - 18;
         }
+    }
+
+    return grid;
+}
+
+// See hodoku.sourceforge.net/en/libs.php
+static Grid *grid_from_hodoku(char *grid_str) {
+    Grid *grid = malloc(sizeof(Grid));
+    grid->num_empty = 81;
+
+    grid_str = strchr(grid_str, ':') + 1;
+    grid_str = strchr(grid_str, ':') + 1;
+
+    int i = 0;
+    while (*grid_str != ':') {
+        if (*grid_str == '.') {
+            grid->values[i] = 0;
+            grid->clues[i] = false;
+        } else if (*grid_str == '+') {
+            grid->values[i] = *(++grid_str) - '0';
+            grid->clues[i] = false;
+            grid->num_empty--;
+        } else {
+            grid->values[i] = *grid_str - '0';
+            grid->clues[i] = true;
+            grid->num_empty--;
+        }
+        grid_str++;
+        i++;
+    }
+    grid_str++;
+
+    for (int i = 0; i < 81; i++) {
+        grid->cands[i] = grid_cell_is_empty(grid, i)
+                             ? grid_cell_init_cands(grid, i)
+                             : CAND_SET_EMPTY;
+    }
+
+    while (*grid_str != ':') {
+        if (*grid_str == ' ') {
+            grid_str++;
+        }
+
+        int cand = *grid_str - '0';
+        int row = *(grid_str + 1) - '0' - 1;
+        int col = *(grid_str + 2) - '0' - 1;
+        grid_cell_remove_cand(grid, cell_from_row_col(row, col), cand);
+
+        grid_str += 3;
     }
 
     return grid;

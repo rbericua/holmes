@@ -83,8 +83,8 @@ static bool pointing_set_unit(Grid *grid, Step *step, UnitType unit_type) {
         int *unit = units[unit_type][unit_i];
 
         int missing_values[9];
-        int num_missing_values = grid_region_missing_values(grid, unit, 9,
-                                                            missing_values);
+        int num_missing_values = grid_region_missing_values_to_arr(
+            grid, unit, 9, missing_values);
 
         for (int value_i = 0; value_i < num_missing_values; value_i++) {
             int value = missing_values[value_i];

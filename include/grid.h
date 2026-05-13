@@ -35,8 +35,10 @@ int grid_cell_first_cand(Grid *grid, int cell);
 CandSet grid_region_cands_intersection(Grid *grid, int region[],
                                        int region_len);
 CandSet grid_region_cands_union(Grid *grid, int region[], int region_len);
-int grid_region_missing_values(Grid *grid, int region[], int region_len,
-                               int out[]);
+CandSet grid_region_missing_values_to_set(Grid *grid, int region[],
+                                          int region_len);
+int grid_region_missing_values_to_arr(Grid *grid, int region[], int region_len,
+                                      int out[]);
 int grid_region_with_cand(Grid *grid, int region[], int region_len, int cand,
                           int out[]);
 int grid_region_with_n_cands_max(Grid *grid, int region[], int region_len,
