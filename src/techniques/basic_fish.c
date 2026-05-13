@@ -13,10 +13,17 @@
 #include "util/dynstr.h"
 
 typedef struct {
-    int unit_idx;
+    int idx;
     int cells[MAX_BASIC_FISH_SIZE];
-    int num_cells;
+    int len;
 } UnitSubset;
+
+static int cell_from_base_cover(int base_idx, int cover_idx,
+                                UnitType base_type) {
+    int row = base_type == UNIT_ROW ? base_idx : cover_idx;
+    int col = base_type == UNIT_ROW ? cover_idx : base_idx;
+    return cell_from_row_col(row, col);
+}
 
 static bool basic_n_fish_unit(Grid *grid, Step *step, int fish_size,
                               UnitType unit_type);
@@ -98,11 +105,8 @@ void basic_fish_colorise(ColorPair colors[81][9], Step *step) {
 
     for (int i = 0; i < s->fish_size; i++) {
         for (int j = 0; j < s->fish_size; j++) {
-            int row = s->base_unit_type == UNIT_ROW ? s->base_idxs[i]
-                                                    : s->cover_idxs[i];
-            int col = s->base_unit_type == UNIT_ROW ? s->cover_idxs[j]
-                                                    : s->base_idxs[j];
-            int cell = cell_from_row_col(row, col);
+            int cell = cell_from_base_cover(s->base_idxs[i], s->cover_idxs[j],
+                                            s->base_unit_type);
             colors[cell][s->value - 1] = CP_TRIGGER;
         }
     }
@@ -138,12 +142,12 @@ static bool basic_n_fish_unit(Grid *grid, Step *step, int fish_size,
             if (s->num_removals == 0) continue;
 
             for (int i = 0; i < fish_size; i++) {
-                s->base_idxs[i] = comb[i].unit_idx;
+                s->base_idxs[i] = comb[i].idx;
             }
             s->fish_size = fish_size;
             s->value = value;
             s->base_unit_type = unit_type;
-            s->cover_unit_type = unit_type == UNIT_ROW ? UNIT_COL : UNIT_ROW;
+            s->cover_unit_type = other_line(unit_type);
 
             free_combinations(combs);
 
@@ -176,8 +180,8 @@ static int find_base_sets(Grid *grid, int fish_size, UnitType unit_type,
         }
 
         if (num_cells > 0 && num_cells <= fish_size) {
-            out[num_sets].unit_idx = unit_i;
-            out[num_sets].num_cells = num_cells;
+            out[num_sets].idx = unit_i;
+            out[num_sets].len = num_cells;
             num_sets++;
         }
     }
@@ -188,8 +192,7 @@ static int find_base_sets(Grid *grid, int fish_size, UnitType unit_type,
 static bool find_cover_idxs(UnitSubset base_sets[], int fish_size, int out[]) {
     Bitset16 base_cells[MAX_BASIC_FISH_SIZE];
     for (int i = 0; i < fish_size; i++) {
-        base_cells[i] = bitset16_from_arr(base_sets[i].cells,
-                                          base_sets[i].num_cells);
+        base_cells[i] = bitset16_from_arr(base_sets[i].cells, base_sets[i].len);
     }
 
     Bitset16 covers = bitset16_union(base_cells, fish_size);
@@ -206,16 +209,14 @@ static int find_removals(Grid *grid, UnitSubset base_sets[], int cover_idxs[],
     int base_idx = 0;
 
     for (int cell_i = 0; cell_i < 9; cell_i++) {
-        if (base_idx < fish_size && cell_i == base_sets[base_idx].unit_idx) {
+        if (base_idx < fish_size && cell_i == base_sets[base_idx].idx) {
             base_idx++;
             continue;
         }
 
         for (int cover_i = 0; cover_i < fish_size; cover_i++) {
             int cover_idx = cover_idxs[cover_i];
-            int cell = unit_type == UNIT_ROW
-                           ? cell_from_row_col(cell_i, cover_idx)
-                           : cell_from_row_col(cover_idx, cell_i);
+            int cell = cell_from_base_cover(cell_i, cover_idx, unit_type);
             if (grid_cell_has_cand(grid, cell, value)) {
                 out[count++] = cell;
             }
