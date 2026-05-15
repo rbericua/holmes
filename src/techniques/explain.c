@@ -76,6 +76,14 @@ char *explain_cand_set(CandSet cands) {
     return ds.elems;
 }
 
+char *explain_cell(int cell) {
+    DynStr ds = {0};
+
+    ds_append(&ds, "r%dc%d", cell_row(cell) + 1, cell_col(cell) + 1);
+
+    return ds.elems;
+}
+
 char *explain_cells(int cells[], int num_cells) {
     DynStr ds = {0};
 

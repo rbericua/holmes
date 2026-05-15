@@ -20,6 +20,7 @@ typedef enum {
     TECH_FINNED_X_WING,
     TECH_FINNED_SWORDFISH,
     TECH_FINNED_JELLYFISH,
+    TECH_Y_WING,
 
     NUM_TECHNIQUES
 } TechniqueType;
@@ -115,6 +116,18 @@ typedef struct {
     UnitType cover_unit_type;
 } FinnedFishStep;
 
+#define MAX_Y_WING_REMOVALS 5
+
+typedef struct {
+    int hinge;
+    CandSet hinge_cands;
+    int wings[2];
+    CandSet wing_cands[2];
+    int removal_cand;
+    int removal_cells[MAX_Y_WING_REMOVALS];
+    int num_removals;
+} YWingStep;
+
 typedef struct {
     TechniqueType type;
     union {
@@ -125,6 +138,7 @@ typedef struct {
         PointingSetStep pointing_set;
         BasicFishStep basic_fish;
         FinnedFishStep finned_fish;
+        YWingStep y_wing;
     } as;
 } Step;
 

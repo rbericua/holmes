@@ -159,6 +159,17 @@ int grid_region_with_cand(Grid *grid, int region[], int region_len, int cand,
     return count;
 }
 
+int grid_region_with_n_cands_exact(Grid *grid, int region[], int region_len,
+                                   int n, int out[]) {
+    int count = 0;
+    for (int i = 0; i < region_len; i++) {
+        if (grid_cell_num_cands(grid, region[i]) == n) {
+            out[count++] = region[i];
+        }
+    }
+    return count;
+}
+
 int grid_region_with_n_cands_max(Grid *grid, int region[], int region_len,
                                  int n, int out[]) {
     int count = 0;

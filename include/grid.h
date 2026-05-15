@@ -41,6 +41,8 @@ int grid_region_missing_values_to_arr(Grid *grid, int region[], int region_len,
                                       int out[]);
 int grid_region_with_cand(Grid *grid, int region[], int region_len, int cand,
                           int out[]);
+int grid_region_with_n_cands_exact(Grid *grid, int region[], int region_len,
+                                   int n, int out[]);
 int grid_region_with_n_cands_max(Grid *grid, int region[], int region_len,
                                  int n, int out[]);
 int grid_region_with_cands_some(Grid *grid, int region[], int region_len,
