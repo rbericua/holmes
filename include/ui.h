@@ -31,7 +31,10 @@ typedef struct {
 typedef enum {
     CP_NORMAL,
     CP_CLUE,
-    CP_TRIGGER,
+
+    CP_REVERSE_START,
+
+    CP_TRIGGER = CP_REVERSE_START,
     CP_REMOVAL,
     CP_SPECIAL
 } ColorPair;

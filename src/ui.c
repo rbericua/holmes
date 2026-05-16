@@ -191,7 +191,7 @@ void ui_print_step(Ui *ui, Step *step) {
 
 static int color_attr(ColorPair color) {
     int attr = COLOR_PAIR(color);
-    if (color == CP_TRIGGER || color == CP_REMOVAL || color == CP_SPECIAL) {
+    if (color >= CP_REVERSE_START) {
         attr |= A_REVERSE;
     }
     return attr;
