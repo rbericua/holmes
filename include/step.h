@@ -21,6 +21,7 @@ typedef enum {
     TECH_FINNED_SWORDFISH,
     TECH_FINNED_JELLYFISH,
     TECH_Y_WING,
+    TECH_SIMPLE_COLORING,
 
     NUM_TECHNIQUES
 } TechniqueType;
@@ -128,6 +129,31 @@ typedef struct {
     int num_removals;
 } YWingStep;
 
+#define MAX_SIMPLE_COLORING_LEN 18
+
+typedef enum {
+    SC_TWICE_IN_UNIT,
+    SC_BOTH_SEEN
+} SimpleColoringRule;
+
+typedef struct {
+    int cells[MAX_SIMPLE_COLORING_LEN];
+    int colors[MAX_SIMPLE_COLORING_LEN];
+    int len;
+    int value;
+    SimpleColoringRule rule;
+    union {
+        struct {
+            int cells[2];
+            int color;
+        } twice_in_unit;
+        struct {
+            int removal_cells[81];
+            int num_removals;
+        } both_seen;
+    };
+} SimpleColoringStep;
+
 typedef struct {
     TechniqueType type;
     union {
@@ -139,6 +165,7 @@ typedef struct {
         BasicFishStep basic_fish;
         FinnedFishStep finned_fish;
         YWingStep y_wing;
+        SimpleColoringStep simple_coloring;
     } as;
 } Step;
 
