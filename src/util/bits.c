@@ -15,9 +15,9 @@
     } \
     int bitset##n##_to_arr(Bitset##n set, int arr[]) { \
         int count = 0; \
-        for (int value = 0; value < n; value++) { \
-            if (bitset##n##_has(set, value)) { \
-                arr[count++] = value; \
+        for (int pos = 0; pos < n; pos++) { \
+            if (bitset##n##_has(set, pos)) { \
+                arr[count++] = pos; \
             } \
         } \
         return count; \
@@ -25,14 +25,14 @@
     int bitset##n##_len(Bitset##n set) { \
         return __builtin_popcount(set); \
     } \
-    bool bitset##n##_has(Bitset##n set, int value) { \
-        return IS_BIT_SET(set, value); \
+    bool bitset##n##_has(Bitset##n set, int pos) { \
+        return IS_BIT_SET(set, pos); \
     } \
-    void bitset##n##_add(Bitset##n *set, int value) { \
-        *set = SET_BIT(*set, value); \
+    void bitset##n##_add(Bitset##n *set, int pos) { \
+        *set = SET_BIT(*set, pos); \
     } \
-    void bitset##n##_remove(Bitset##n *set, int value) { \
-        *set = UNSET_BIT(*set, value); \
+    void bitset##n##_remove(Bitset##n *set, int pos) { \
+        *set = UNSET_BIT(*set, pos); \
     } \
     void bitset##n##_clear(Bitset##n *set) { \
         *set = BITSET##n##_EMPTY; \
