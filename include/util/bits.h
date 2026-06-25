@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define BIT(n) (1u << (n))
+#define BIT(n) (1ull << (n))
 #define SET_BIT(x, n) ((x) | BIT(n))
 #define UNSET_BIT(x, n) ((x) & ~BIT(n))
 #define IS_BIT_SET(x, n) ((x) & BIT(n))
