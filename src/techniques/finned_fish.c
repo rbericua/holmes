@@ -128,7 +128,7 @@ void finned_fish_colorise(ColorPair colors[81][9], Step *step) {
         colors[s->removal_cells[i]][s->value - 1] = CP_REMOVAL;
     }
     for (int i = 0; i < s->num_fins; i++) {
-        colors[s->fins[i]][s->value - 1] = CP_SPECIAL;
+        colors[s->fins[i]][s->value - 1] = CP_SPECIAL1;
     }
 }
 

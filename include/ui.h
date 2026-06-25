@@ -36,7 +36,8 @@ typedef enum {
 
     CP_TRIGGER = CP_REVERSE_START,
     CP_REMOVAL,
-    CP_SPECIAL
+    CP_SPECIAL1,
+    CP_SPECIAL2
 } ColorPair;
 
 typedef enum {

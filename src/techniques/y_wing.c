@@ -114,9 +114,9 @@ void y_wing_colorise(ColorPair colors[81][9], Step *step) {
     YWingStep *s = &step->as.y_wing;
 
     for (int i = 0; i < 9; i++) {
-        colors[s->hinge][i] = CP_SPECIAL;
-        colors[s->wings[0]][i] = CP_SPECIAL;
-        colors[s->wings[1]][i] = CP_SPECIAL;
+        colors[s->hinge][i] = CP_SPECIAL1;
+        colors[s->wings[0]][i] = CP_SPECIAL1;
+        colors[s->wings[1]][i] = CP_SPECIAL1;
     }
     colors[s->wings[0]][s->removal_cand - 1] = CP_TRIGGER;
     colors[s->wings[1]][s->removal_cand - 1] = CP_TRIGGER;

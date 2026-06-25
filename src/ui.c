@@ -40,9 +40,10 @@ void ui_init(Ui *ui) {
     start_color();
     use_default_colors();
     init_pair(CP_CLUE, COLOR_BLUE, -1);
-    init_pair(CP_TRIGGER, COLOR_GREEN, -1);  // Reverse
-    init_pair(CP_REMOVAL, COLOR_RED, -1);    // Reverse
-    init_pair(CP_SPECIAL, COLOR_YELLOW, -1); // Reverse
+    init_pair(CP_TRIGGER, COLOR_GREEN, -1);    // Reverse
+    init_pair(CP_REMOVAL, COLOR_RED, -1);      // Reverse
+    init_pair(CP_SPECIAL1, COLOR_YELLOW, -1);  // Reverse
+    init_pair(CP_SPECIAL2, COLOR_MAGENTA, -1); // Reverse
 
     ui->grid_win = newwin(GRID_HEIGHT, GRID_WIDTH, 0, (COLS - GRID_WIDTH) / 2);
     ui->info_win = newwin(INFO_HEIGHT, INFO_WIDTH, GRID_HEIGHT, 0);
