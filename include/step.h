@@ -33,6 +33,11 @@ typedef struct {
     int value;
     int removal_cells[MAX_NAKED_SINGLE_REMOVALS];
     int num_removals;
+} NakedSingleInfo;
+
+typedef struct {
+    NakedSingleInfo steps[81];
+    int len;
 } NakedSingleStep;
 
 #define MAX_HIDDEN_SINGLE_REMOVALS NUM_PEERS
@@ -44,6 +49,11 @@ typedef struct {
     int removal_cells[MAX_HIDDEN_SINGLE_REMOVALS];
     int num_removals;
     int units[3];
+} HiddenSingleInfo;
+
+typedef struct {
+    HiddenSingleInfo steps[81];
+    int len;
 } HiddenSingleStep;
 
 #define MAX_NAKED_SET_SIZE 4
