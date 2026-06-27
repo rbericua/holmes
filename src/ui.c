@@ -24,10 +24,14 @@
 #define SCROLLBAR_WIDTH 1
 #define SCROLLBAR_HEIGHT (LINES - GRID_HEIGHT)
 
+#define SIGN(x) ((x) > 0 ? 1 : (x) < 0 ? -1 : 0)
+
 static int color_attr(ColorPair color);
 static void generate_lines(DynStr *buf, Lines *lines);
 static void refresh_info(Ui *ui);
 static void print_scroll_indicators(Ui *ui);
+static void cell_cand_to_grid_pos(int cell, int cand, int *out_y, int *out_x);
+static void print_link(Ui *ui, Link link);
 
 void ui_init(Ui *ui) {
     setlocale(LC_ALL, "");
@@ -68,17 +72,23 @@ InputAction ui_wait_for_input(void) {
     while (true) {
         switch (getch()) {
         case 'q': return ACTION_QUIT;
+
         case 'n':
         case ' ':
         case '\n':
         case KEY_RIGHT: return ACTION_NEXT;
+
         case 'p':
         case KEY_BACKSPACE:
         case KEY_LEFT: return ACTION_PREV;
+
         case 'j':
         case KEY_DOWN: return ACTION_SCROLL_DOWN;
+
         case 'k':
         case KEY_UP: return ACTION_SCROLL_UP;
+
+        case 'l': return ACTION_TOGGLE_LINKS;
         }
     }
 }
@@ -105,7 +115,7 @@ void ui_print_message(Ui *ui, char *format, ...) {
     va_end(args);
 }
 
-void ui_print_grid(Ui *ui, Grid *grid, Step *step) {
+void ui_print_grid(Ui *ui, Grid *grid, Step *step, bool show_links) {
     wchar_t *top = L"┏━━━━━━━━━┯━━━━━━━━━┯━━━━━━━━━┳━━━━━━━━━┯━━━━━━━━━┯━━━━━━━"
                    L"━━┳━━━━━━━━━┯━━━━━━━━━┯━━━━━━━━━┓";
     wchar_t *row_sep = L"┠─────────┼─────────┼─────────╂─────────┼─────────┼───"
@@ -174,6 +184,16 @@ void ui_print_grid(Ui *ui, Grid *grid, Step *step) {
         }
     }
     waddwstr(ui->grid_win, bottom);
+
+    if (show_links && technique_ops[step->type].links) {
+        Links links = {0};
+        technique_ops[step->type].links(step, &links);
+        for (int i = 0; i < links.len; i++) {
+            print_link(ui, links.elems[i]);
+        }
+        da_deinit(&links);
+    }
+
     wrefresh(ui->grid_win);
 }
 
@@ -244,4 +264,41 @@ static void print_scroll_indicators(Ui *ui) {
         mvwaddwstr(ui->scrollbar_win, SCROLLBAR_HEIGHT - 1, 0, L"↓");
     }
     wrefresh(ui->scrollbar_win);
+}
+
+static void cell_cand_to_grid_pos(int cell, int cand, int *out_y, int *out_x) {
+    *out_y = cell_row(cell) * 4 + (cand - 1) / 3 + 1;
+    *out_x = cell_col(cell) * 10 + ((cand - 1) % 3) * 3 + 2;
+}
+
+static void print_link(Ui *ui, Link link) {
+    int y1, x1, y2, x2;
+    cell_cand_to_grid_pos(link.cell1, link.cand1, &y1, &x1);
+    cell_cand_to_grid_pos(link.cell2, link.cand2, &y2, &x2);
+
+    int dy = SIGN(y2 - y1);
+    int dx = SIGN(x2 - x1);
+
+    wchar_t *corner = dy == 1 ? (dx == 1 ? L"└" : L"┘")
+                              : (dx == 1 ? L"┌" : L"┐");
+
+    wattron(ui->grid_win, color_attr(CP_LINK));
+
+    y1 += dy;
+    while (y1 != y2) {
+        mvwaddwstr(ui->grid_win, y1, x1, L"│");
+        y1 += dy;
+    }
+
+    if (dy != 0 && dx != 0) {
+        mvwaddwstr(ui->grid_win, y1, x1, corner);
+    }
+
+    x1 += dx;
+    while (x1 != x2) {
+        mvwaddwstr(ui->grid_win, y1, x1, L"─");
+        x1 += dx;
+    }
+
+    wattroff(ui->grid_win, color_attr(CP_LINK));
 }

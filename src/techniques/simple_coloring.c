@@ -9,6 +9,7 @@
 #include "step.h"
 #include "ui.h"
 #include "techniques/explain.h"
+#include "util/dynarr.h"
 #include "util/dynstr.h"
 
 static bool arr_contains(int arr[], int len, int elem) {
@@ -34,7 +35,9 @@ static int other_color(int color) {
 
 static bool find_links(Grid *grid, int value, int links[][3]);
 static int find_first_linked(int links[][3]);
-static void paint_links(int links[][3], int cell, int curr_color, int colors[]);
+static void paint_and_extract_links(int links[][3], int cell, int curr_color,
+                                    int colors[], int out_links[][2],
+                                    int *num_links);
 static int extract_colors(int colors[], int out_cells[], int out_colors[]);
 
 bool simple_coloring(Grid *grid, Step *step) {
@@ -53,8 +56,10 @@ bool simple_coloring(Grid *grid, Step *step) {
         int first;
         while ((first = find_first_linked(links)) != -1) {
             int colors[81] = {0};
-            paint_links(links, first, 1, colors);
-            s->len = extract_colors(colors, s->cells, s->colors);
+            s->num_links = 0;
+            paint_and_extract_links(links, first, 1, colors, s->links,
+                                    &s->num_links);
+            s->chain_len = extract_colors(colors, s->cells, s->colors);
             s->value = value;
             s->rule = SC_BOTH_SEEN;
             s->both_seen.num_removals = 0;
@@ -100,7 +105,7 @@ void simple_coloring_apply(Grid *grid, Step *step) {
 
     switch (s->rule) {
     case SC_TWICE_IN_UNIT:
-        for (int i = 0; i < s->len; i++) {
+        for (int i = 0; i < s->chain_len; i++) {
             if (s->colors[i] == s->twice_in_unit.color) {
                 grid_cell_remove_cand(grid, s->cells[i], s->value);
             }
@@ -120,7 +125,7 @@ void simple_coloring_revert(Grid *grid, Step *step) {
 
     switch (s->rule) {
     case SC_TWICE_IN_UNIT:
-        for (int i = 0; i < s->len; i++) {
+        for (int i = 0; i < s->chain_len; i++) {
             if (s->colors[i] == s->twice_in_unit.color) {
                 grid_cell_add_cand(grid, s->cells[i], s->value);
             }
@@ -145,7 +150,7 @@ void simple_coloring_explain(DynStr *buf, Step *step) {
                   "[Simple Coloring (Twice in Unit)] %s see each "
                   "other and have the same color\n",
                   cells_str);
-        for (int i = 0; i < s->len; i++) {
+        for (int i = 0; i < s->chain_len; i++) {
             if (s->colors[i] == s->twice_in_unit.color) {
                 char *removal_msg = explain_value_removal(s->cells[i],
                                                           s->value);
@@ -172,7 +177,7 @@ void simple_coloring_explain(DynStr *buf, Step *step) {
 void simple_coloring_colorise(ColorPair colors[81][9], Step *step) {
     SimpleColoringStep *s = &step->as.simple_coloring;
 
-    for (int i = 0; i < s->len; i++) {
+    for (int i = 0; i < s->chain_len; i++) {
         int color;
         if (s->rule == SC_TWICE_IN_UNIT
             && s->colors[i] == s->twice_in_unit.color) {
@@ -186,6 +191,20 @@ void simple_coloring_colorise(ColorPair colors[81][9], Step *step) {
         for (int i = 0; i < s->both_seen.num_removals; i++) {
             colors[s->both_seen.removal_cells[i]][s->value - 1] = CP_REMOVAL;
         }
+    }
+}
+
+void simple_coloring_links(Step *step, Links *links) {
+    SimpleColoringStep *s = &step->as.simple_coloring;
+
+    for (int i = 0; i < s->num_links; i++) {
+        Link link = {
+            .cell1 = s->links[i][0],
+            .cand1 = s->value,
+            .cell2 = s->links[i][1],
+            .cand2 = s->value,
+        };
+        da_append(links, link);
     }
 }
 
@@ -214,15 +233,20 @@ static int find_first_linked(int links[][3]) {
     return -1;
 }
 
-static void paint_links(int links[][3], int cell, int curr_color,
-                        int colors[]) {
+static void paint_and_extract_links(int links[][3], int cell, int curr_color,
+                                    int colors[], int out_links[][2],
+                                    int *num_links) {
     colors[cell] = curr_color;
     for (int unit_type = 0; unit_type < 3; unit_type++) {
         int other_cell = links[cell][unit_type];
         if (other_cell != -1) {
             links[cell][unit_type] = -1;
             links[other_cell][unit_type] = -1;
-            paint_links(links, other_cell, other_color(curr_color), colors);
+
+            out_links[*num_links][0] = cell;
+            out_links[(*num_links)++][1] = other_cell;
+            paint_and_extract_links(links, other_cell, other_color(curr_color),
+                                    colors, out_links, num_links);
         }
     }
 }

@@ -1,6 +1,8 @@
 #ifndef STEP_H
 #define STEP_H
 
+#include <stdbool.h>
+
 #include "cand_set.h"
 #include "geometry.h"
 
@@ -139,7 +141,8 @@ typedef struct {
     int num_removals;
 } YWingStep;
 
-#define MAX_SIMPLE_COLORING_LEN 18
+#define MAX_SIMPLE_COLORING_CHAIN_LEN 18
+#define MAX_SIMPLE_COLORING_LINKS 27
 
 typedef enum {
     SC_TWICE_IN_UNIT,
@@ -147,9 +150,11 @@ typedef enum {
 } SimpleColoringRule;
 
 typedef struct {
-    int cells[MAX_SIMPLE_COLORING_LEN];
-    int colors[MAX_SIMPLE_COLORING_LEN];
-    int len;
+    int cells[MAX_SIMPLE_COLORING_CHAIN_LEN];
+    int colors[MAX_SIMPLE_COLORING_CHAIN_LEN];
+    int chain_len;
+    int links[MAX_SIMPLE_COLORING_LINKS][2];
+    int num_links;
     int value;
     SimpleColoringRule rule;
     union {

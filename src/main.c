@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    ui_print_grid(&ui, grid, NULL);
+    ui_print_grid(&ui, grid, NULL, false);
 
     bool waiting = true;
     while (waiting) {
@@ -65,16 +65,17 @@ int main(int argc, char *argv[]) {
         if (status != SOLVE_ONGOING) break;
 
         history_save(&hist, step);
-        ui_print_grid(&ui, grid, &step);
+        ui_print_grid(&ui, grid, &step, false);
         ui_print_step(&ui, &step);
 
+        bool show_links = false;
         waiting = true;
         while (waiting) {
             switch (ui_wait_for_input()) {
             case ACTION_QUIT: goto cleanup;
             case ACTION_NEXT:
                 if (history_redo(&hist, grid)) {
-                    ui_print_grid(&ui, grid, history_curr(&hist));
+                    ui_print_grid(&ui, grid, history_curr(&hist), false);
                     ui_print_step(&ui, history_curr(&hist));
                 } else {
                     waiting = false;
@@ -82,7 +83,7 @@ int main(int argc, char *argv[]) {
                 break;
             case ACTION_PREV:
                 if (history_undo(&hist, grid)) {
-                    ui_print_grid(&ui, grid, history_curr(&hist));
+                    ui_print_grid(&ui, grid, history_curr(&hist), false);
                     ui_print_step(&ui, history_curr(&hist));
                 } else {
                     ui_print_message(&ui, "Already at initial state\n");
@@ -90,13 +91,16 @@ int main(int argc, char *argv[]) {
                 break;
             case ACTION_SCROLL_DOWN: ui_scroll(&ui, 1); break;
             case ACTION_SCROLL_UP: ui_scroll(&ui, -1); break;
+            case ACTION_TOGGLE_LINKS:
+                show_links = !show_links;
+                ui_print_grid(&ui, grid, history_curr(&hist), show_links);
             }
         }
 
         solver_apply_step(grid, &step);
     }
 
-    ui_print_grid(&ui, grid, NULL);
+    ui_print_grid(&ui, grid, NULL, false);
 
     switch (status) {
     case SOLVE_COMPLETE:

@@ -31,6 +31,7 @@ typedef struct {
 typedef enum {
     CP_NORMAL,
     CP_CLUE,
+    CP_LINK = CP_CLUE,
 
     CP_REVERSE_START,
 
@@ -45,7 +46,8 @@ typedef enum {
     ACTION_NEXT,
     ACTION_PREV,
     ACTION_SCROLL_DOWN,
-    ACTION_SCROLL_UP
+    ACTION_SCROLL_UP,
+    ACTION_TOGGLE_LINKS
 } InputAction;
 
 void ui_init(Ui *ui);
@@ -54,7 +56,7 @@ InputAction ui_wait_for_input(void);
 void ui_scroll(Ui *ui, int offset);
 void ui_print_message(Ui *ui, char *format, ...)
     __attribute__((format(printf, 2, 3)));
-void ui_print_grid(Ui *ui, Grid *grid, Step *step);
+void ui_print_grid(Ui *ui, Grid *grid, Step *step, bool show_links);
 void ui_print_step(Ui *ui, Step *step);
 
 #endif

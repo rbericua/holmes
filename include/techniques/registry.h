@@ -1,6 +1,7 @@
 #ifndef REGISTRY_H
 #define REGISTRY_H
 
+#include "geometry.h"
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
@@ -13,6 +14,7 @@ typedef struct {
     void (*revert)(Grid *, Step *);
     void (*explain)(DynStr *, Step *);
     void (*colorise)(ColorPair[81][9], Step *);
+    void (*links)(Step *, Links *);
 } TechniqueOps;
 
 extern TechniqueFn techniques[NUM_TECHNIQUES];

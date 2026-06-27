@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include "geometry.h"
 #include "grid.h"
 #include "step.h"
 #include "ui.h"
@@ -14,5 +15,6 @@ void simple_coloring_apply(Grid *grid, Step *step);
 void simple_coloring_revert(Grid *grid, Step *step);
 void simple_coloring_explain(DynStr *buf, Step *step);
 void simple_coloring_colorise(ColorPair colors[81][9], Step *step);
+void simple_coloring_links(Step *step, Links *links);
 
 #endif
