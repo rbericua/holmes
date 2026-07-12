@@ -5,7 +5,7 @@
 
 #include "grid.h"
 #include "step.h"
-#include "ui.h"
+#include "ui/colors.h"
 #include "util/dynstr.h"
 
 bool hidden_pair(Grid *grid, Step *step);

@@ -5,7 +5,7 @@
 
 #include "grid.h"
 #include "step.h"
-#include "ui.h"
+#include "ui/colors.h"
 #include "util/dynstr.h"
 
 bool finned_x_wing(Grid *grid, Step *step);

@@ -6,7 +6,7 @@
 #include "geometry.h"
 #include "grid.h"
 #include "step.h"
-#include "ui.h"
+#include "ui/colors.h"
 #include "util/dynstr.h"
 
 bool simple_coloring(Grid *grid, Step *step);

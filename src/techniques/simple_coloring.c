@@ -7,8 +7,8 @@
 #include "geometry.h"
 #include "grid.h"
 #include "step.h"
-#include "ui.h"
 #include "techniques/explain.h"
+#include "ui/colors.h"
 #include "util/dynarr.h"
 #include "util/dynstr.h"
 

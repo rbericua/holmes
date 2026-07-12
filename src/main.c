@@ -5,8 +5,8 @@
 #include "history.h"
 #include "solver.h"
 #include "step.h"
-#include "ui.h"
 #include "techniques/backtrack.h"
+#include "ui/ui.h"
 #include "util/log.h"
 
 int main(int argc, char *argv[]) {

@@ -7,8 +7,8 @@
 #include "geometry.h"
 #include "grid.h"
 #include "step.h"
-#include "ui.h"
 #include "techniques/explain.h"
+#include "ui/colors.h"
 #include "util/dynstr.h"
 
 static bool pointing_set_unit(Grid *grid, Step *step, UnitType unit_type);

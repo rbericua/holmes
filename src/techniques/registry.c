@@ -1,5 +1,7 @@
 #include "techniques/registry.h"
 
+#include <stddef.h>
+
 #include "step.h"
 
 #include "techniques/basic_fish.h"

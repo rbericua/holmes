@@ -4,7 +4,7 @@
 #include "geometry.h"
 #include "grid.h"
 #include "step.h"
-#include "ui.h"
+#include "ui/colors.h"
 #include "util/dynstr.h"
 
 typedef bool (*TechniqueFn)(Grid *, Step *);

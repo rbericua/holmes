@@ -1,4 +1,4 @@
-#include "ui.h"
+#include "ui/ui.h"
 
 #include <locale.h>
 #include <stdarg.h>
@@ -12,6 +12,7 @@
 #include "grid.h"
 #include "step.h"
 #include "techniques/registry.h"
+#include "ui/colors.h"
 #include "util/dynarr.h"
 #include "util/dynstr.h"
 
@@ -26,7 +27,6 @@
 
 #define SIGN(x) ((x) > 0 ? 1 : (x) < 0 ? -1 : 0)
 
-static int color_attr(ColorPair color);
 static void generate_lines(DynStr *buf, Lines *lines);
 static void refresh_info(Ui *ui);
 static void print_scroll_indicators(Ui *ui);
@@ -208,14 +208,6 @@ void ui_print_step(Ui *ui, Step *step) {
 
     ui->curr_line = 0;
     refresh_info(ui);
-}
-
-static int color_attr(ColorPair color) {
-    int attr = COLOR_PAIR(color);
-    if (color >= CP_REVERSE_START) {
-        attr |= A_REVERSE;
-    }
-    return attr;
 }
 
 static void generate_lines(DynStr *buf, Lines *lines) {
