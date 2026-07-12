@@ -12,23 +12,6 @@
 #include "util/dynarr.h"
 #include "util/dynstr.h"
 
-static bool arr_contains(int arr[], int len, int elem) {
-    for (int i = 0; i < len; i++) {
-        if (arr[i] == elem) return true;
-    }
-    return false;
-}
-
-static int arr_extend_no_reps(int arr1[], int len1, int arr2[], int len2) {
-    int new_len = len1;
-    for (int i = 0; i < len2; i++) {
-        if (!arr_contains(arr1, len1, arr2[i])) {
-            arr1[new_len++] = arr2[i];
-        }
-    }
-    return new_len;
-}
-
 static int other_color(int color) {
     return color == 1 ? 2 : 1;
 }
@@ -39,6 +22,8 @@ static void paint_and_extract_links(int links[][3], int cell, int curr_color,
                                     int colors[], int out_links[][2],
                                     int *num_links);
 static int extract_colors(int colors[], int out_cells[], int out_colors[]);
+static bool find_removals(SimpleColoringStep *s, Grid *grid, int value,
+                          int colors[]);
 
 bool simple_coloring(Grid *grid, Step *step) {
     step->type = TECH_SIMPLE_COLORING;
@@ -61,39 +46,8 @@ bool simple_coloring(Grid *grid, Step *step) {
                                     &s->num_links);
             s->chain_len = extract_colors(colors, s->cells, s->colors);
             s->value = value;
-            s->rule = SC_BOTH_SEEN;
-            s->both_seen.num_removals = 0;
 
-            for (int cell_i = 0; cell_i < 80; cell_i++) {
-                if (colors[cell_i] == 0) continue;
-
-                for (int cell_j = cell_i + 1; cell_j < 81; cell_j++) {
-                    int cells[] = {cell_i, cell_j};
-
-                    if (colors[cell_j] == colors[cell_i]
-                        && cells_are_peers(cells[0], cells[1])) {
-                        s->rule = SC_TWICE_IN_UNIT;
-                        memcpy(s->twice_in_unit.cells, cells, 2 * sizeof(int));
-                        s->twice_in_unit.color = colors[cell_i];
-                        return true;
-                    } else if (colors[cell_j] == other_color(colors[cell_i])) {
-                        int common_peers[MAX_COMMON_PEERS];
-                        int num_common_peers = cells_common_peers(cells, 2,
-                                                                  common_peers);
-
-                        int removals[MAX_COMMON_PEERS];
-                        int num_removals = grid_region_with_cand(
-                            grid, common_peers, num_common_peers, value,
-                            removals);
-
-                        s->both_seen.num_removals = arr_extend_no_reps(
-                            s->both_seen.removal_cells,
-                            s->both_seen.num_removals, removals, num_removals);
-                    }
-                }
-            }
-
-            if (s->both_seen.num_removals > 0) return true;
+            if (find_removals(s, grid, value, colors)) return true;
         }
     }
 
@@ -260,4 +214,39 @@ static int extract_colors(int colors[], int out_cells[], int out_colors[]) {
         }
     }
     return count;
+}
+
+static bool find_removals(SimpleColoringStep *s, Grid *grid, int value,
+                          int colors[]) {
+    s->rule = SC_BOTH_SEEN;
+    s->both_seen.num_removals = 0;
+
+    for (int cell_i = 0; cell_i < 80; cell_i++) {
+        if (colors[cell_i] == 0) {
+            if (!grid_cell_has_cand(grid, cell_i, value)) continue;
+            bool seen[3] = {0};
+            for (int peer_i = 0; peer_i < NUM_PEERS; peer_i++) {
+                int peer = peers[cell_i][peer_i];
+                seen[colors[peer]] = true;
+            }
+            if (seen[1] && seen[2]) {
+                s->both_seen.removal_cells[s->both_seen.num_removals++] =
+                    cell_i;
+            }
+            continue;
+        }
+
+        for (int cell_j = cell_i + 1; cell_j < 81; cell_j++) {
+            int cells[] = {cell_i, cell_j};
+            if (colors[cell_j] == colors[cell_i]
+                && cells_are_peers(cells[0], cells[1])) {
+                s->rule = SC_TWICE_IN_UNIT;
+                memcpy(s->twice_in_unit.cells, cells, 2 * sizeof(int));
+                s->twice_in_unit.color = colors[cell_i];
+                return true;
+            }
+        }
+    }
+
+    return s->both_seen.num_removals > 0;
 }
