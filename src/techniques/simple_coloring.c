@@ -17,6 +17,7 @@ static int other_color(int color) {
     return color == 1 ? 2 : 1;
 }
 
+static bool is_link_repeated(int links[][3], int cell1, int cell2);
 static bool find_links(Grid *grid, int value, int links[][3]);
 static int find_first_linked(int links[][3]);
 static void paint_and_extract_links(int links[][3], int cell, int curr_color,
@@ -37,7 +38,7 @@ bool simple_coloring(Grid *grid, Step *step) {
                 links[i][j] = -1;
             }
         }
-        find_links(grid, value, links);
+        if (!find_links(grid, value, links)) continue;
 
         int first;
         while ((first = find_first_linked(links)) != -1) {
@@ -158,6 +159,13 @@ void simple_coloring_pipes(Step *step, Pipes *pipes) {
     }
 }
 
+static bool is_link_repeated(int links[][3], int cell1, int cell2) {
+    for (int unit_type = 0; unit_type < 3; unit_type++) {
+        if (links[cell1][unit_type] == cell2) return true;
+    }
+    return false;
+}
+
 static bool find_links(Grid *grid, int value, int links[][3]) {
     bool found = false;
     for (int unit_type = 0; unit_type < 3; unit_type++) {
@@ -166,9 +174,11 @@ static bool find_links(Grid *grid, int value, int links[][3]) {
             int pair[9];
             if (grid_region_with_cand(grid, unit, 9, value, pair) != 2)
                 continue;
-            links[pair[0]][unit_type] = pair[1];
-            links[pair[1]][unit_type] = pair[0];
-            found = true;
+            if (!is_link_repeated(links, pair[0], pair[1])) {
+                links[pair[0]][unit_type] = pair[1];
+                links[pair[1]][unit_type] = pair[0];
+                found = true;
+            }
         }
     }
     return found;
@@ -195,6 +205,7 @@ static void paint_and_extract_links(int links[][3], int cell, int curr_color,
 
             out_links[*num_links][0] = cell;
             out_links[(*num_links)++][1] = other_cell;
+
             paint_and_extract_links(links, other_cell, other_color(curr_color),
                                     colors, out_links, num_links);
         }
