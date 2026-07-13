@@ -12,19 +12,6 @@ typedef enum {
     UNIT_BOX
 } UnitType;
 
-typedef struct {
-    int cell1;
-    int cand1;
-    int cell2;
-    int cand2;
-} Link;
-
-typedef struct {
-    Link *elems;
-    int len;
-    int cap;
-} Links;
-
 extern int units[3][9][9];
 extern int peers[81][NUM_PEERS];
 

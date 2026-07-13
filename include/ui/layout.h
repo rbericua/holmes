@@ -1,0 +1,16 @@
+#ifndef LAYOUT_H
+#define LAYOUT_H
+
+#define CELL_HEIGHT 3
+#define CELL_WIDTH 9
+
+#define GRID_HEIGHT ((CELL_HEIGHT * 9) + 10)
+#define GRID_WIDTH ((CELL_WIDTH * 9) + 10)
+
+#define INFO_HEIGHT (LINES - GRID_HEIGHT)
+#define INFO_WIDTH (COLS - SCROLLBAR_WIDTH - 1)
+
+#define SCROLLBAR_HEIGHT (LINES - GRID_HEIGHT)
+#define SCROLLBAR_WIDTH 1
+
+#endif

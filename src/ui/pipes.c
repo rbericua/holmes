@@ -1,0 +1,364 @@
+#include "ui/pipes.h"
+
+#include <limits.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "geometry.h"
+#include "ui/layout.h"
+#include "util/dynarr.h"
+
+#define GRIDLINE_PENALTY 1000
+#define OVERLAP_PENALTY 100
+#define TURN_PENALTY 10
+
+#define ABS(x) ((x) > 0 ? (x) : -(x))
+#define SIGN(x) ((x) > 0 ? 1 : (x) < 0 ? -1 : 0)
+
+typedef enum {
+    ORIENT_VERTICAL,
+    ORIENT_HORIZONTAL,
+
+    NUM_ORIENTATIONS
+} Orientation;
+
+typedef enum {
+    NODE_UNVISITED,
+    NODE_OPEN,
+    NODE_CLOSED
+} NodeStatus;
+
+struct Node {
+    Position pos;
+    int f, g, h;
+    NodeStatus status;
+    struct Node *prev;
+};
+typedef struct Node Node;
+
+typedef struct {
+    bool orients[GRID_HEIGHT][GRID_WIDTH][NUM_ORIENTATIONS];
+    Node nodes[GRID_HEIGHT][GRID_WIDTH];
+} RoutingMap;
+
+#define HEAP_INIT_CAP 16
+#define HEAP_GROWTH_FACTOR 2
+
+#define HEAP_PARENT(i) (((i) - 1) / 2)
+#define HEAP_LEFT_CHILD(i) (2 * (i) + 1)
+#define HEAP_RIGHT_CHILD(i) (2 * (i) + 2)
+
+typedef struct {
+    Node **nodes;
+    int len;
+    int cap;
+} Heap;
+
+static void route_pipe(Pipe *pipe, RoutingMap *map);
+static int calculate_cost(Position prev, Position curr, Position next,
+                          RoutingMap *map);
+static int calculate_heuristic(Position from, Position to);
+static void reconstruct_path(Node *target, Positions *path, RoutingMap *map);
+
+static void cell_cand_to_pos(int cell, int cand, Position *pos);
+static void pipe_deltas(Pipe *pipe, int *delta_y, int *delta_x);
+static int pipe_cmp(Pipe *pipe1, Pipe *pipe2);
+static bool is_out_of_bounds(Position pos);
+static int taxicab(Position pos1, Position pos2);
+static Orientation get_orientation(Position from, Position to);
+static Direction get_straight_dir(Position from, Position to);
+static Direction get_corner_dir(Direction dir1, Direction dir2);
+
+static Heap *heap_create(void);
+static void heap_destroy(Heap *h);
+static bool heap_is_empty(Heap *h);
+static Node *heap_extract_min(Heap *h);
+static void heap_insert(Heap *h, Node *node);
+static void heap_bubble_up(Heap *h, int from);
+static void heap_bubble_down(Heap *h, int from);
+
+Pipe pipe_create(int cell1, int cand1, int cell2, int cand2) {
+    Pipe pipe;
+    cell_cand_to_pos(cell1, cand1, &pipe.pos1);
+    cell_cand_to_pos(cell2, cand2, &pipe.pos2);
+    da_init(&pipe.path);
+    return pipe;
+}
+
+void pipe_destroy(Pipe *pipe) {
+    da_deinit(&pipe->path);
+}
+
+void route_pipes(Pipes *pipes) {
+    qsort(pipes->elems, pipes->len, sizeof(Pipe),
+          (int (*)(const void *, const void *))pipe_cmp);
+
+    RoutingMap *map = malloc(sizeof(RoutingMap));
+
+    for (int i = 1; i < GRID_HEIGHT - 1; i++) {
+        for (int j = 1; j < GRID_WIDTH - 1; j++) {
+            map->nodes[i][j].pos = (Position){i, j};
+            memset(map->orients[i][j], 0, 2 * sizeof(bool));
+        }
+    }
+
+    for (int i = 0; i < pipes->len; i++) {
+        route_pipe(&pipes->elems[i], map);
+    }
+
+    free(map);
+}
+
+Direction get_direction(Position prev, Position curr, Position next) {
+    Direction dir1 = get_straight_dir(prev, curr);
+    Direction dir2 = get_straight_dir(curr, next);
+    if (dir1 == dir2) return dir1;
+    return get_corner_dir(dir1, dir2);
+}
+
+static void route_pipe(Pipe *pipe, RoutingMap *map) {
+    Position src = pipe->pos1;
+    Position tgt = pipe->pos2;
+
+    for (int i = 1; i < GRID_HEIGHT - 1; i++) {
+        for (int j = 1; j < GRID_WIDTH - 1; j++) {
+            map->nodes[i][j].g = INT_MAX;
+            map->nodes[i][j].f = INT_MAX;
+            map->nodes[i][j].status = NODE_UNVISITED;
+            map->nodes[i][j].prev = NULL;
+        }
+    }
+
+    map->nodes[src.y][src.x].g = 0;
+    map->nodes[src.y][src.x].f = 0;
+
+    Heap *open_nodes = heap_create();
+    heap_insert(open_nodes, &map->nodes[src.y][src.x]);
+
+    int dy[] = {-1, 0, 0, 1};
+    int dx[] = {0, -1, 1, 0};
+
+    while (!heap_is_empty(open_nodes)) {
+        Node *curr = heap_extract_min(open_nodes);
+        curr->status = NODE_CLOSED;
+
+        if (curr->pos.y == tgt.y && curr->pos.x == tgt.x) {
+            reconstruct_path(curr, &pipe->path, map);
+            heap_destroy(open_nodes);
+            return;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            int ny = curr->pos.y + dy[i];
+            int nx = curr->pos.x + dx[i];
+            if (is_out_of_bounds((Position){ny, nx})) continue;
+
+            Node *next = &map->nodes[ny][nx];
+            if (next->status == NODE_CLOSED) continue;
+
+            int new_cost = curr->g
+                           + calculate_cost(curr->prev ? curr->prev->pos
+                                                       : (Position){-1, -1},
+                                            curr->pos, next->pos, map);
+            if (new_cost < next->g) {
+                next->g = new_cost;
+                next->h = calculate_heuristic(next->pos, tgt);
+                next->f = next->g + next->h;
+                next->prev = curr;
+            }
+
+            if (next->status == NODE_UNVISITED) {
+                heap_insert(open_nodes, next);
+                next->status = NODE_OPEN;
+            }
+        }
+    }
+
+    heap_destroy(open_nodes);
+}
+
+static int calculate_cost(Position prev, Position curr, Position next,
+                          RoutingMap *map) {
+    int cost = 1;
+
+    Orientation next_orient = get_orientation(curr, next);
+    Orientation curr_orient = (prev.y != -1 && prev.x != -1)
+                                  ? get_orientation(prev, curr)
+                                  : next_orient;
+
+    if ((next_orient == ORIENT_HORIZONTAL && next.y % (CELL_HEIGHT + 1) == 0)
+        || (next_orient == ORIENT_VERTICAL && next.x % (CELL_WIDTH + 1) == 0)) {
+        cost += GRIDLINE_PENALTY;
+    }
+
+    if (map->orients[curr.y][curr.x][next_orient]
+        || map->orients[next.y][next.x][next_orient]) {
+        cost += OVERLAP_PENALTY;
+    }
+
+    if (curr_orient != next_orient) {
+        cost += TURN_PENALTY;
+    }
+
+    return cost;
+}
+
+static int calculate_heuristic(Position from, Position to) {
+    int heur = taxicab(from, to);
+    if (from.y != to.y && from.x != to.x) {
+        heur += TURN_PENALTY;
+    }
+    return heur;
+}
+
+static void reconstruct_path(Node *target, Positions *path, RoutingMap *map) {
+    bool first = true;
+    Node *curr = target;
+    while (curr) {
+        if (!first && curr->prev) {
+            Orientation orient = get_orientation(curr->prev->pos, curr->pos);
+            map->orients[curr->pos.y][curr->pos.x][orient] = true;
+        }
+
+        da_append(path, curr->pos);
+        curr = curr->prev;
+        first = false;
+    }
+}
+
+static void cell_cand_to_pos(int cell, int cand, Position *pos) {
+    pos->y = cell_row(cell) * (CELL_HEIGHT + 1) + (cand - 1) / 3 + 1;
+    pos->x = cell_col(cell) * (CELL_WIDTH + 1) + ((cand - 1) % 3) * 3 + 2;
+}
+
+static void pipe_deltas(Pipe *pipe, int *delta_y, int *delta_x) {
+    *delta_y = ABS(pipe->pos1.y - pipe->pos2.y);
+    *delta_x = ABS(pipe->pos1.x - pipe->pos2.x);
+}
+
+static int pipe_cmp(Pipe *pipe1, Pipe *pipe2) {
+    int delta_y1, delta_x1;
+    int delta_y2, delta_x2;
+
+    pipe_deltas(pipe1, &delta_y1, &delta_x1);
+    pipe_deltas(pipe2, &delta_y2, &delta_x2);
+
+    bool is_straight1 = delta_y1 == 0 || delta_x1 == 0;
+    bool is_straight2 = delta_y2 == 0 || delta_x2 == 0;
+
+    int len1 = delta_y1 + delta_x1;
+    int len2 = delta_y2 + delta_x2;
+
+    if (is_straight1 && !is_straight2) return -1;
+    if (!is_straight1 && is_straight2) return 1;
+
+    return len1 - len2;
+}
+
+static bool is_out_of_bounds(Position pos) {
+    return (pos.y <= 0 || pos.y >= GRID_HEIGHT - 1)
+           || (pos.x <= 0 || pos.x >= GRID_WIDTH - 1);
+}
+
+static int taxicab(Position pos1, Position pos2) {
+    return ABS(pos1.y - pos2.y) + ABS(pos1.x - pos2.x);
+}
+
+static Orientation get_orientation(Position from, Position to) {
+    return from.y == to.y ? ORIENT_HORIZONTAL : ORIENT_VERTICAL;
+}
+
+static Direction get_straight_dir(Position from, Position to) {
+    int dy = SIGN(to.y - from.y);
+    int dx = SIGN(to.x - from.x);
+
+    return dy == 1    ? DIR_DOWN
+           : dy == -1 ? DIR_UP
+           : dx == 1  ? DIR_RIGHT
+                      : DIR_LEFT;
+}
+
+static Direction get_corner_dir(Direction dir1, Direction dir2) {
+    if ((dir1 == DIR_DOWN && dir2 == DIR_RIGHT)
+        || (dir1 == DIR_LEFT && dir2 == DIR_UP))
+        return DIR_DOWN_RIGHT;
+
+    if ((dir1 == DIR_DOWN && dir2 == DIR_LEFT)
+        || (dir1 == DIR_RIGHT && dir2 == DIR_UP))
+        return DIR_DOWN_LEFT;
+
+    if ((dir1 == DIR_UP && dir2 == DIR_RIGHT)
+        || (dir1 == DIR_LEFT && dir2 == DIR_DOWN))
+        return DIR_UP_RIGHT;
+
+    return DIR_UP_LEFT;
+}
+
+static Heap *heap_create(void) {
+    Heap *h = malloc(sizeof(Heap));
+    h->nodes = malloc(HEAP_INIT_CAP * sizeof(Node *));
+    h->len = 0;
+    h->cap = HEAP_INIT_CAP;
+    return h;
+}
+
+static void heap_destroy(Heap *h) {
+    free(h->nodes);
+    free(h);
+}
+
+static bool heap_is_empty(Heap *h) {
+    return h->len == 0;
+}
+
+static Node *heap_extract_min(Heap *h) {
+    Node *ret = h->nodes[0];
+
+    h->nodes[0] = h->nodes[--h->len];
+    heap_bubble_down(h, 0);
+
+    return ret;
+}
+
+static void heap_insert(Heap *h, Node *node) {
+    if (h->len >= h->cap) {
+        h->cap *= HEAP_GROWTH_FACTOR;
+        h->nodes = realloc(h->nodes, h->cap * sizeof(Node *));
+    }
+
+    h->nodes[h->len++] = node;
+    heap_bubble_up(h, h->len - 1);
+}
+
+static void heap_bubble_up(Heap *h, int from) {
+    if (from == 0) return;
+
+    int parent = HEAP_PARENT(from);
+
+    if (h->nodes[parent]->f <= h->nodes[from]->f) return;
+
+    Node *temp = h->nodes[from];
+    h->nodes[from] = h->nodes[parent];
+    h->nodes[parent] = temp;
+
+    heap_bubble_up(h, parent);
+}
+
+static void heap_bubble_down(Heap *h, int from) {
+    int left = HEAP_LEFT_CHILD(from);
+    int right = HEAP_RIGHT_CHILD(from);
+
+    if (left >= h->len) return;
+
+    int min = right < h->len && h->nodes[right]->f < h->nodes[left]->f ? right
+                                                                       : left;
+
+    if (h->nodes[from]->f <= h->nodes[min]->f) return;
+
+    Node *temp = h->nodes[from];
+    h->nodes[from] = h->nodes[min];
+    h->nodes[min] = temp;
+
+    heap_bubble_down(h, min);
+}

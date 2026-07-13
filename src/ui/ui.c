@@ -13,25 +13,15 @@
 #include "step.h"
 #include "techniques/registry.h"
 #include "ui/colors.h"
+#include "ui/layout.h"
+#include "ui/pipes.h"
 #include "util/dynarr.h"
 #include "util/dynstr.h"
-
-#define GRID_WIDTH 91
-#define GRID_HEIGHT 37
-
-#define INFO_WIDTH (COLS - SCROLLBAR_WIDTH - 1)
-#define INFO_HEIGHT (LINES - GRID_HEIGHT)
-
-#define SCROLLBAR_WIDTH 1
-#define SCROLLBAR_HEIGHT (LINES - GRID_HEIGHT)
-
-#define SIGN(x) ((x) > 0 ? 1 : (x) < 0 ? -1 : 0)
 
 static void generate_lines(DynStr *buf, Lines *lines);
 static void refresh_info(Ui *ui);
 static void print_scroll_indicators(Ui *ui);
-static void cell_cand_to_grid_pos(int cell, int cand, int *out_y, int *out_x);
-static void print_link(Ui *ui, Link link);
+static void print_pipes(Ui *ui, Pipes *pipes);
 
 void ui_init(Ui *ui) {
     setlocale(LC_ALL, "");
@@ -115,7 +105,7 @@ void ui_print_message(Ui *ui, char *format, ...) {
     va_end(args);
 }
 
-void ui_print_grid(Ui *ui, Grid *grid, Step *step, bool show_links) {
+void ui_print_grid(Ui *ui, Grid *grid, Step *step, bool show_pipes) {
     wchar_t *top = L"┏━━━━━━━━━┯━━━━━━━━━┯━━━━━━━━━┳━━━━━━━━━┯━━━━━━━━━┯━━━━━━━"
                    L"━━┳━━━━━━━━━┯━━━━━━━━━┯━━━━━━━━━┓";
     wchar_t *row_sep = L"┠─────────┼─────────┼─────────╂─────────┼─────────┼───"
@@ -185,13 +175,15 @@ void ui_print_grid(Ui *ui, Grid *grid, Step *step, bool show_links) {
     }
     waddwstr(ui->grid_win, bottom);
 
-    if (show_links && technique_ops[step->type].links) {
-        Links links = {0};
-        technique_ops[step->type].links(step, &links);
-        for (int i = 0; i < links.len; i++) {
-            print_link(ui, links.elems[i]);
+    if (show_pipes && technique_ops[step->type].pipes) {
+        Pipes pipes = {0};
+        technique_ops[step->type].pipes(step, &pipes);
+        route_pipes(&pipes);
+        print_pipes(ui, &pipes);
+        for (int i = 0; i < pipes.len; i++) {
+            pipe_destroy(&pipes.elems[i]);
         }
-        da_deinit(&links);
+        da_deinit(&pipes);
     }
 
     wrefresh(ui->grid_win);
@@ -258,38 +250,27 @@ static void print_scroll_indicators(Ui *ui) {
     wrefresh(ui->scrollbar_win);
 }
 
-static void cell_cand_to_grid_pos(int cell, int cand, int *out_y, int *out_x) {
-    *out_y = cell_row(cell) * 4 + (cand - 1) / 3 + 1;
-    *out_x = cell_col(cell) * 10 + ((cand - 1) % 3) * 3 + 2;
-}
-
-static void print_link(Ui *ui, Link link) {
-    int y1, x1, y2, x2;
-    cell_cand_to_grid_pos(link.cell1, link.cand1, &y1, &x1);
-    cell_cand_to_grid_pos(link.cell2, link.cand2, &y2, &x2);
-
-    int dy = SIGN(y2 - y1);
-    int dx = SIGN(x2 - x1);
-
-    wchar_t *corner = dy == 1 ? (dx == 1 ? L"└" : L"┘")
-                              : (dx == 1 ? L"┌" : L"┐");
+static void print_pipes(Ui *ui, Pipes *pipes) {
+    wchar_t *dir_to_char[] = {
+        [DIR_DOWN] = L"│",     [DIR_UP] = L"│",         [DIR_RIGHT] = L"─",
+        [DIR_LEFT] = L"─",     [DIR_DOWN_RIGHT] = L"└", [DIR_DOWN_LEFT] = L"┘",
+        [DIR_UP_RIGHT] = L"┌", [DIR_UP_LEFT] = L"┐",
+    };
 
     wattron(ui->grid_win, color_attr(CP_LINK));
 
-    y1 += dy;
-    while (y1 != y2) {
-        mvwaddwstr(ui->grid_win, y1, x1, L"│");
-        y1 += dy;
-    }
+    for (int i = 0; i < pipes->len; i++) {
+        Pipe pipe = pipes->elems[i];
+        Positions path = pipe.path;
 
-    if (dy != 0 && dx != 0) {
-        mvwaddwstr(ui->grid_win, y1, x1, corner);
-    }
+        for (int j = 1; j < path.len - 1; j++) {
+            Position prev = path.elems[j - 1];
+            Position curr = path.elems[j];
+            Position next = path.elems[j + 1];
 
-    x1 += dx;
-    while (x1 != x2) {
-        mvwaddwstr(ui->grid_win, y1, x1, L"─");
-        x1 += dx;
+            Direction dir = get_direction(prev, curr, next);
+            mvwprintw(ui->grid_win, curr.y, curr.x, "%ls", dir_to_char[dir]);
+        }
     }
 
     wattroff(ui->grid_win, color_attr(CP_LINK));

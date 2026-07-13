@@ -9,6 +9,7 @@
 #include "step.h"
 #include "techniques/explain.h"
 #include "ui/colors.h"
+#include "ui/pipes.h"
 #include "util/dynarr.h"
 #include "util/dynstr.h"
 
@@ -148,17 +149,12 @@ void simple_coloring_colorise(ColorPair colors[81][9], Step *step) {
     }
 }
 
-void simple_coloring_links(Step *step, Links *links) {
+void simple_coloring_pipes(Step *step, Pipes *pipes) {
     SimpleColoringStep *s = &step->as.simple_coloring;
 
     for (int i = 0; i < s->num_links; i++) {
-        Link link = {
-            .cell1 = s->links[i][0],
-            .cand1 = s->value,
-            .cell2 = s->links[i][1],
-            .cand2 = s->value,
-        };
-        da_append(links, link);
+        da_append(pipes, pipe_create(s->links[i][0], s->value, s->links[i][1],
+                                     s->value));
     }
 }
 

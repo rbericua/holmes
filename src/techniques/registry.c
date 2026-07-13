@@ -20,16 +20,16 @@
         .revert = tech##_revert, \
         .explain = tech##_explain, \
         .colorise = tech##_colorise, \
-        .links = NULL, \
+        .pipes = NULL, \
     }
 
-#define LINK_TECHNIQUE_OPS(tech) \
+#define PIPE_TECHNIQUE_OPS(tech) \
     { \
         .apply = tech##_apply, \
         .revert = tech##_revert, \
         .explain = tech##_explain, \
         .colorise = tech##_colorise, \
-        .links = tech##_links, \
+        .pipes = tech##_pipes, \
     }
 
 TechniqueFn techniques[] = {
@@ -57,5 +57,5 @@ TechniqueOps technique_ops[] = {
     [TECH_FINNED_SWORDFISH] = TECHNIQUE_OPS(finned_fish),
     [TECH_FINNED_JELLYFISH] = TECHNIQUE_OPS(finned_fish),
     [TECH_Y_WING] = TECHNIQUE_OPS(y_wing),
-    [TECH_SIMPLE_COLORING] = LINK_TECHNIQUE_OPS(simple_coloring),
+    [TECH_SIMPLE_COLORING] = PIPE_TECHNIQUE_OPS(simple_coloring),
 };
