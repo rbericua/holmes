@@ -5,6 +5,8 @@
 
 #include "cand_set.h"
 
+#define GRID_STR_LEN 162
+
 typedef struct {
     int values[81];
     CandSet cands[81];
@@ -13,6 +15,7 @@ typedef struct {
 } Grid;
 
 Grid *grid_create(char *grid_str);
+void grid_encode(Grid *grid, char buf[]);
 void grid_destroy(Grid *grid);
 int grid_num_empty(Grid *grid);
 bool grid_is_solved(Grid *grid);

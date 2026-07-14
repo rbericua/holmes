@@ -34,7 +34,8 @@ typedef enum {
     ACTION_PREV,
     ACTION_SCROLL_DOWN,
     ACTION_SCROLL_UP,
-    ACTION_TOGGLE_LINKS
+    ACTION_TOGGLE_LINKS,
+    ACTION_EXPORT
 } InputAction;
 
 void ui_init(Ui *ui);

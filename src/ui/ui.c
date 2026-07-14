@@ -79,6 +79,8 @@ InputAction ui_wait_for_input(void) {
         case KEY_UP: return ACTION_SCROLL_UP;
 
         case 'l': return ACTION_TOGGLE_LINKS;
+
+        case 'e': return ACTION_EXPORT;
         }
     }
 }

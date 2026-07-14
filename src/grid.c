@@ -28,6 +28,27 @@ Grid *grid_create(char *grid_str) {
     return grid;
 }
 
+void grid_encode(Grid *grid, char buf[]) {
+    char *char_map = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; i < 81; i++) {
+        int cell_bits = 0;
+        if (!grid_cell_is_empty(grid, i)) {
+            cell_bits = grid_cell_value(grid, i);
+            if (!grid_cell_is_clue(grid, i)) {
+                cell_bits += 9;
+            }
+        } else {
+            cell_bits = grid_cell_cands(grid, i);
+            cell_bits += 18;
+        }
+
+        buf[i * 2 + 1] = char_map[cell_bits % 36];
+        buf[i * 2] = char_map[cell_bits / 36];
+    }
+    buf[GRID_STR_LEN] = '\0';
+}
+
 void grid_destroy(Grid *grid) {
     free(grid);
 }

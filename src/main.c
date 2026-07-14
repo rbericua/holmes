@@ -58,6 +58,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    char grid_str[GRID_STR_LEN + 1];
+
     SolveStatus status;
     while (true) {
         Step step;
@@ -94,6 +96,10 @@ int main(int argc, char *argv[]) {
             case ACTION_TOGGLE_LINKS:
                 show_links = !show_links;
                 ui_print_grid(&ui, grid, history_curr(&hist), show_links);
+                break;
+            case ACTION_EXPORT:
+                grid_encode(grid, grid_str);
+                ui_print_message(&ui, "Current grid state: %s\n", grid_str);
             }
         }
 
