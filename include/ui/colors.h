@@ -4,7 +4,7 @@
 typedef enum {
     CP_NORMAL,
     CP_CLUE,
-    CP_LINK = CP_CLUE,
+    CP_PIPE = CP_CLUE,
 
     CP_REVERSE_START,
 

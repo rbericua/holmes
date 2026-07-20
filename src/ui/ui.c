@@ -78,7 +78,7 @@ InputAction ui_wait_for_input(void) {
         case 'k':
         case KEY_UP: return ACTION_SCROLL_UP;
 
-        case 'l': return ACTION_TOGGLE_LINKS;
+        case 'l': return ACTION_TOGGLE_PIPES;
 
         case 'e': return ACTION_EXPORT;
         }
@@ -259,7 +259,7 @@ static void print_pipes(Ui *ui, Pipes *pipes) {
         [DIR_UP_RIGHT] = L"┌", [DIR_UP_LEFT] = L"┐",
     };
 
-    wattron(ui->grid_win, color_attr(CP_LINK));
+    wattron(ui->grid_win, color_attr(CP_PIPE));
 
     for (int i = 0; i < pipes->len; i++) {
         Pipe pipe = pipes->elems[i];
@@ -275,5 +275,5 @@ static void print_pipes(Ui *ui, Pipes *pipes) {
         }
     }
 
-    wattroff(ui->grid_win, color_attr(CP_LINK));
+    wattroff(ui->grid_win, color_attr(CP_PIPE));
 }

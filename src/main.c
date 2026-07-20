@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
         ui_print_grid(&ui, grid, &step, false);
         ui_print_step(&ui, &step);
 
-        bool show_links = false;
+        bool show_pipes = false;
         waiting = true;
         while (waiting) {
             switch (ui_wait_for_input()) {
@@ -93,9 +93,9 @@ int main(int argc, char *argv[]) {
                 break;
             case ACTION_SCROLL_DOWN: ui_scroll(&ui, 1); break;
             case ACTION_SCROLL_UP: ui_scroll(&ui, -1); break;
-            case ACTION_TOGGLE_LINKS:
-                show_links = !show_links;
-                ui_print_grid(&ui, grid, history_curr(&hist), show_links);
+            case ACTION_TOGGLE_PIPES:
+                show_pipes = !show_pipes;
+                ui_print_grid(&ui, grid, history_curr(&hist), show_pipes);
                 break;
             case ACTION_EXPORT:
                 grid_encode(grid, grid_str);

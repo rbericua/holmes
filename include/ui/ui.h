@@ -34,7 +34,7 @@ typedef enum {
     ACTION_PREV,
     ACTION_SCROLL_DOWN,
     ACTION_SCROLL_UP,
-    ACTION_TOGGLE_LINKS,
+    ACTION_TOGGLE_PIPES,
     ACTION_EXPORT
 } InputAction;
 
@@ -44,7 +44,7 @@ InputAction ui_wait_for_input(void);
 void ui_scroll(Ui *ui, int offset);
 void ui_print_message(Ui *ui, char *format, ...)
     __attribute__((format(printf, 2, 3)));
-void ui_print_grid(Ui *ui, Grid *grid, Step *step, bool show_links);
+void ui_print_grid(Ui *ui, Grid *grid, Step *step, bool show_pipes);
 void ui_print_step(Ui *ui, Step *step);
 
 #endif
