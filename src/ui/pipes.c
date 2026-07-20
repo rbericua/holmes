@@ -34,6 +34,8 @@ struct Node {
     int f, g, h;
     NodeStatus status;
     struct Node *prev;
+
+    int heap_idx;
 };
 typedef struct Node Node;
 
@@ -75,6 +77,8 @@ static void heap_destroy(Heap *h);
 static bool heap_is_empty(Heap *h);
 static Node *heap_extract_min(Heap *h);
 static void heap_insert(Heap *h, Node *node);
+static void heap_update(Heap *h, Node *node);
+static void heap_swap_nodes(Heap *h, int i, int j);
 static void heap_bubble_up(Heap *h, int from);
 static void heap_bubble_down(Heap *h, int from);
 
@@ -166,11 +170,13 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
                 next->h = calculate_heuristic(next->pos, tgt);
                 next->f = next->g + next->h;
                 next->prev = curr;
-            }
 
-            if (next->status == NODE_UNVISITED) {
-                heap_insert(open_nodes, next);
-                next->status = NODE_OPEN;
+                if (next->status == NODE_UNVISITED) {
+                    next->status = NODE_OPEN;
+                    heap_insert(open_nodes, next);
+                } else {
+                    heap_update(open_nodes, next);
+                }
             }
         }
     }
@@ -316,6 +322,7 @@ static Node *heap_extract_min(Heap *h) {
     Node *ret = h->nodes[0];
 
     h->nodes[0] = h->nodes[--h->len];
+    h->nodes[0]->heap_idx = 0;
     heap_bubble_down(h, 0);
 
     return ret;
@@ -327,8 +334,23 @@ static void heap_insert(Heap *h, Node *node) {
         h->nodes = realloc(h->nodes, h->cap * sizeof(Node *));
     }
 
-    h->nodes[h->len++] = node;
-    heap_bubble_up(h, h->len - 1);
+    h->nodes[h->len] = node;
+    h->nodes[h->len]->heap_idx = h->len;
+    heap_bubble_up(h, h->len);
+    h->len++;
+}
+
+static void heap_update(Heap *h, Node *node) {
+    heap_bubble_up(h, node->heap_idx);
+    heap_bubble_down(h, node->heap_idx);
+}
+
+static void heap_swap_nodes(Heap *h, int i, int j) {
+    Node *temp = h->nodes[i];
+    h->nodes[i] = h->nodes[j];
+    h->nodes[j] = temp;
+    h->nodes[i]->heap_idx = i;
+    h->nodes[j]->heap_idx = j;
 }
 
 static void heap_bubble_up(Heap *h, int from) {
@@ -338,9 +360,7 @@ static void heap_bubble_up(Heap *h, int from) {
 
     if (h->nodes[parent]->f <= h->nodes[from]->f) return;
 
-    Node *temp = h->nodes[from];
-    h->nodes[from] = h->nodes[parent];
-    h->nodes[parent] = temp;
+    heap_swap_nodes(h, from, parent);
 
     heap_bubble_up(h, parent);
 }
@@ -356,9 +376,7 @@ static void heap_bubble_down(Heap *h, int from) {
 
     if (h->nodes[from]->f <= h->nodes[min]->f) return;
 
-    Node *temp = h->nodes[from];
-    h->nodes[from] = h->nodes[min];
-    h->nodes[min] = temp;
+    heap_swap_nodes(h, from, min);
 
     heap_bubble_down(h, min);
 }
