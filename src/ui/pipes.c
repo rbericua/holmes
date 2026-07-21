@@ -12,6 +12,7 @@
 #define GRIDLINE_PENALTY 1000
 #define OVERLAP_PENALTY 100
 #define TURN_PENALTY 10
+#define NEAR_VERTICAL_PENALTY 1
 
 #define ABS(x) ((x) > 0 ? (x) : -(x))
 #define SIGN(x) ((x) > 0 ? 1 : (x) < 0 ? -1 : 0)
@@ -222,6 +223,12 @@ static int calculate_cost(Position prev, Position curr, Position next,
 
     if (prev_orient != next_orient) {
         cost += TURN_PENALTY;
+    }
+
+    if (next_orient == ORIENT_VERTICAL
+        && (map->orients[next.y][next.x - 1][ORIENT_VERTICAL]
+            || map->orients[next.y][next.x + 1][ORIENT_VERTICAL])) {
+        cost += NEAR_VERTICAL_PENALTY;
     }
 
     return cost;
