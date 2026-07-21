@@ -37,6 +37,7 @@ struct Node {
     struct Node *prev;
 
     int heap_idx;
+    int heap_insertion;
 };
 typedef struct Node Node;
 
@@ -56,6 +57,7 @@ typedef struct {
     Node **nodes;
     int len;
     int cap;
+    int counter;
 } Heap;
 
 static void route_pipe(Pipe *pipe, RoutingMap *map);
@@ -73,6 +75,7 @@ static Orientation get_orientation(Position from, Position to);
 static Direction get_straight_dir(Position from, Position to);
 static Direction get_corner_dir(Direction dir1, Direction dir2);
 
+static int node_cmp(Node *node1, Node *node2);
 static Heap *heap_create(void);
 static void heap_destroy(Heap *h);
 static bool heap_is_empty(Heap *h);
@@ -313,11 +316,17 @@ static Direction get_corner_dir(Direction dir1, Direction dir2) {
     return DIR_UP_LEFT;
 }
 
+static int node_cmp(Node *node1, Node *node2) {
+    if (node1->f != node2->f) return node1->f - node2->f;
+    return node2->heap_insertion - node1->heap_insertion;
+}
+
 static Heap *heap_create(void) {
     Heap *h = malloc(sizeof(Heap));
     h->nodes = malloc(HEAP_INIT_CAP * sizeof(Node *));
     h->len = 0;
     h->cap = HEAP_INIT_CAP;
+    h->counter = 0;
     return h;
 }
 
@@ -346,6 +355,7 @@ static void heap_insert(Heap *h, Node *node) {
         h->nodes = realloc(h->nodes, h->cap * sizeof(Node *));
     }
 
+    node->heap_insertion = h->counter++;
     h->nodes[h->len] = node;
     h->nodes[h->len]->heap_idx = h->len;
     heap_bubble_up(h, h->len);
@@ -353,6 +363,7 @@ static void heap_insert(Heap *h, Node *node) {
 }
 
 static void heap_update(Heap *h, Node *node) {
+    node->heap_insertion = h->counter++;
     heap_bubble_up(h, node->heap_idx);
     heap_bubble_down(h, node->heap_idx);
 }
@@ -370,7 +381,7 @@ static void heap_bubble_up(Heap *h, int from) {
 
     int parent = HEAP_PARENT(from);
 
-    if (h->nodes[parent]->f <= h->nodes[from]->f) return;
+    if (node_cmp(h->nodes[parent], h->nodes[from]) < 0) return;
 
     heap_swap_nodes(h, from, parent);
 
@@ -383,10 +394,11 @@ static void heap_bubble_down(Heap *h, int from) {
 
     if (left >= h->len) return;
 
-    int min = right < h->len && h->nodes[right]->f < h->nodes[left]->f ? right
-                                                                       : left;
+    int min = right < h->len && node_cmp(h->nodes[right], h->nodes[left]) < 0
+                  ? right
+                  : left;
 
-    if (h->nodes[from]->f <= h->nodes[min]->f) return;
+    if (node_cmp(h->nodes[from], h->nodes[min]) < 0) return;
 
     heap_swap_nodes(h, from, min);
 
