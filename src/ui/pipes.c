@@ -63,7 +63,7 @@ typedef struct {
 static void route_pipe(Pipe *pipe, RoutingMap *map);
 static int calculate_cost(Position prev, Position curr, Position next,
                           RoutingMap *map);
-static int calculate_heuristic(Position from, Position to);
+static int calculate_heuristic(Position prev, Position curr, Position tgt);
 static void reconstruct_path(Node *target, Positions *path, RoutingMap *map);
 
 static void cell_cand_to_pos(int cell, int cand, Position *pos);
@@ -145,7 +145,7 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
 
     Node *src_node = &map->nodes[src.y][src.x][ORIENT_VERTICAL];
     src_node->g = 0;
-    src_node->h = calculate_heuristic(src, tgt);
+    src_node->h = calculate_heuristic((Position){-1, -1}, src, tgt);
     src_node->f = src_node->g + src_node->f;
 
     Heap *open_nodes = heap_create();
@@ -182,7 +182,7 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
                                                   next->pos, map);
             if (tentative_cost < next->g) {
                 next->g = tentative_cost;
-                next->h = calculate_heuristic(next->pos, tgt);
+                next->h = calculate_heuristic(curr->pos, next->pos, tgt);
                 next->f = next->g + next->h;
                 next->prev = curr;
 
@@ -225,12 +225,21 @@ static int calculate_cost(Position prev, Position curr, Position next,
     return cost;
 }
 
-static int calculate_heuristic(Position from, Position to) {
-    int heur = taxicab(from, to);
-    if (from.y != to.y && from.x != to.x) {
-        heur += TURN_PENALTY;
+static int turns_needed(Position prev, Position curr, Position tgt) {
+    Orientation needed_orient = get_orientation(curr, tgt);
+    Orientation prev_orient = (prev.y != -1 && prev.x != -1)
+                                  ? get_orientation(prev, curr)
+                                  : needed_orient;
+
+    if ((curr.y != tgt.y && curr.x == tgt.x)
+        || (curr.y == tgt.y && curr.x != tgt.x)) {
+        return prev_orient != needed_orient;
     }
-    return heur;
+    return curr.y != tgt.y || curr.x != tgt.x;
+}
+
+static int calculate_heuristic(Position prev, Position curr, Position tgt) {
+    return taxicab(curr, tgt) + turns_needed(prev, curr, tgt) * TURN_PENALTY;
 }
 
 static void reconstruct_path(Node *target, Positions *path, RoutingMap *map) {
