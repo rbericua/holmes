@@ -146,7 +146,7 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
     Node *src_node = &map->nodes[src.y][src.x][ORIENT_VERTICAL];
     src_node->g = 0;
     src_node->h = calculate_heuristic((Position){-1, -1}, src, tgt);
-    src_node->f = src_node->g + src_node->f;
+    src_node->f = src_node->h;
 
     Heap *open_nodes = heap_create();
     heap_insert(open_nodes, src_node);
@@ -172,7 +172,9 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
         for (int i = 0; i < 4; i++) {
             int ny = curr->pos.y + dy[i];
             int nx = curr->pos.x + dx[i];
-            if (is_out_of_bounds((Position){ny, nx})) continue;
+            if (is_out_of_bounds((Position){ny, nx})
+                || (prev_pos.y == ny && prev_pos.x == nx))
+                continue;
 
             Node *next = &map->nodes[ny][nx][dor[i]];
             if (next->status == NODE_CLOSED) continue;
