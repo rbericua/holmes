@@ -134,11 +134,13 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
         }
     }
 
-    map->nodes[src.y][src.x].g = 0;
-    map->nodes[src.y][src.x].f = 0;
+    Node *src_node = &map->nodes[src.y][src.x];
+    src_node->g = 0;
+    src_node->h = calculate_heuristic(src, tgt);
+    src_node->f = src_node->g + src_node->f;
 
     Heap *open_nodes = heap_create();
-    heap_insert(open_nodes, &map->nodes[src.y][src.x]);
+    heap_insert(open_nodes, src_node);
 
     int dy[] = {-1, 0, 0, 1};
     int dx[] = {0, -1, 1, 0};
@@ -146,6 +148,8 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
     while (!heap_is_empty(open_nodes)) {
         Node *curr = heap_extract_min(open_nodes);
         curr->status = NODE_CLOSED;
+
+        Position prev_pos = curr->prev ? curr->prev->pos : (Position){-1, -1};
 
         if (curr->pos.y == tgt.y && curr->pos.x == tgt.x) {
             reconstruct_path(curr, &pipe->path, map);
@@ -161,12 +165,11 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
             Node *next = &map->nodes[ny][nx];
             if (next->status == NODE_CLOSED) continue;
 
-            int new_cost = curr->g
-                           + calculate_cost(curr->prev ? curr->prev->pos
-                                                       : (Position){-1, -1},
-                                            curr->pos, next->pos, map);
-            if (new_cost < next->g) {
-                next->g = new_cost;
+            int tentative_cost = curr->g
+                                 + calculate_cost(prev_pos, curr->pos,
+                                                  next->pos, map);
+            if (tentative_cost < next->g) {
+                next->g = tentative_cost;
                 next->h = calculate_heuristic(next->pos, tgt);
                 next->f = next->g + next->h;
                 next->prev = curr;
@@ -189,7 +192,7 @@ static int calculate_cost(Position prev, Position curr, Position next,
     int cost = 1;
 
     Orientation next_orient = get_orientation(curr, next);
-    Orientation curr_orient = (prev.y != -1 && prev.x != -1)
+    Orientation prev_orient = (prev.y != -1 && prev.x != -1)
                                   ? get_orientation(prev, curr)
                                   : next_orient;
 
@@ -203,7 +206,7 @@ static int calculate_cost(Position prev, Position curr, Position next,
         cost += OVERLAP_PENALTY;
     }
 
-    if (curr_orient != next_orient) {
+    if (prev_orient != next_orient) {
         cost += TURN_PENALTY;
     }
 
