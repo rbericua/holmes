@@ -32,6 +32,7 @@ typedef enum {
 struct Node {
     Position pos;
     int f, g, h;
+    Orientation orient;
     NodeStatus status;
     struct Node *prev;
 
@@ -41,7 +42,7 @@ typedef struct Node Node;
 
 typedef struct {
     bool orients[GRID_HEIGHT][GRID_WIDTH][NUM_ORIENTATIONS];
-    Node nodes[GRID_HEIGHT][GRID_WIDTH];
+    Node nodes[GRID_HEIGHT][GRID_WIDTH][NUM_ORIENTATIONS];
 } RoutingMap;
 
 #define HEAP_INIT_CAP 16
@@ -102,8 +103,11 @@ void route_pipes(Pipes *pipes) {
 
     for (int i = 1; i < GRID_HEIGHT - 1; i++) {
         for (int j = 1; j < GRID_WIDTH - 1; j++) {
-            map->nodes[i][j].pos = (Position){i, j};
-            memset(map->orients[i][j], 0, 2 * sizeof(bool));
+            for (int orient = 0; orient < NUM_ORIENTATIONS; orient++) {
+                map->nodes[i][j][orient].pos = (Position){i, j};
+                map->nodes[i][j][orient].orient = orient;
+                map->orients[i][j][orient] = false;
+            }
         }
     }
 
@@ -127,23 +131,28 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
 
     for (int i = 1; i < GRID_HEIGHT - 1; i++) {
         for (int j = 1; j < GRID_WIDTH - 1; j++) {
-            map->nodes[i][j].g = INT_MAX;
-            map->nodes[i][j].f = INT_MAX;
-            map->nodes[i][j].status = NODE_UNVISITED;
-            map->nodes[i][j].prev = NULL;
+            for (int orient = 0; orient < NUM_ORIENTATIONS; orient++) {
+                map->nodes[i][j][orient].g = INT_MAX;
+                map->nodes[i][j][orient].f = INT_MAX;
+                map->nodes[i][j][orient].status = NODE_UNVISITED;
+                map->nodes[i][j][orient].prev = NULL;
+            }
         }
     }
 
-    Node *src_node = &map->nodes[src.y][src.x];
+    Node *src_node = &map->nodes[src.y][src.x][ORIENT_VERTICAL];
     src_node->g = 0;
     src_node->h = calculate_heuristic(src, tgt);
     src_node->f = src_node->g + src_node->f;
 
     Heap *open_nodes = heap_create();
     heap_insert(open_nodes, src_node);
+    map->nodes[src.y][src.x][ORIENT_HORIZONTAL].status = NODE_CLOSED;
 
     int dy[] = {-1, 0, 0, 1};
     int dx[] = {0, -1, 1, 0};
+    Orientation dor[] = {ORIENT_VERTICAL, ORIENT_HORIZONTAL, ORIENT_HORIZONTAL,
+                         ORIENT_VERTICAL};
 
     while (!heap_is_empty(open_nodes)) {
         Node *curr = heap_extract_min(open_nodes);
@@ -162,7 +171,7 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
             int nx = curr->pos.x + dx[i];
             if (is_out_of_bounds((Position){ny, nx})) continue;
 
-            Node *next = &map->nodes[ny][nx];
+            Node *next = &map->nodes[ny][nx][dor[i]];
             if (next->status == NODE_CLOSED) continue;
 
             int tentative_cost = curr->g
