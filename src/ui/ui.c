@@ -39,10 +39,10 @@ void ui_init(Ui *ui) {
     init_pair(CP_SPECIAL1, COLOR_YELLOW, -1);  // Reverse
     init_pair(CP_SPECIAL2, COLOR_MAGENTA, -1); // Reverse
 
-    ui->grid_win = newwin(GRID_HEIGHT, GRID_WIDTH, 0, (COLS - GRID_WIDTH) / 2);
-    ui->info_win = newwin(INFO_HEIGHT, INFO_WIDTH, GRID_HEIGHT, 0);
-    ui->scrollbar_win = newwin(SCROLLBAR_HEIGHT, SCROLLBAR_WIDTH, GRID_HEIGHT,
-                               COLS - SCROLLBAR_WIDTH);
+    ui->grid_win = newwin(GRID_HEIGHT, GRID_WIDTH, GRID_START_Y, GRID_START_X);
+    ui->info_win = newwin(INFO_HEIGHT, INFO_WIDTH, INFO_START_Y, INFO_START_X);
+    ui->scrollbar_win = newwin(SCROLLBAR_HEIGHT, SCROLLBAR_WIDTH,
+                               SCROLLBAR_START_Y, SCROLLBAR_START_X);
     ds_init(&ui->info_buf);
     da_init(&ui->lines);
 
