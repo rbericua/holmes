@@ -179,7 +179,7 @@ void ui_print_grid(Ui *ui, Grid *grid, Step *step, bool show_pipes) {
 
     if (show_pipes && technique_ops[step->type].pipes) {
         Pipes pipes = {0};
-        technique_ops[step->type].pipes(step, &pipes);
+        technique_ops[step->type].pipes(&pipes, step);
         route_pipes(&pipes);
         print_pipes(ui, &pipes);
         for (int i = 0; i < pipes.len; i++) {

@@ -189,7 +189,7 @@ void simple_coloring_colorise(ColorPair colors[81][9], Step *step) {
     }
 }
 
-void simple_coloring_pipes(Step *step, Pipes *pipes) {
+void simple_coloring_pipes(Pipes *pipes, Step *step) {
     SimpleColoringStep *s = &step->as.simple_coloring;
 
     for (int i = 0; i < s->num_links; i++) {

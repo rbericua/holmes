@@ -14,7 +14,7 @@ typedef struct {
     void (*revert)(Grid *, Step *);
     void (*explain)(DynStr *, Step *);
     void (*colorise)(ColorPair[81][9], Step *);
-    void (*pipes)(Step *, Pipes *);
+    void (*pipes)(Pipes *, Step *);
 } TechniqueOps;
 
 extern TechniqueFn techniques[NUM_TECHNIQUES];
