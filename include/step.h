@@ -146,7 +146,8 @@ typedef struct {
 
 typedef enum {
     SC_TWICE_IN_UNIT,
-    SC_BOTH_SEEN
+    SC_BOTH_SEEN,
+    SC_EMPTIED_UNIT
 } SimpleColoringRule;
 
 typedef struct {
@@ -166,6 +167,13 @@ typedef struct {
             int removal_cells[81];
             int num_removals;
         } both_seen;
+        struct {
+            int unit_idx;
+            UnitType unit_type;
+            int emptied_cells[9];
+            int num_emptied_cells;
+            int color;
+        } emptied_unit;
     };
 } SimpleColoringStep;
 
