@@ -265,17 +265,16 @@ static int calculate_heuristic(Position prev, Position curr, Position tgt) {
 }
 
 static void reconstruct_path(Node *target, Positions *path, RoutingMap *map) {
-    bool first = true;
     Node *curr = target;
     while (curr) {
-        if (!first && curr->prev) {
+        if (curr->prev) {
             Orientation orient = get_orientation(curr->prev->pos, curr->pos);
+            map->orients[curr->prev->pos.y][curr->prev->pos.x][orient] = true;
             map->orients[curr->pos.y][curr->pos.x][orient] = true;
         }
 
         da_append(path, curr->pos);
         curr = curr->prev;
-        first = false;
     }
 }
 
