@@ -63,7 +63,7 @@ typedef struct {
 
 static void route_pipe(Pipe *pipe, RoutingMap *map);
 static int calculate_cost(Position prev, Position curr, Position next,
-                          RoutingMap *map);
+                          bool is_source, bool is_target, RoutingMap *map);
 static int calculate_heuristic(Position prev, Position curr, Position tgt);
 static void reconstruct_path(Node *target, Positions *path, RoutingMap *map);
 
@@ -112,6 +112,15 @@ void route_pipes(Pipes *pipes) {
                 map->nodes[i][j][orient].orient = orient;
                 map->orients[i][j][orient] = false;
             }
+        }
+    }
+
+    for (int i = 0; i < pipes->len; i++) {
+        Position pos1 = pipes->elems[i].pos1;
+        Position pos2 = pipes->elems[i].pos2;
+        for (int orient = 0; orient < NUM_ORIENTATIONS; orient++) {
+            map->orients[pos1.y][pos1.x][orient] = true;
+            map->orients[pos2.y][pos2.x][orient] = true;
         }
     }
 
@@ -180,9 +189,13 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
             Node *next = &map->nodes[ny][nx][dor[i]];
             if (next->status == NODE_CLOSED) continue;
 
+            bool is_source = curr->pos.y == src.y && curr->pos.x == src.x;
+            bool is_target = ny == tgt.y && nx == tgt.x;
+
             int tentative_cost = curr->g
                                  + calculate_cost(prev_pos, curr->pos,
-                                                  next->pos, map);
+                                                  next->pos, is_source,
+                                                  is_target, map);
             if (tentative_cost < next->g) {
                 next->g = tentative_cost;
                 next->h = calculate_heuristic(curr->pos, next->pos, tgt);
@@ -203,7 +216,7 @@ static void route_pipe(Pipe *pipe, RoutingMap *map) {
 }
 
 static int calculate_cost(Position prev, Position curr, Position next,
-                          RoutingMap *map) {
+                          bool is_source, bool is_target, RoutingMap *map) {
     int cost = 1;
 
     Orientation next_orient = get_orientation(curr, next);
@@ -216,8 +229,8 @@ static int calculate_cost(Position prev, Position curr, Position next,
         cost += GRIDLINE_PENALTY;
     }
 
-    if (map->orients[curr.y][curr.x][next_orient]
-        || map->orients[next.y][next.x][next_orient]) {
+    if ((!is_source && map->orients[curr.y][curr.x][next_orient])
+        || (!is_target && map->orients[next.y][next.x][next_orient])) {
         cost += OVERLAP_PENALTY;
     }
 
