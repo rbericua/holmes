@@ -105,8 +105,8 @@ void route_pipes(Pipes *pipes) {
 
     RoutingMap *map = malloc(sizeof(RoutingMap));
 
-    for (int i = 1; i < GRID_HEIGHT - 1; i++) {
-        for (int j = 1; j < GRID_WIDTH - 1; j++) {
+    for (int i = 0; i < GRID_HEIGHT; i++) {
+        for (int j = 0; j < GRID_WIDTH; j++) {
             for (int orient = 0; orient < NUM_ORIENTATIONS; orient++) {
                 map->nodes[i][j][orient].pos = (Position){i, j};
                 map->nodes[i][j][orient].orient = orient;
