@@ -12,7 +12,7 @@ CandSet cand_set_from_value(int value) {
 CandSet cand_set_from_arr(int arr[], int len) {
     CandSet set;
     for (int i = 0; i < len; i++) {
-        cand_set_add(&set, arr[i]);
+        set = cand_set_add(set, arr[i]);
     }
     return set;
 }
@@ -35,18 +35,14 @@ bool cand_set_has(CandSet set, int cand) {
     return cand != 0 && IS_BIT_SET(set, cand - 1);
 }
 
-void cand_set_add(CandSet *set, int cand) {
-    if (cand == 0) return;
-    *set = SET_BIT(*set, cand - 1);
+CandSet cand_set_add(CandSet set, int cand) {
+    if (cand == 0) return set;
+    return SET_BIT(set, cand - 1);
 }
 
-void cand_set_remove(CandSet *set, int cand) {
-    if (cand == 0) return;
-    *set = UNSET_BIT(*set, cand - 1);
-}
-
-void cand_set_clear(CandSet *set) {
-    *set = CAND_SET_EMPTY;
+CandSet cand_set_remove(CandSet set, int cand) {
+    if (cand == 0) return set;
+    return UNSET_BIT(set, cand - 1);
 }
 
 int cand_set_first(CandSet set) {

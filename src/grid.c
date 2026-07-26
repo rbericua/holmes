@@ -102,7 +102,7 @@ bool grid_cell_has_cand(Grid *grid, int cell, int cand) {
 }
 
 void grid_cell_add_cand(Grid *grid, int cell, int cand) {
-    cand_set_add(&grid->cands[cell], cand);
+    grid->cands[cell] = cand_set_add(grid->cands[cell], cand);
 }
 
 void grid_cell_add_cands(Grid *grid, int cell, CandSet cands) {
@@ -110,7 +110,7 @@ void grid_cell_add_cands(Grid *grid, int cell, CandSet cands) {
 }
 
 void grid_cell_remove_cand(Grid *grid, int cell, int cand) {
-    cand_set_remove(&grid->cands[cell], cand);
+    grid->cands[cell] = cand_set_remove(grid->cands[cell], cand);
 }
 
 void grid_cell_remove_cands(Grid *grid, int cell, CandSet cands) {
@@ -118,7 +118,7 @@ void grid_cell_remove_cands(Grid *grid, int cell, CandSet cands) {
 }
 
 void grid_cell_clear_cands(Grid *grid, int cell) {
-    cand_set_clear(&grid->cands[cell]);
+    grid->cands[cell] = CAND_SET_EMPTY;
 }
 
 int grid_cell_first_cand(Grid *grid, int cell) {
@@ -158,7 +158,8 @@ CandSet grid_region_missing_values_to_set(Grid *grid, int region[],
                                           int region_len) {
     CandSet missing_values = CAND_SET_FULL;
     for (int i = 0; i < region_len; i++) {
-        cand_set_remove(&missing_values, grid_cell_value(grid, region[i]));
+        missing_values = cand_set_remove(missing_values,
+                                         grid_cell_value(grid, region[i]));
     }
     return missing_values;
 }
