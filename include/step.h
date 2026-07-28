@@ -144,6 +144,7 @@ typedef struct {
 
 #define MAX_SIMPLE_COLORING_CHAIN_LEN 18
 #define MAX_SIMPLE_COLORING_LINKS 27
+#define MAX_SIMPLE_COLORING_REMOVALS 81
 
 typedef enum {
     SC_TWICE_IN_UNIT,
@@ -152,20 +153,24 @@ typedef enum {
 } SimpleColoringRule;
 
 typedef struct {
-    int cells[MAX_SIMPLE_COLORING_CHAIN_LEN];
-    int colors[MAX_SIMPLE_COLORING_CHAIN_LEN];
+    int cell;
+    int color;
+} SimpleColoringNode;
+
+typedef struct {
+    SimpleColoringNode chain[MAX_SIMPLE_COLORING_CHAIN_LEN];
     int chain_len;
     int links[MAX_SIMPLE_COLORING_LINKS][2];
     int num_links;
     int value;
     SimpleColoringRule rule;
+    int removal_color;
     union {
         struct {
             int cells[2];
-            int color;
         } twice_in_unit;
         struct {
-            int removal_cells[81];
+            int removal_cells[MAX_SIMPLE_COLORING_REMOVALS];
             int num_removals;
         } both_seen;
         struct {
@@ -173,7 +178,6 @@ typedef struct {
             UnitType unit_type;
             int emptied_cells[9];
             int num_emptied_cells;
-            int color;
         } emptied_unit;
     };
 } SimpleColoringStep;

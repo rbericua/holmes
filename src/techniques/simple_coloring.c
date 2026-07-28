@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "geometry.h"
 #include "grid.h"
@@ -16,19 +17,23 @@ static int other_color(int color) {
     return color == 1 ? 2 : 1;
 }
 
-static void colorise_chain(ColorPair colors[81][9], SimpleColoringStep *s,
-                           int removal_color);
+static void explain_color_removals(DynStr *buf, SimpleColoringStep *s);
 static bool is_link_repeated(int links[][3], int cell1, int cell2);
 static bool find_links(Grid *grid, int value, int links[][3]);
 static int find_first_linked(int links[][3]);
 static void paint_and_extract_links(int links[][3], int cell, int curr_color,
                                     int colors[], int out_links[][2],
                                     int *num_links);
-static int extract_colors(int colors[], int out_cells[], int out_colors[]);
+static int extract_chain(int colors[], SimpleColoringNode chain[]);
 static int cells_emptied_by_color(int cells[], int num_cells,
-                                  int colors_seen[][2]);
-static bool find_removals(SimpleColoringStep *s, Grid *grid, int value,
-                          int colors[]);
+                                  int seen_color[][2]);
+static bool check_twice_in_unit(int colors[], int seen_color[][2],
+                                SimpleColoringStep *s);
+static bool check_emptied_unit(Grid *grid, int seen_color[][2],
+                               SimpleColoringStep *s);
+static bool check_both_seen(Grid *grid, int colors[], int seen_color[][2],
+                            SimpleColoringStep *s);
+static bool find_removals(Grid *grid, int colors[], SimpleColoringStep *s);
 
 bool simple_coloring(Grid *grid, Step *step) {
     step->type = TECH_SIMPLE_COLORING;
@@ -49,10 +54,10 @@ bool simple_coloring(Grid *grid, Step *step) {
             s->num_links = 0;
             paint_and_extract_links(links, first, 1, colors, s->links,
                                     &s->num_links);
-            s->chain_len = extract_colors(colors, s->cells, s->colors);
+            s->chain_len = extract_chain(colors, s->chain);
             s->value = value;
 
-            if (find_removals(s, grid, value, colors)) return true;
+            if (find_removals(grid, colors, s)) return true;
         }
     }
 
@@ -62,53 +67,33 @@ bool simple_coloring(Grid *grid, Step *step) {
 void simple_coloring_apply(Grid *grid, Step *step) {
     SimpleColoringStep *s = &step->as.simple_coloring;
 
-    switch (s->rule) {
-    case SC_TWICE_IN_UNIT:
-        for (int i = 0; i < s->chain_len; i++) {
-            if (s->colors[i] == s->twice_in_unit.color) {
-                grid_cell_remove_cand(grid, s->cells[i], s->value);
-            }
-        }
-        break;
-    case SC_BOTH_SEEN:
+    if (s->rule == SC_BOTH_SEEN) {
         for (int i = 0; i < s->both_seen.num_removals; i++) {
             grid_cell_remove_cand(grid, s->both_seen.removal_cells[i],
                                   s->value);
         }
-        break;
-    case SC_EMPTIED_UNIT:
+    } else {
         for (int i = 0; i < s->chain_len; i++) {
-            if (s->colors[i] == s->emptied_unit.color) {
-                grid_cell_remove_cand(grid, s->cells[i], s->value);
+            if (s->chain[i].color == s->removal_color) {
+                grid_cell_remove_cand(grid, s->chain[i].cell, s->value);
             }
         }
-        break;
     }
 }
 
 void simple_coloring_revert(Grid *grid, Step *step) {
     SimpleColoringStep *s = &step->as.simple_coloring;
 
-    switch (s->rule) {
-    case SC_TWICE_IN_UNIT:
-        for (int i = 0; i < s->chain_len; i++) {
-            if (s->colors[i] == s->twice_in_unit.color) {
-                grid_cell_add_cand(grid, s->cells[i], s->value);
-            }
-        }
-        break;
-    case SC_BOTH_SEEN:
+    if (s->rule == SC_BOTH_SEEN) {
         for (int i = 0; i < s->both_seen.num_removals; i++) {
             grid_cell_add_cand(grid, s->both_seen.removal_cells[i], s->value);
         }
-        break;
-    case SC_EMPTIED_UNIT:
+    } else {
         for (int i = 0; i < s->chain_len; i++) {
-            if (s->colors[i] == s->emptied_unit.color) {
-                grid_cell_add_cand(grid, s->cells[i], s->value);
+            if (s->chain[i].color == s->removal_color) {
+                grid_cell_add_cand(grid, s->chain[i].cell, s->value);
             }
         }
-        break;
     }
 }
 
@@ -120,20 +105,13 @@ void simple_coloring_explain(DynStr *buf, Step *step) {
         char *cells_str = explain_cells(s->twice_in_unit.cells, 2);
 
         ds_append(buf,
-                  "[Simple Coloring (Twice in Unit)] %s see each "
-                  "other and have the same color\n",
+                  "[Simple Coloring (Twice in Unit)] %s see each other and "
+                  "have the same color\n",
                   cells_str);
 
         free(cells_str);
 
-        for (int i = 0; i < s->chain_len; i++) {
-            if (s->colors[i] == s->twice_in_unit.color) {
-                char *removal_msg = explain_value_removal(s->cells[i],
-                                                          s->value);
-                ds_append(buf, "%s\n", removal_msg);
-                free(removal_msg);
-            }
-        }
+        explain_color_removals(buf, s);
     } break;
     case SC_BOTH_SEEN: {
         ds_append(buf, "[Simple Coloring (Both Seen)]\n");
@@ -143,26 +121,18 @@ void simple_coloring_explain(DynStr *buf, Step *step) {
             ds_append(buf, "%s\n", removal_msg);
             free(removal_msg);
         }
-        break;
-    }
+    } break;
     case SC_EMPTIED_UNIT: {
         char *unit_str = explain_unit_name(s->emptied_unit.unit_type);
 
         ds_append(buf,
-                  "[Simple Coloring (Emptied Unit)] Every %d in %s %d "
-                  "sees the same color\n",
+                  "[Simple Coloring (Emptied Unit)] Every %d in %s %d sees the "
+                  "same color\n",
                   s->value, unit_str, s->emptied_unit.unit_idx + 1);
 
         free(unit_str);
 
-        for (int i = 0; i < s->chain_len; i++) {
-            if (s->colors[i] == s->emptied_unit.color) {
-                char *removal_msg = explain_value_removal(s->cells[i],
-                                                          s->value);
-                ds_append(buf, "%s\n", removal_msg);
-                free(removal_msg);
-            }
-        }
+        explain_color_removals(buf, s);
     } break;
     }
 }
@@ -170,22 +140,28 @@ void simple_coloring_explain(DynStr *buf, Step *step) {
 void simple_coloring_colorise(ColorPair colors[81][9], Step *step) {
     SimpleColoringStep *s = &step->as.simple_coloring;
 
+    for (int i = 0; i < s->chain_len; i++) {
+        int color;
+        if (s->chain[i].color == s->removal_color) {
+            color = CP_REMOVAL;
+        } else {
+            color = s->chain[i].color == 1 ? CP_SPECIAL1 : CP_SPECIAL2;
+        }
+        colors[s->chain[i].cell][s->value - 1] = color;
+    }
+
     switch (s->rule) {
-    case SC_TWICE_IN_UNIT:
-        colorise_chain(colors, s, s->twice_in_unit.color);
-        break;
     case SC_BOTH_SEEN:
-        colorise_chain(colors, s, -1);
         for (int i = 0; i < s->both_seen.num_removals; i++) {
             colors[s->both_seen.removal_cells[i]][s->value - 1] = CP_REMOVAL;
         }
         break;
     case SC_EMPTIED_UNIT:
-        colorise_chain(colors, s, s->emptied_unit.color);
         for (int i = 0; i < s->emptied_unit.num_emptied_cells; i++) {
             colors[s->emptied_unit.emptied_cells[i]][s->value - 1] = CP_TRIGGER;
         }
         break;
+    default: break;
     }
 }
 
@@ -198,16 +174,14 @@ void simple_coloring_pipes(Pipes *pipes, Step *step) {
     }
 }
 
-static void colorise_chain(ColorPair colors[81][9], SimpleColoringStep *s,
-                           int removal_color) {
+static void explain_color_removals(DynStr *buf, SimpleColoringStep *s) {
     for (int i = 0; i < s->chain_len; i++) {
-        int color;
-        if (removal_color != -1 && s->colors[i] == removal_color) {
-            color = CP_REMOVAL;
-        } else {
-            color = s->colors[i] == 1 ? CP_SPECIAL1 : CP_SPECIAL2;
+        if (s->chain[i].color == s->removal_color) {
+            char *removal_msg = explain_value_removal(s->chain[i].cell,
+                                                      s->value);
+            ds_append(buf, "%s\n", removal_msg);
+            free(removal_msg);
         }
-        colors[s->cells[i]][s->value - 1] = color;
     }
 }
 
@@ -264,25 +238,27 @@ static void paint_and_extract_links(int links[][3], int cell, int curr_color,
     }
 }
 
-static int extract_colors(int colors[], int out_cells[], int out_colors[]) {
+static int extract_chain(int colors[], SimpleColoringNode chain[]) {
     int count = 0;
     for (int i = 0; i < 81; i++) {
         if (colors[i] != 0) {
-            out_cells[count] = i;
-            out_colors[count++] = colors[i];
+            chain[count++] = (SimpleColoringNode){
+                .cell = i,
+                .color = colors[i],
+            };
         }
     }
     return count;
 }
 
 static int cells_emptied_by_color(int cells[], int num_cells,
-                                  int colors_seen[][2]) {
+                                  int seen_color[][2]) {
     bool emptied_by[] = {true, true};
-    for (int i = 0; i < num_cells; i++) {
-        int cell = cells[i];
-        for (int color_i = 0; color_i < 2; color_i++) {
-            if (emptied_by[color_i] && colors_seen[cell][color_i] == -1) {
-                emptied_by[color_i] = false;
+    for (int cell_i = 0; cell_i < num_cells; cell_i++) {
+        int cell = cells[cell_i];
+        for (int color = 0; color < 2; color++) {
+            if (seen_color[cell][color] == -1) {
+                emptied_by[color] = false;
             }
         }
     }
@@ -292,61 +268,88 @@ static int cells_emptied_by_color(int cells[], int num_cells,
     return 0;
 }
 
-static bool find_removals(SimpleColoringStep *s, Grid *grid, int value,
-                          int colors[]) {
-    s->rule = SC_BOTH_SEEN;
-    s->both_seen.num_removals = 0;
+static bool check_twice_in_unit(int colors[], int seen_color[][2],
+                                SimpleColoringStep *s) {
+    for (int cell = 0; cell < 81; cell++) {
+        if (seen_color[cell][0] == -1 || seen_color[cell][1] == -1) continue;
 
-    int colors_seen[81][2];
-    for (int i = 0; i < 81; i++) {
-        colors_seen[i][0] = -1;
-        colors_seen[i][1] = -1;
-    }
-
-    for (int cell_i = 0; cell_i < 81; cell_i++) {
-        if (colors[cell_i] == 0) continue;
-        for (int peer_i = 0; peer_i < NUM_PEERS; peer_i++) {
-            int peer = peers[cell_i][peer_i];
-            colors_seen[peer][colors[cell_i] - 1] = cell_i;
+        int color = colors[cell];
+        if (color != 0) {
+            s->rule = SC_TWICE_IN_UNIT;
+            s->twice_in_unit.cells[0] = cell;
+            s->twice_in_unit.cells[1] = seen_color[cell][color - 1];
+            s->removal_color = color;
+            return true;
         }
     }
+    return false;
+}
 
-    for (int cell_i = 0; cell_i < 81; cell_i++) {
-        int color = colors[cell_i];
-        if (colors_seen[cell_i][0] != -1 && colors_seen[cell_i][1] != -1) {
-            if (color == 0 && grid_cell_has_cand(grid, cell_i, value)) {
-                s->both_seen.removal_cells[s->both_seen.num_removals++] =
-                    cell_i;
-            } else if (color != 0) {
-                s->rule = SC_TWICE_IN_UNIT;
-                s->twice_in_unit.cells[0] = cell_i;
-                s->twice_in_unit.cells[1] = colors_seen[cell_i][color - 1];
-                s->twice_in_unit.color = color;
-                return true;
-            }
-        }
-    }
-
+static bool check_emptied_unit(Grid *grid, int seen_color[][2],
+                               SimpleColoringStep *s) {
     for (int unit_type = 0; unit_type < 3; unit_type++) {
         for (int unit_i = 0; unit_i < 9; unit_i++) {
-            s->emptied_unit.num_emptied_cells = grid_region_with_cand(
-                grid, units[unit_type][unit_i], 9, value,
-                s->emptied_unit.emptied_cells);
-            if (s->emptied_unit.num_emptied_cells == 0) continue;
+            int cells_to_empty[9];
+            int num_cells_to_empty = grid_region_with_cand(
+                grid, units[unit_type][unit_i], 9, s->value, cells_to_empty);
+            if (num_cells_to_empty == 0) continue;
 
             int emptied_by = cells_emptied_by_color(
-                s->emptied_unit.emptied_cells,
-                s->emptied_unit.num_emptied_cells, colors_seen);
+                cells_to_empty, num_cells_to_empty, seen_color);
 
             if (emptied_by != 0) {
                 s->rule = SC_EMPTIED_UNIT;
                 s->emptied_unit.unit_idx = unit_i;
                 s->emptied_unit.unit_type = unit_type;
-                s->emptied_unit.color = emptied_by;
+                s->emptied_unit.unit_type = unit_type;
+                memcpy(s->emptied_unit.emptied_cells, cells_to_empty,
+                       num_cells_to_empty * sizeof(int));
+                s->emptied_unit.num_emptied_cells = num_cells_to_empty;
+                s->removal_color = emptied_by;
                 return true;
             }
         }
     }
+    return false;
+}
 
-    return s->both_seen.num_removals > 0;
+static bool check_both_seen(Grid *grid, int colors[], int seen_color[][2],
+                            SimpleColoringStep *s) {
+    s->both_seen.num_removals = 0;
+    for (int cell = 0; cell < 81; cell++) {
+        if (seen_color[cell][0] == -1 || seen_color[cell][1] == -1) continue;
+
+        int color = colors[cell];
+        if (color == 0 && grid_cell_has_cand(grid, cell, s->value)) {
+            s->both_seen.removal_cells[s->both_seen.num_removals++] = cell;
+        }
+    }
+    if (s->both_seen.num_removals > 0) {
+        s->rule = SC_BOTH_SEEN;
+        s->removal_color = -1;
+        return true;
+    }
+    return false;
+}
+
+static bool find_removals(Grid *grid, int colors[], SimpleColoringStep *s) {
+    int seen_color[81][2];
+    for (int i = 0; i < 81; i++) {
+        seen_color[i][0] = -1;
+        seen_color[i][1] = -1;
+    }
+
+    for (int cell = 0; cell < 81; cell++) {
+        if (colors[cell] == 0) continue;
+        for (int peer_i = 0; peer_i < NUM_PEERS; peer_i++) {
+            int peer = peers[cell][peer_i];
+            seen_color[peer][colors[cell] - 1] = cell;
+        }
+    }
+
+    if (check_twice_in_unit(colors, seen_color, s)) return true;
+    if (check_emptied_unit(grid, seen_color, s)) return true;
+    if (check_both_seen(grid, colors, seen_color, s)) return true;
+
+    return false;
 }
