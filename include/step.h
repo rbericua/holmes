@@ -24,6 +24,7 @@ typedef enum {
     TECH_FINNED_JELLYFISH,
     TECH_Y_WING,
     TECH_SIMPLE_COLORING,
+    TECH_MEDUSA,
 
     NUM_TECHNIQUES
 } TechniqueType;
@@ -177,6 +178,75 @@ typedef struct {
     };
 } SimpleColoringStep;
 
+#define MAX_MEDUSA_CHAIN_LEN 729
+#define MAX_MEDUSA_LINKS 324
+#define MAX_MEDUSA_REMOVALS 729
+
+typedef struct {
+    int cell1;
+    int cand1;
+    int cell2;
+    int cand2;
+} Link;
+
+typedef enum {
+    MED_TWICE_IN_CELL,
+    MED_TWICE_IN_UNIT,
+    MED_BOTH_SEEN,
+    MED_EMPTIED_CELL,
+    MED_EMPTIED_UNIT
+} MedusaRule;
+
+typedef enum {
+    MED_BOTH_SEEN_CELL,
+    MED_BOTH_SEEN_UNITS,
+    MED_BOTH_SEEN_CELL_UNIT,
+} MedusaBothSeenRule;
+
+typedef struct {
+    int cell;
+    int cand;
+    int color;
+} MedusaNode;
+
+typedef struct {
+    int cell;
+    int cand;
+    MedusaBothSeenRule rule;
+} MedusaRemoval;
+
+typedef struct {
+    MedusaNode chain[MAX_MEDUSA_CHAIN_LEN];
+    int chain_len;
+    Link links[MAX_MEDUSA_LINKS];
+    int num_links;
+    MedusaRule rule;
+    int removal_color;
+    union {
+        struct {
+            int cell;
+        } twice_in_cell;
+        struct {
+            int value;
+            int cells[2];
+        } twice_in_unit;
+        struct {
+            MedusaRemoval removals[MAX_MEDUSA_REMOVALS];
+            int num_removals;
+        } both_seen;
+        struct {
+            int cell;
+        } emptied_cell;
+        struct {
+            int value;
+            int unit_idx;
+            UnitType unit_type;
+            int emptied_cells[9];
+            int num_emptied_cells;
+        } emptied_unit;
+    };
+} MedusaStep;
+
 typedef struct {
     TechniqueType type;
     union {
@@ -189,6 +259,7 @@ typedef struct {
         FinnedFishStep finned_fish;
         YWingStep y_wing;
         SimpleColoringStep simple_coloring;
+        MedusaStep medusa;
     } as;
 } Step;
 
