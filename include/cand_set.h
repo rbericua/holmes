@@ -16,6 +16,7 @@ int cand_set_len(CandSet set);
 bool cand_set_has(CandSet set, int cand);
 CandSet cand_set_add(CandSet set, int cand);
 CandSet cand_set_remove(CandSet set, int cand);
+bool cand_set_is_sub(CandSet set1, CandSet set2);
 int cand_set_first(CandSet set);
 CandSet cand_set_intersection(CandSet sets[], int num_sets);
 CandSet cand_set_union(CandSet sets[], int num_sets);

@@ -45,6 +45,10 @@ CandSet cand_set_remove(CandSet set, int cand) {
     return UNSET_BIT(set, cand - 1);
 }
 
+bool cand_set_is_sub(CandSet set1, CandSet set2) {
+    return (set1 & set2) == set1;
+}
+
 int cand_set_first(CandSet set) {
     return __builtin_ffs(set);
 }
