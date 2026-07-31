@@ -8,6 +8,7 @@
 #include "techniques/finned_fish.h"
 #include "techniques/hidden_set.h"
 #include "techniques/hidden_single.h"
+#include "techniques/kite.h"
 #include "techniques/medusa.h"
 #include "techniques/naked_set.h"
 #include "techniques/naked_single.h"
@@ -35,11 +36,11 @@
     }
 
 TechniqueFn techniques[] = {
-    naked_single,  hidden_single,    naked_pair,       hidden_pair,
-    naked_triple,  hidden_triple,    naked_quad,       hidden_quad,
-    pointing_set,  x_wing,           y_wing,           swordfish,
-    skyscraper,    simple_coloring,  jellyfish,        medusa,
-    finned_x_wing, finned_swordfish, finned_jellyfish,
+    naked_single, hidden_single, naked_pair,       hidden_pair,
+    naked_triple, hidden_triple, naked_quad,       hidden_quad,
+    pointing_set, x_wing,        skyscraper,       kite,
+    swordfish,    y_wing,        simple_coloring,  jellyfish,
+    medusa,       finned_x_wing, finned_swordfish, finned_jellyfish,
 };
 
 TechniqueOps technique_ops[] = {
@@ -59,6 +60,7 @@ TechniqueOps technique_ops[] = {
     [TECH_FINNED_SWORDFISH] = TECHNIQUE_OPS(finned_fish),
     [TECH_FINNED_JELLYFISH] = TECHNIQUE_OPS(finned_fish),
     [TECH_SKYSCRAPER] = TECHNIQUE_OPS(skyscraper),
+    [TECH_KITE] = TECHNIQUE_OPS(kite),
     [TECH_Y_WING] = TECHNIQUE_OPS(y_wing),
     [TECH_SIMPLE_COLORING] = PIPE_TECHNIQUE_OPS(simple_coloring),
     [TECH_MEDUSA] = PIPE_TECHNIQUE_OPS(medusa),
