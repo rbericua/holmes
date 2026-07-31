@@ -34,6 +34,9 @@
     Bitset##n bitset##n##_remove(Bitset##n set, int pos) { \
         return UNSET_BIT(set, pos); \
     } \
+    bool bitset##n##_is_sub(Bitset##n set1, Bitset##n set2) { \
+        return (set1 & set2) == set1; \
+    } \
     int bitset##n##_first(Bitset##n set) { \
         return __builtin_ffs(set); \
     } \

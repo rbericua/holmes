@@ -18,6 +18,7 @@
     bool bitset##n##_has(Bitset##n set, int pos); \
     Bitset##n bitset##n##_add(Bitset##n set, int pos); \
     Bitset##n bitset##n##_remove(Bitset##n set, int pos); \
+    bool bitset##n##_is_sub(Bitset##n set1, Bitset##n set2); \
     int bitset##n##_first(Bitset##n set); \
     Bitset##n bitset##n##_intersection(Bitset##n sets[], int num_sets); \
     Bitset##n bitset##n##_union(Bitset##n sets[], int num_sets);
