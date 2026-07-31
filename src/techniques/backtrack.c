@@ -24,6 +24,7 @@ int backtrack(Grid *grid) {
             empty_idxs[num_empty++] = i;
         } else {
             values[i] = grid_cell_value(grid, i);
+            if (!is_placement_valid(i, values[i])) return 0;
             place_value(i, values[i]);
         }
     }
