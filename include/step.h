@@ -22,6 +22,7 @@ typedef enum {
     TECH_FINNED_X_WING,
     TECH_FINNED_SWORDFISH,
     TECH_FINNED_JELLYFISH,
+    TECH_SKYSCRAPER,
     TECH_Y_WING,
     TECH_SIMPLE_COLORING,
     TECH_MEDUSA,
@@ -129,6 +130,16 @@ typedef struct {
     UnitType base_unit_type;
     UnitType cover_unit_type;
 } FinnedFishStep;
+
+#define MAX_SKYSCRAPER_REMOVALS 4
+
+typedef struct {
+    int floor[2];
+    int roof[2];
+    int value;
+    int removal_cells[MAX_SKYSCRAPER_REMOVALS];
+    int num_removals;
+} SkyscraperStep;
 
 #define MAX_Y_WING_REMOVALS 5
 
@@ -261,6 +272,7 @@ typedef struct {
         PointingSetStep pointing_set;
         BasicFishStep basic_fish;
         FinnedFishStep finned_fish;
+        SkyscraperStep skyscraper;
         YWingStep y_wing;
         SimpleColoringStep simple_coloring;
         MedusaStep medusa;
