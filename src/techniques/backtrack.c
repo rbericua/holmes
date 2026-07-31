@@ -60,15 +60,15 @@ int backtrack(Grid *grid) {
 }
 
 static void place_value(int idx, int value) {
-    bitset16_add(&rows[cell_row(idx)], value);
-    bitset16_add(&cols[cell_col(idx)], value);
-    bitset16_add(&boxes[cell_box(idx)], value);
+    rows[cell_row(idx)] = bitset16_add(rows[cell_row(idx)], value);
+    cols[cell_col(idx)] = bitset16_add(cols[cell_col(idx)], value);
+    boxes[cell_box(idx)] = bitset16_add(boxes[cell_box(idx)], value);
 }
 
 static void remove_value(int idx, int value) {
-    bitset16_remove(&rows[cell_row(idx)], value);
-    bitset16_remove(&cols[cell_col(idx)], value);
-    bitset16_remove(&boxes[cell_box(idx)], value);
+    rows[cell_row(idx)] = bitset16_remove(rows[cell_row(idx)], value);
+    cols[cell_col(idx)] = bitset16_remove(cols[cell_col(idx)], value);
+    boxes[cell_box(idx)] = bitset16_remove(boxes[cell_box(idx)], value);
 }
 
 static bool is_placement_valid(int idx, int value) {

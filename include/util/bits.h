@@ -16,9 +16,8 @@
     int bitset##n##_to_arr(Bitset##n set, int arr[]); \
     int bitset##n##_len(Bitset##n set); \
     bool bitset##n##_has(Bitset##n set, int pos); \
-    void bitset##n##_add(Bitset##n *set, int pos); \
-    void bitset##n##_remove(Bitset##n *set, int pos); \
-    void bitset##n##_clear(Bitset##n *set); \
+    Bitset##n bitset##n##_add(Bitset##n set, int pos); \
+    Bitset##n bitset##n##_remove(Bitset##n set, int pos); \
     int bitset##n##_first(Bitset##n set); \
     Bitset##n bitset##n##_intersection(Bitset##n sets[], int num_sets); \
     Bitset##n bitset##n##_union(Bitset##n sets[], int num_sets);

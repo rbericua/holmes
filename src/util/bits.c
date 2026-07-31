@@ -9,7 +9,7 @@
     Bitset##n bitset##n##_from_arr(int arr[], int len) { \
         Bitset##n set; \
         for (int i = 0; i < len; i++) { \
-            bitset##n##_add(&set, arr[i]); \
+            set = bitset##n##_add(set, arr[i]); \
         } \
         return set; \
     } \
@@ -28,14 +28,11 @@
     bool bitset##n##_has(Bitset##n set, int pos) { \
         return IS_BIT_SET(set, pos); \
     } \
-    void bitset##n##_add(Bitset##n *set, int pos) { \
-        *set = SET_BIT(*set, pos); \
+    Bitset##n bitset##n##_add(Bitset##n set, int pos) { \
+        return SET_BIT(set, pos); \
     } \
-    void bitset##n##_remove(Bitset##n *set, int pos) { \
-        *set = UNSET_BIT(*set, pos); \
-    } \
-    void bitset##n##_clear(Bitset##n *set) { \
-        *set = BITSET##n##_EMPTY; \
+    Bitset##n bitset##n##_remove(Bitset##n set, int pos) { \
+        return UNSET_BIT(set, pos); \
     } \
     int bitset##n##_first(Bitset##n set) { \
         return __builtin_ffs(set); \
