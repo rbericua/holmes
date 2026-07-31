@@ -54,6 +54,12 @@ int cell_from_row_col(int row, int col) {
     return row * 9 + col;
 }
 
+int cell_from_unit_pos(int unit, int pos, UnitType unit_type) {
+    int row = unit_type == UNIT_ROW ? unit : pos;
+    int col = unit_type == UNIT_ROW ? pos : unit;
+    return cell_from_row_col(row, col);
+}
+
 bool cells_are_peers(int a, int b) {
     return a != b
            && (cell_row(a) == cell_row(b) || cell_col(a) == cell_col(b)

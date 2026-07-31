@@ -23,6 +23,7 @@ int cell_col(int cell);
 int cell_box(int cell);
 int cell_idx_in_box(int cell);
 int cell_from_row_col(int row, int col);
+int cell_from_unit_pos(int unit, int pos, UnitType unit_type);
 
 bool cells_are_peers(int a, int b);
 bool cells_in_same_row(int cells[], int num_cells);

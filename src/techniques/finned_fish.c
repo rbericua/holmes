@@ -24,13 +24,6 @@ static bool arr_contains(int arr[], int len, int elem) {
     return false;
 }
 
-static int cell_from_base_cover(int base_idx, int cover_idx,
-                                UnitType base_type) {
-    int row = base_type == UNIT_ROW ? base_idx : cover_idx;
-    int col = base_type == UNIT_ROW ? cover_idx : base_idx;
-    return cell_from_row_col(row, col);
-}
-
 static bool finned_n_fish_unit(Grid *grid, Step *step, int size,
                                UnitType unit_type);
 static int find_base_sets(Grid *grid, int size, UnitType unit_type, int value,
@@ -119,8 +112,8 @@ void finned_fish_colorise(ColorPair colors[81][9], Step *step) {
 
     for (int i = 0; i < s->size; i++) {
         for (int j = 0; j < s->size; j++) {
-            int cell = cell_from_base_cover(s->base_idxs[i], s->cover_idxs[j],
-                                            s->base_unit_type);
+            int cell = cell_from_unit_pos(s->base_idxs[i], s->cover_idxs[j],
+                                          s->base_unit_type);
             colors[cell][s->value - 1] = CP_TRIGGER;
         }
     }
@@ -256,7 +249,7 @@ static int find_fins(UnitSubset fin_units[], int num_fin_units,
     for (int i = 0; i < num_fin_units; i++) {
         for (int j = 0; j < fin_units[i].len; j++) {
             if (num_fins == MAX_FINS) return -1;
-            out[num_fins++] = cell_from_base_cover(
+            out[num_fins++] = cell_from_unit_pos(
                 fin_units[i].cells[j], fin_units[i].idx, base_unit_type);
         }
     }

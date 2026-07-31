@@ -17,12 +17,6 @@ typedef struct {
     int cells[2];
 } ConjugatePair;
 
-static int cell_from_unit_pos(int unit, int pos, UnitType unit_type) {
-    int row = unit_type == UNIT_ROW ? unit : pos;
-    int col = unit_type == UNIT_ROW ? pos : unit;
-    return cell_from_row_col(row, col);
-}
-
 static bool skyscraper_unit(Grid *grid, Step *step, UnitType unit_type);
 static int find_conjugate_pairs(Grid *grid, UnitType unit_type, int value,
                                 ConjugatePair out[]);

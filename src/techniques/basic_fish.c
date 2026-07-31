@@ -18,13 +18,6 @@ typedef struct {
     int len;
 } UnitSubset;
 
-static int cell_from_base_cover(int base_idx, int cover_idx,
-                                UnitType base_type) {
-    int row = base_type == UNIT_ROW ? base_idx : cover_idx;
-    int col = base_type == UNIT_ROW ? cover_idx : base_idx;
-    return cell_from_row_col(row, col);
-}
-
 static bool basic_n_fish_unit(Grid *grid, Step *step, int size,
                               UnitType unit_type);
 static int find_base_sets(Grid *grid, int size, UnitType unit_type, int value,
@@ -104,8 +97,8 @@ void basic_fish_colorise(ColorPair colors[81][9], Step *step) {
 
     for (int i = 0; i < s->size; i++) {
         for (int j = 0; j < s->size; j++) {
-            int cell = cell_from_base_cover(s->base_idxs[i], s->cover_idxs[j],
-                                            s->base_unit_type);
+            int cell = cell_from_unit_pos(s->base_idxs[i], s->cover_idxs[j],
+                                          s->base_unit_type);
             colors[cell][s->value - 1] = CP_TRIGGER;
         }
     }
@@ -212,7 +205,7 @@ static int find_removals(Grid *grid, UnitSubset base_sets[], int cover_idxs[],
 
         for (int cover_i = 0; cover_i < size; cover_i++) {
             int cover_idx = cover_idxs[cover_i];
-            int cell = cell_from_base_cover(cell_i, cover_idx, unit_type);
+            int cell = cell_from_unit_pos(cell_i, cover_idx, unit_type);
             if (grid_cell_has_cand(grid, cell, value)) {
                 out[count++] = cell;
             }
