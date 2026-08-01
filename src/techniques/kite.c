@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "geometry.h"
 #include "grid.h"
@@ -95,28 +96,14 @@ void kite_colorise(ColorPair colors[81][9], Step *step) {
 static int find_conjugate_pairs(Grid *grid, UnitType unit_type, int value,
                                 int out[][2]) {
     int num_pairs = 0;
-
     for (int unit_i = 0; unit_i < 9; unit_i++) {
         int *unit = units[unit_type][unit_i];
-        int num_cells = 0;
-
-        for (int cell_i = 0; cell_i < 9; cell_i++) {
-            if (!grid_cell_has_cand(grid, unit[cell_i], value)) continue;
-
-            if (num_cells < 2) {
-                out[num_pairs][num_cells++] = cell_from_unit_pos(unit_i, cell_i,
-                                                                 unit_type);
-            } else {
-                num_cells++;
-                break;
-            }
-        }
-
-        if (num_cells == 2) {
-            num_pairs++;
-        }
+        int temp_pair[9];
+        if (grid_region_with_cand(grid, unit, 9, value, temp_pair) != 2)
+            continue;
+        memcpy(out[num_pairs], temp_pair, 2 * sizeof(int));
+        num_pairs++;
     }
-
     return num_pairs;
 }
 
