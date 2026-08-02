@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "geometry.h"
 #include "grid.h"
@@ -197,29 +198,17 @@ static bool finned_n_fish_unit(Grid *grid, Step *step, int size,
 static int find_base_sets(Grid *grid, int size, UnitType unit_type, int value,
                           UnitSubset out[]) {
     int num_sets = 0;
-
     for (int unit_i = 0; unit_i < 9; unit_i++) {
         int *unit = units[unit_type][unit_i];
-        int num_cells = 0;
-
-        for (int cell_i = 0; cell_i < 9; cell_i++) {
-            if (grid_cell_has_cand(grid, unit[cell_i], value)) {
-                if (num_cells < size + 2) {
-                    out[num_sets].cells[num_cells++] = cell_i;
-                } else {
-                    num_cells++;
-                    break;
-                }
-            }
-        }
-
-        if (num_cells > 0 && num_cells <= size + 2) {
-            out[num_sets].idx = unit_i;
-            out[num_sets].len = num_cells;
-            num_sets++;
-        }
+        int temp_cells[9];
+        int num_cells = grid_region_pos_with_cand(grid, unit, 9, value,
+                                                  temp_cells);
+        if (num_cells == 0 || num_cells > size + 2) continue;
+        out[num_sets].idx = unit_i;
+        memcpy(out[num_sets].cells, temp_cells, num_cells * sizeof(int));
+        out[num_sets].len = num_cells;
+        num_sets++;
     }
-
     return num_sets;
 }
 

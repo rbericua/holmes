@@ -215,6 +215,17 @@ int grid_region_with_cands_some(Grid *grid, int region[], int region_len,
     return count;
 }
 
+int grid_region_pos_with_cand(Grid *grid, int region[], int region_len,
+                              int cand, int out[]) {
+    int count = 0;
+    for (int i = 0; i < region_len; i++) {
+        if (grid_cell_has_cand(grid, region[i], cand)) {
+            out[count++] = i;
+        }
+    }
+    return count;
+}
+
 static CandSet grid_cell_init_cands(Grid *grid, int cell) {
     CandSet init_cands = CAND_SET_FULL;
     for (int i = 0; i < 3; i++) {

@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "geometry.h"
 #include "grid.h"
@@ -127,28 +128,15 @@ static bool skyscraper_unit(Grid *grid, Step *step, UnitType unit_type) {
 static int find_conjugate_pairs(Grid *grid, UnitType unit_type, int value,
                                 ConjugatePair out[]) {
     int num_pairs = 0;
-
     for (int unit_i = 0; unit_i < 9; unit_i++) {
         int *unit = units[unit_type][unit_i];
-        int num_cells = 0;
-
-        for (int cell_i = 0; cell_i < 9; cell_i++) {
-            if (!grid_cell_has_cand(grid, unit[cell_i], value)) continue;
-
-            if (num_cells < 2) {
-                out[num_pairs].cells[num_cells++] = cell_i;
-            } else {
-                num_cells++;
-                break;
-            }
-        }
-
-        if (num_cells == 2) {
-            out[num_pairs].unit = unit_i;
-            num_pairs++;
-        }
+        int temp_pair[9];
+        if (grid_region_pos_with_cand(grid, unit, 9, value, temp_pair) != 2)
+            continue;
+        out[num_pairs].unit = unit_i;
+        memcpy(out[num_pairs].cells, temp_pair, 2 * sizeof(int));
+        num_pairs++;
     }
-
     return num_pairs;
 }
 
