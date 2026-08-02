@@ -7,7 +7,7 @@
         return BIT(value); \
     } \
     Bitset##n bitset##n##_from_arr(int arr[], int len) { \
-        Bitset##n set; \
+        Bitset##n set = BITSET##n##_EMPTY; \
         for (int i = 0; i < len; i++) { \
             set = bitset##n##_add(set, arr[i]); \
         } \

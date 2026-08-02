@@ -10,7 +10,7 @@ CandSet cand_set_from_value(int value) {
 }
 
 CandSet cand_set_from_arr(int arr[], int len) {
-    CandSet set;
+    CandSet set = CAND_SET_EMPTY;
     for (int i = 0; i < len; i++) {
         set = cand_set_add(set, arr[i]);
     }
