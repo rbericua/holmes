@@ -111,3 +111,30 @@ int cells_common_peers(int cells[], int num_cells, int out[]) {
 UnitType other_line(UnitType unit) {
     return unit == UNIT_ROW ? UNIT_COL : UNIT_ROW;
 }
+
+bool link_is_weak(LinkType link) {
+    return link & LINK_WEAK;
+}
+
+bool link_is_strong(LinkType link) {
+    return link & LINK_STRONG;
+}
+
+bool link_is_dual(LinkType link) {
+    return link == LINK_DUAL;
+}
+
+LinkType other_link(LinkType link) {
+    switch (link) {
+    case LINK_WEAK: return LINK_STRONG;
+    case LINK_STRONG: return LINK_WEAK;
+    case LINK_DUAL: return LINK_DUAL;
+    }
+    // Unreachable
+    return 0;
+}
+
+bool links_are_alternating(LinkType a, LinkType b) {
+    return (link_is_weak(a) && link_is_strong(b))
+           || (link_is_strong(a) && link_is_weak(b));
+}

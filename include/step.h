@@ -27,6 +27,7 @@ typedef enum {
     TECH_Y_WING,
     TECH_SIMPLE_COLORING,
     TECH_MEDUSA,
+    TECH_X_CHAIN,
 
     NUM_TECHNIQUES
 } TechniqueType;
@@ -270,6 +271,21 @@ typedef struct {
     };
 } MedusaStep;
 
+#define MAX_X_CHAIN_LEN 15
+
+typedef struct {
+    int cells[MAX_X_CHAIN_LEN];
+    int len;
+    bool is_ring;
+} XChain;
+
+typedef struct {
+    int value;
+    XChain chain;
+    int removal_cells[81];
+    int num_removals;
+} XChainStep;
+
 typedef struct {
     TechniqueType type;
     union {
@@ -285,6 +301,7 @@ typedef struct {
         YWingStep y_wing;
         SimpleColoringStep simple_coloring;
         MedusaStep medusa;
+        XChainStep x_chain;
     } as;
 } Step;
 

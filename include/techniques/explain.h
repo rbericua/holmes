@@ -3,6 +3,7 @@
 
 #include "cand_set.h"
 #include "geometry.h"
+#include "step.h"
 
 char *explain_unit_name(UnitType unit);
 char *explain_unit_name_plural(UnitType unit);
@@ -15,5 +16,6 @@ char *explain_cells(int cells[], int num_cells);
 char *explain_nums_plus_one(int nums[], int len);
 char *explain_value_removal(int cell, int value);
 char *explain_cands_removal(int cell, CandSet cands);
+char *explain_x_chain(XChain *chain, int value);
 
 #endif

@@ -6,6 +6,7 @@
 
 #include "cand_set.h"
 #include "geometry.h"
+#include "step.h"
 #include "util/dynstr.h"
 
 char *explain_unit_name(UnitType unit) {
@@ -127,6 +128,26 @@ char *explain_cands_removal(int cell, CandSet cands) {
     ds_append(&ds, "- Removed %s from r%dc%d", cands_str, row, col);
 
     free(cands_str);
+
+    return ds.elems;
+}
+
+char *explain_x_chain(XChain *chain, int value) {
+    DynStr ds = {0};
+
+    ds_append(&ds, "(%d): ", value);
+
+    LinkType link = LINK_STRONG;
+    for (int i = 0; i < chain->len; i++) {
+        int row = cell_row(chain->cells[i]) + 1;
+        int col = cell_col(chain->cells[i]) + 1;
+        char *link_char = link == LINK_WEAK ? "-" : "=";
+
+        ds_append(&ds, "r%dc%d%s", row, col,
+                  i == chain->len - 1 ? "" : link_char);
+
+        link = other_link(link);
+    }
 
     return ds.elems;
 }

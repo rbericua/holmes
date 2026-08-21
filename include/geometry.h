@@ -21,6 +21,8 @@ typedef enum {
 extern int units[3][9][9];
 extern int peers[81][NUM_PEERS];
 
+#define ALL_UNITS ((int (*)[9])units)
+
 void geometry_init(void);
 
 int cell_unit(int cell, UnitType unit);
@@ -38,5 +40,11 @@ bool cells_in_same_box(int cells[], int num_cells);
 int cells_common_peers(int cells[], int num_cells, int out[]);
 
 UnitType other_line(UnitType unit);
+
+bool link_is_weak(LinkType link);
+bool link_is_strong(LinkType link);
+bool link_is_dual(LinkType link);
+LinkType other_link(LinkType link);
+bool links_are_alternating(LinkType a, LinkType b);
 
 #endif
