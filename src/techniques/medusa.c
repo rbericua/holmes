@@ -216,8 +216,8 @@ void medusa_pipes(Pipes *pipes, Step *step) {
 
     for (int i = 0; i < s->num_links; i++) {
         Link link = s->links[i];
-        da_append(pipes,
-                  pipe_create(link.cell1, link.cand1, link.cell2, link.cand2));
+        da_append(pipes, pipe_create(link.cell1, link.cand1, link.cell2,
+                                     link.cand2, LINK_STRONG));
     }
 }
 

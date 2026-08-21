@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#include "geometry.h"
+
 typedef enum {
     DIR_DOWN,
     DIR_UP,
@@ -26,6 +28,7 @@ typedef struct {
 
 typedef struct {
     Position pos1, pos2;
+    LinkType type;
     Positions path;
 } Pipe;
 
@@ -35,7 +38,7 @@ typedef struct {
     int cap;
 } Pipes;
 
-Pipe pipe_create(int cell1, int cand1, int cell2, int cand2);
+Pipe pipe_create(int cell1, int cand1, int cell2, int cand2, LinkType type);
 void pipe_destroy(Pipe *pipe);
 void route_pipes(Pipes *pipes);
 Direction get_direction(Position prev, Position curr, Position next);

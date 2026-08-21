@@ -12,6 +12,12 @@ typedef enum {
     UNIT_BOX
 } UnitType;
 
+typedef enum {
+    LINK_WEAK = 1 << 0,
+    LINK_STRONG = 1 << 1,
+    LINK_DUAL = LINK_WEAK | LINK_STRONG,
+} LinkType;
+
 extern int units[3][9][9];
 extern int peers[81][NUM_PEERS];
 

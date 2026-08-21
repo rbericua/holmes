@@ -87,10 +87,11 @@ static void heap_swap_nodes(Heap *h, int i, int j);
 static void heap_bubble_up(Heap *h, int from);
 static void heap_bubble_down(Heap *h, int from);
 
-Pipe pipe_create(int cell1, int cand1, int cell2, int cand2) {
+Pipe pipe_create(int cell1, int cand1, int cell2, int cand2, LinkType type) {
     Pipe pipe;
     cell_cand_to_pos(cell1, cand1, &pipe.pos1);
     cell_cand_to_pos(cell2, cand2, &pipe.pos2);
+    pipe.type = type;
     da_init(&pipe.path);
     return pipe;
 }

@@ -170,7 +170,7 @@ void simple_coloring_pipes(Pipes *pipes, Step *step) {
 
     for (int i = 0; i < s->num_links; i++) {
         da_append(pipes, pipe_create(s->links[i][0], s->value, s->links[i][1],
-                                     s->value));
+                                     s->value, LINK_STRONG));
     }
 }
 

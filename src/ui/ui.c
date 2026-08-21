@@ -253,10 +253,29 @@ static void print_scroll_indicators(Ui *ui) {
 }
 
 static void print_pipes(Ui *ui, Pipes *pipes) {
-    wchar_t *dir_to_char[] = {
-        [DIR_DOWN] = L"│",     [DIR_UP] = L"│",         [DIR_RIGHT] = L"─",
-        [DIR_LEFT] = L"─",     [DIR_DOWN_RIGHT] = L"└", [DIR_DOWN_LEFT] = L"┘",
-        [DIR_UP_RIGHT] = L"┌", [DIR_UP_LEFT] = L"┐",
+    wchar_t *dir_to_char[][8] = {
+        [LINK_WEAK] =
+            {
+                [DIR_DOWN] = L"┆",
+                [DIR_UP] = L"┆",
+                [DIR_RIGHT] = L"╌",
+                [DIR_LEFT] = L"╌",
+                [DIR_DOWN_RIGHT] = L"└",
+                [DIR_DOWN_LEFT] = L"┘",
+                [DIR_UP_RIGHT] = L"┌",
+                [DIR_UP_LEFT] = L"┐",
+            },
+        [LINK_STRONG] =
+            {
+                [DIR_DOWN] = L"│",
+                [DIR_UP] = L"│",
+                [DIR_RIGHT] = L"─",
+                [DIR_LEFT] = L"─",
+                [DIR_DOWN_RIGHT] = L"└",
+                [DIR_DOWN_LEFT] = L"┘",
+                [DIR_UP_RIGHT] = L"┌",
+                [DIR_UP_LEFT] = L"┐",
+            },
     };
 
     wattron(ui->grid_win, color_attr(CP_PIPE));
@@ -271,7 +290,8 @@ static void print_pipes(Ui *ui, Pipes *pipes) {
             Position next = path.elems[j + 1];
 
             Direction dir = get_direction(prev, curr, next);
-            mvwprintw(ui->grid_win, curr.y, curr.x, "%ls", dir_to_char[dir]);
+            mvwprintw(ui->grid_win, curr.y, curr.x, "%ls",
+                      dir_to_char[pipe.type][dir]);
         }
     }
 
