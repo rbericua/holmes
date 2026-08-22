@@ -36,14 +36,31 @@
         .pipes = tech##_pipes, \
     }
 
+// clang-format off
 TechniqueFn techniques[] = {
-    naked_single,     hidden_single, naked_pair,      hidden_pair,
-    naked_triple,     hidden_triple, naked_quad,      hidden_quad,
-    pointing_set,     x_wing,        skyscraper,      kite,
-    swordfish,        y_wing,        simple_coloring, x_chain,
-    jellyfish,        medusa,        finned_x_wing,   finned_swordfish,
+    naked_single,
+    hidden_single,
+    naked_pair,
+    hidden_pair,
+    naked_triple,
+    hidden_triple,
+    naked_quad,
+    hidden_quad,
+    pointing_set,
+    x_wing,
+    skyscraper,
+    kite,
+    swordfish,
+    y_wing,
+    simple_coloring,
+    x_chain,
+    jellyfish,
+    medusa,
+    finned_x_wing,
+    finned_swordfish,
     finned_jellyfish,
 };
+// clang-format on
 
 TechniqueOps technique_ops[] = {
     [TECH_NAKED_SINGLE] = TECHNIQUE_OPS(naked_single),
