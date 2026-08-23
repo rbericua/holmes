@@ -62,6 +62,30 @@ TechniqueFn techniques[] = {
 };
 // clang-format on
 
+char *technique_names[] = {
+    [TECH_NAKED_SINGLE] = "Naked Single",
+    [TECH_HIDDEN_SINGLE] = "Hidden Single",
+    [TECH_NAKED_PAIR] = "Naked Pair",
+    [TECH_NAKED_TRIPLE] = "Naked Triple",
+    [TECH_NAKED_QUAD] = "Naked Quad",
+    [TECH_HIDDEN_PAIR] = "Hidden Pair",
+    [TECH_HIDDEN_TRIPLE] = "Hidden Triple",
+    [TECH_HIDDEN_QUAD] = "Hidden Quad",
+    [TECH_POINTING_SET] = "Pointing Set",
+    [TECH_X_WING] = "X-Wing",
+    [TECH_SWORDFISH] = "Swordfish",
+    [TECH_JELLYFISH] = "Jellyfish",
+    [TECH_FINNED_X_WING] = "Finned X-Wing",
+    [TECH_FINNED_SWORDFISH] = "Finned Swordfish",
+    [TECH_FINNED_JELLYFISH] = "Finned Jellyfish",
+    [TECH_SKYSCRAPER] = "Skyscraper",
+    [TECH_KITE] = "2-String Kite",
+    [TECH_Y_WING] = "Y-Wing",
+    [TECH_SIMPLE_COLORING] = "Simple Coloring",
+    [TECH_MEDUSA] = "3D Medusa",
+    [TECH_X_CHAIN] = "X-Chain",
+};
+
 TechniqueOps technique_ops[] = {
     [TECH_NAKED_SINGLE] = TECHNIQUE_OPS(naked_single),
     [TECH_HIDDEN_SINGLE] = TECHNIQUE_OPS(hidden_single),

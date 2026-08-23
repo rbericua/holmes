@@ -18,6 +18,7 @@ typedef struct {
 } TechniqueOps;
 
 extern TechniqueFn techniques[NUM_TECHNIQUES];
+extern char *technique_names[NUM_TECHNIQUES];
 extern TechniqueOps technique_ops[NUM_TECHNIQUES];
 
 #endif
