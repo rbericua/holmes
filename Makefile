@@ -1,3 +1,5 @@
+MAKEFLAGS += --warn-undefined-variables
+
 CC := gcc
 CFLAGS := -Iinclude -Wall -Wextra -Werror -fsanitize=address,undefined -g -MMD -MP
 LDFLAGS := -lncurses
@@ -15,7 +17,7 @@ OBJS_NO_MAIN := $(filter-out $(BUILD_DIR)/$(SRC_DIR)/main.o, $(OBJS))
 
 BENCH_OBJ := $(BUILD_DIR)/$(BENCH_DIR)/main.o
 
-DEPS := $(patsubst %.o, %.d, $(OBJS) $(BENCH_OBJS))
+DEPS := $(patsubst %.o, %.d, $(OBJS) $(BENCH_OBJ))
 
 .PHONY: all
 all: makedirs $(TARGET) $(BENCH_TARGET)
