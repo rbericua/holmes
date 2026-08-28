@@ -27,6 +27,10 @@ int cand_set_to_arr(CandSet set, int arr[]) {
     return count;
 }
 
+bool cand_set_is_empty(CandSet set) {
+    return set == CAND_SET_EMPTY;
+}
+
 int cand_set_len(CandSet set) {
     return __builtin_popcount(set);
 }
@@ -51,6 +55,12 @@ bool cand_set_is_sub(CandSet set1, CandSet set2) {
 
 int cand_set_first(CandSet set) {
     return __builtin_ffs(set);
+}
+
+int cand_set_pop(CandSet *set) {
+    int first = cand_set_first(*set);
+    *set = cand_set_remove(*set, first);
+    return first;
 }
 
 CandSet cand_set_intersection(CandSet sets[], int num_sets) {

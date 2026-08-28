@@ -22,6 +22,9 @@
         } \
         return count; \
     } \
+    bool bitset##n##_is_empty(Bitset##n set) { \
+        return set == BITSET##n##_EMPTY; \
+    } \
     int bitset##n##_len(Bitset##n set) { \
         return __builtin_popcount(set); \
     } \
@@ -39,6 +42,11 @@
     } \
     int bitset##n##_first(Bitset##n set) { \
         return __builtin_ffs(set) - 1; \
+    } \
+    int bitset##n##_pop(Bitset##n *set) { \
+        int first = bitset##n##_first(*set); \
+        *set = bitset##n##_remove(*set, first); \
+        return first; \
     } \
     Bitset##n bitset##n##_intersection(Bitset##n sets[], int num_sets) { \
         Bitset##n result = BITSET##n##_FULL; \
