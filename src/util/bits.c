@@ -38,7 +38,7 @@
         return (set1 & set2) == set1; \
     } \
     int bitset##n##_first(Bitset##n set) { \
-        return __builtin_ffs(set); \
+        return __builtin_ffs(set) - 1; \
     } \
     Bitset##n bitset##n##_intersection(Bitset##n sets[], int num_sets) { \
         Bitset##n result = BITSET##n##_FULL; \
