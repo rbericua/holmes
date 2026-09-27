@@ -26,7 +26,7 @@
         return set == BITSET##n##_EMPTY; \
     } \
     int bitset##n##_len(Bitset##n set) { \
-        return __builtin_popcount(set); \
+        return __builtin_popcountll(set); \
     } \
     bool bitset##n##_has(Bitset##n set, int pos) { \
         return IS_BIT_SET(set, pos); \
@@ -41,7 +41,7 @@
         return (set1 & set2) == set1; \
     } \
     int bitset##n##_first(Bitset##n set) { \
-        return __builtin_ffs(set) - 1; \
+        return __builtin_ffsll(set) - 1; \
     } \
     int bitset##n##_pop(Bitset##n *set) { \
         int first = bitset##n##_first(*set); \
