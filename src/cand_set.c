@@ -63,6 +63,10 @@ int cand_set_pop(CandSet *set) {
     return first;
 }
 
+CandSet cand_set_not(CandSet set) {
+    return ~set;
+}
+
 CandSet cand_set_intersection(CandSet sets[], int num_sets) {
     CandSet result = CAND_SET_FULL;
     for (int i = 0; i < num_sets; i++) {

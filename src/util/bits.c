@@ -48,6 +48,9 @@
         *set = bitset##n##_remove(*set, first); \
         return first; \
     } \
+    Bitset##n bitset##n##_not(Bitset##n set) { \
+        return ~set; \
+    } \
     Bitset##n bitset##n##_intersection(Bitset##n sets[], int num_sets) { \
         Bitset##n result = BITSET##n##_FULL; \
         for (int i = 0; i < num_sets; i++) { \
@@ -132,6 +135,10 @@ int bitset128_pop(Bitset128 *set) {
     int first = bitset128_first(*set);
     *set = bitset128_remove(*set, first);
     return first;
+}
+
+Bitset128 bitset128_not(Bitset128 set) {
+    return (Bitset128){.bits = {~set.bits[0], ~set.bits[1]}};
 }
 
 Bitset128 bitset128_intersection(Bitset128 sets[], int num_sets) {
