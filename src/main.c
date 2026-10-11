@@ -5,7 +5,7 @@
 #include "history.h"
 #include "solver.h"
 #include "step.h"
-#include "techniques/backtrack.h"
+#include "bruteforce/dlx.h"
 #include "ui/ui.h"
 #include "util/log.h"
 
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
         ui_print_message(&ui, "Invalid Sudoku. Must have at least 17 clues\n");
         bad_sudoku = true;
     } else {
-        int num_solutions = backtrack(grid);
+        int num_solutions = solve_dlx(grid);
         if (num_solutions != 1) {
             ui_print_message(&ui, "Invalid Sudoku. Found %s solutions\n",
                              num_solutions == 0 ? "no" : "multiple");
