@@ -149,10 +149,10 @@ static bool find_roof(ConjugatePair pairs[], UnitType unit_type, int roof[],
 
     Bitset16 walls_intersection = bitset16_intersection(walls, 2);
     if (bitset16_len(walls_intersection) != 1) return false;
-    *floor_unit = bitset16_first(walls_intersection) - 1;
+    *floor_unit = bitset16_first(walls_intersection);
 
     for (int i = 0; i < 2; i++) {
-        int roof_pos = bitset16_first(walls[i] & ~walls_intersection) - 1;
+        int roof_pos = bitset16_first(walls[i] & ~walls_intersection);
         roof[i] = cell_from_unit_pos(pairs[i].unit, roof_pos, unit_type);
     }
 

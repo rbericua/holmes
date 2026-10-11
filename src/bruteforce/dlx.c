@@ -1,6 +1,5 @@
 #include "bruteforce/dlx.h"
 
-#include <limits.h>
 #include <stdlib.h>
 
 #include "grid.h"
@@ -50,7 +49,6 @@ int solve_dlx(Grid *grid) {
     search(root, &num_solutions);
 
     free_matrix(cols);
-    // free(cols[0].head);
     return num_solutions;
 }
 
