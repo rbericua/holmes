@@ -2,11 +2,11 @@
 
 #include <stdlib.h>
 
+#include "cand_set.h"
+#include "geometry.h"
 #include "grid.h"
-#include "bruteforce/patterns.h"
-#include "util/bits.h"
 
-#define NUM_COLUMNS (9 + 81)
+#define NUM_COLUMNS (81 * 4)
 
 struct Node;
 typedef struct Node Node;
@@ -24,10 +24,9 @@ struct Node {
     Column *col;
 };
 
-static void fill_value_patterns(Grid *grid, Bitset128 out[]);
 static void create_columns(Column out[]);
-static void create_row(Column cols[], int value, Bitset128 pattern);
-static void fill_matrix(Bitset128 value_patterns[], Column cols[]);
+static void create_row(Column cols[], int col_idxs[], int num_col_idxs);
+static void fill_matrix(Grid *grid, Column cols[]);
 static void free_matrix(Column cols[]);
 static void search(Column *root, int *num_solutions);
 
@@ -36,31 +35,17 @@ static void cover_column(Column *col);
 static void uncover_column(Column *col);
 
 int solve_dlx(Grid *grid) {
-    Bitset128 value_patterns[9];
-    fill_value_patterns(grid, value_patterns);
-
     Column cols[NUM_COLUMNS + 1];
     create_columns(cols);
     Column *root = &cols[0];
 
-    fill_matrix(value_patterns, cols);
+    fill_matrix(grid, cols);
 
     int num_solutions = 0;
     search(root, &num_solutions);
 
     free_matrix(cols);
     return num_solutions;
-}
-
-static void fill_value_patterns(Grid *grid, Bitset128 out[]) {
-    for (int i = 0; i < 9; i++) {
-        out[i] = BITSET128_EMPTY;
-    }
-    for (int i = 0; i < 81; i++) {
-        if (grid_cell_is_empty(grid, i)) continue;
-        int value = grid_cell_value(grid, i);
-        out[value - 1] = bitset128_add(out[value - 1], i);
-    }
 }
 
 static void create_columns(Column out[]) {
@@ -88,18 +73,12 @@ static void create_columns(Column out[]) {
     }
 }
 
-static void create_row(Column cols[], int value, Bitset128 pattern) {
-    int node_idxs[10] = {[0] = value};
-    int j = 1;
-    while (!bitset128_is_empty(pattern)) {
-        node_idxs[j++] = bitset128_pop(&pattern) + 10;
-    }
-
-    Node *nodes = malloc(10 * sizeof(Node));
+static void create_row(Column cols[], int col_idxs[], int num_col_idxs) {
+    Node *nodes = malloc(num_col_idxs * sizeof(Node));
     Node *prev = &nodes[0];
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < num_col_idxs; i++) {
         Node *node = &nodes[i];
-        Column *col = &cols[node_idxs[i]];
+        Column *col = &cols[col_idxs[i] + 1];
         col->size++;
 
         node->left = prev;
@@ -120,21 +99,26 @@ static void create_row(Column cols[], int value, Bitset128 pattern) {
     }
 }
 
-static void fill_matrix(Bitset128 value_patterns[], Column cols[]) {
-    Bitset128 *patterns = generate_patterns();
-    for (int value = 1; value <= 9; value++) {
-        for (int pattern_i = 0; pattern_i < NUM_PATTERNS; pattern_i++) {
-            Bitset128 pattern = patterns[pattern_i];
-            if (bitset128_is_sub(value_patterns[value - 1], pattern)) {
-                create_row(cols, value, pattern);
-            }
+static void fill_matrix(Grid *grid, Column cols[]) {
+    for (int i = 0; i < 81; i++) {
+        CandSet cands = grid_cell_is_empty(grid, i)
+                            ? grid_cell_cands(grid, i)
+                            : cand_set_from_value(grid_cell_value(grid, i));
+        while (!cand_set_is_empty(cands)) {
+            int cand_idx = cand_set_pop(&cands) - 1;
+            int col_idxs[] = {
+                i,
+                81 + cell_row(i) * 9 + cand_idx,
+                81 * 2 + cell_col(i) * 9 + cand_idx,
+                81 * 3 + cell_box(i) * 9 + cand_idx,
+            };
+            create_row(cols, col_idxs, 4);
         }
     }
-    free_patterns(patterns);
 }
 
 static void free_matrix(Column cols[]) {
-    for (int i = 1; i < 10; i++) {
+    for (int i = 1; i <= 81; i++) {
         Node *curr = cols[i].head->down;
         while (curr != cols[i].head) {
             Node *next = curr->down;
