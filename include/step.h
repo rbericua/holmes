@@ -280,8 +280,8 @@ typedef struct {
 } XChain;
 
 typedef struct {
-    int value;
     XChain chain;
+    int value;
     int removal_cells[81];
     int num_removals;
 } XChainStep;

@@ -34,8 +34,7 @@ static int find_ring_removals(Grid *grid, int value, XChain *chain, int out[]);
 static bool try_update_best_chain(Grid *grid, int value, XChain *chain,
                                   XChainStep *s);
 static bool find_chain(Grid *grid, int value, CellLinks grid_links[81],
-                       int curr_cell, LinkType incoming_link,
-                       XChain *curr_chain, XChainStep *s);
+                       int curr_cell, XChain *curr_chain, XChainStep *s);
 static bool find_best_chain(Grid *grid, int value, CellLinks grid_links[81],
                             XChainStep *s);
 
@@ -80,7 +79,6 @@ void x_chain_revert(Grid *grid, Step *step) {
 
 void x_chain_explain(DynStr *buf, Step *step) {
     XChainStep *s = &step->as.x_chain;
-
     char *chain_str = explain_x_chain(&s->chain, s->value);
 
     ds_append(buf, "[X-Chain%s] %s: \n", s->chain.is_ring ? " (Ring)" : "",
@@ -150,8 +148,10 @@ static bool find_links(Grid *grid, int value, CellLinks out[81]) {
             for (int cell_j = 0; cell_j < num_cells; cell_j++) {
                 if (cell_i == cell_j) continue;
 
-                int link_idx = find_cell_link(&out[cells[cell_i]],
-                                              cells[cell_j]);
+                int link_idx = new_link_type == LINK_DUAL
+                                   ? find_cell_link(&out[cells[cell_i]],
+                                                    cells[cell_j])
+                                   : -1;
                 if (link_idx == -1) {
                     out[cells[cell_i]].links[(*num_links)++] = (CellLink){
                         .cell = cells[cell_j],
@@ -208,9 +208,9 @@ static bool try_update_best_chain(Grid *grid, int value, XChain *chain,
                                   XChainStep *s) {
     int start = chain->cells[0];
     int end = chain->cells[chain->len - 1];
-    if (end < start) return false; // Duplicate chain
+    if (start > end) return false; // Duplicate chain
 
-    int removal_cells[MAX_COMMON_PEERS];
+    int removal_cells[81];
     int num_removals;
 
     bool is_ring = cells_are_peers(start, end);
@@ -224,8 +224,7 @@ static bool try_update_best_chain(Grid *grid, int value, XChain *chain,
 
     if (is_better_chain(chain->len, num_removals, s->chain.len,
                         s->num_removals)) {
-        memcpy(s->chain.cells, chain->cells, chain->len * sizeof(int));
-        s->chain.len = chain->len;
+        s->chain = *chain;
         s->chain.is_ring = is_ring;
         memcpy(s->removal_cells, removal_cells, num_removals * sizeof(int));
         s->num_removals = num_removals;
@@ -235,15 +234,14 @@ static bool try_update_best_chain(Grid *grid, int value, XChain *chain,
     return false;
 }
 
-// incoming_link is either LINK_WEAK or LINK_STRONG
 static bool find_chain(Grid *grid, int value, CellLinks grid_links[81],
-                       int curr_cell, LinkType incoming_link,
-                       XChain *curr_chain, XChainStep *s) {
+                       int curr_cell, XChain *curr_chain, XChainStep *s) {
     bool found = false;
 
     curr_chain->cells[curr_chain->len++] = curr_cell;
+    LinkType incoming_link = curr_chain->len % 2 == 0 ? LINK_STRONG : LINK_WEAK;
 
-    if (incoming_link == LINK_STRONG && curr_chain->len >= 3) {
+    if (incoming_link == LINK_STRONG && curr_chain->len >= 4) {
         if (try_update_best_chain(grid, value, curr_chain, s)) {
             found = true;
         }
@@ -258,8 +256,7 @@ static bool find_chain(Grid *grid, int value, CellLinks grid_links[81],
                 || is_in_chain(next_cell, curr_chain))
                 continue;
 
-            if (find_chain(grid, value, grid_links, next_cell,
-                           other_link(incoming_link), curr_chain, s)) {
+            if (find_chain(grid, value, grid_links, next_cell, curr_chain, s)) {
                 found = true;
             }
         }
@@ -276,8 +273,7 @@ static bool find_best_chain(Grid *grid, int value, CellLinks grid_links[81],
     XChain chain = {.len = 0};
     for (int i = 0; i < 81; i++) {
         if (grid_links[i].len == 0) continue;
-        chain.cells[0] = i;
-        if (find_chain(grid, value, grid_links, i, LINK_WEAK, &chain, s)) {
+        if (find_chain(grid, value, grid_links, i, &chain, s)) {
             found = true;
         }
     }
