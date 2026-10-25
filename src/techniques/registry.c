@@ -16,6 +16,7 @@
 #include "techniques/simple_coloring.h"
 #include "techniques/skyscraper.h"
 #include "techniques/x_chain.h"
+#include "techniques/xy_chain.h"
 #include "techniques/y_wing.h"
 
 #define TECHNIQUE_OPS(tech) \
@@ -55,6 +56,7 @@ TechniqueFn techniques[] = {
     simple_coloring,
     x_chain,
     jellyfish,
+    xy_chain,
     medusa,
     finned_x_wing,
     finned_swordfish,
@@ -84,6 +86,7 @@ char *technique_names[] = {
     [TECH_SIMPLE_COLORING] = "Simple Coloring",
     [TECH_MEDUSA] = "3D Medusa",
     [TECH_X_CHAIN] = "X-Chain",
+    [TECH_XY_CHAIN] = "XY-Chain",
 };
 
 TechniqueOps technique_ops[] = {
@@ -108,4 +111,5 @@ TechniqueOps technique_ops[] = {
     [TECH_SIMPLE_COLORING] = PIPE_TECHNIQUE_OPS(simple_coloring),
     [TECH_MEDUSA] = PIPE_TECHNIQUE_OPS(medusa),
     [TECH_X_CHAIN] = PIPE_TECHNIQUE_OPS(x_chain),
+    [TECH_XY_CHAIN] = PIPE_TECHNIQUE_OPS(xy_chain),
 };

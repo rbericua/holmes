@@ -17,5 +17,6 @@ char *explain_nums_plus_one(int nums[], int len);
 char *explain_value_removal(int cell, int value);
 char *explain_cands_removal(int cell, CandSet cands);
 char *explain_x_chain(XChain *chain, int value);
+char *explain_xy_chain(XyChain *chain);
 
 #endif

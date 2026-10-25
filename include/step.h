@@ -28,6 +28,7 @@ typedef enum {
     TECH_SIMPLE_COLORING,
     TECH_MEDUSA,
     TECH_X_CHAIN,
+    TECH_XY_CHAIN,
 
     NUM_TECHNIQUES
 } TechniqueType;
@@ -286,6 +287,24 @@ typedef struct {
     int num_removals;
 } XChainStep;
 
+#define MAX_XY_CHAIN_LEN 10
+
+typedef struct {
+    // chain[0] and chain[len - 1] are start and end candidates respectively
+    // cell chain[1] is linked with cell chain[3] through the value chain[2]
+    // this repeats until len - 1
+    int chain[MAX_XY_CHAIN_LEN * 2 + 1];
+    int arr_len;   // length of chain array, as described above
+    int chain_len; // number of cells in chain
+    bool is_ring;
+} XyChain;
+
+typedef struct {
+    XyChain chain;
+    CellCand removals[81];
+    int num_removals;
+} XyChainStep;
+
 typedef struct {
     TechniqueType type;
     union {
@@ -302,6 +321,7 @@ typedef struct {
         SimpleColoringStep simple_coloring;
         MedusaStep medusa;
         XChainStep x_chain;
+        XyChainStep xy_chain;
     } as;
 } Step;
 

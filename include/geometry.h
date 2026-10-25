@@ -18,6 +18,11 @@ typedef enum {
     LINK_DUAL = LINK_WEAK | LINK_STRONG,
 } LinkType;
 
+typedef struct {
+    int cell;
+    int cand;
+} CellCand;
+
 extern int units[3][9][9];
 extern int peers[81][NUM_PEERS];
 

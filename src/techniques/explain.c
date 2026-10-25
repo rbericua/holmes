@@ -151,3 +151,18 @@ char *explain_x_chain(XChain *chain, int value) {
 
     return ds.elems;
 }
+
+char *explain_xy_chain(XyChain *chain) {
+    DynStr ds = {0};
+
+    for (int i = 1; i < chain->arr_len - 1; i += 2) {
+        int row = cell_row(chain->chain[i]) + 1;
+        int col = cell_col(chain->chain[i]) + 1;
+
+        ds_append(&ds, "(%d=%d)r%dc%d%s", chain->chain[i - 1],
+                  chain->chain[i + 1], row, col,
+                  i == chain->arr_len - 2 ? "" : "-");
+    }
+
+    return ds.elems;
+}
